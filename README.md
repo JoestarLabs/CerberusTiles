@@ -31,8 +31,8 @@ Tested in a Pixel 8 Pro.
   <summary> Screenshots (Click to expand)</summary>
 
 <p float="left">
-  <img src="demo_assets/screenshot_1_merged.png" width="150" />
-  <img src="demo_assets/recording_1.gif" width="156" />
+  <img src="assets/screenshot_1_merged.png" width="150" />
+  <img src="assets/recording_1.gif" width="156" />
 
 </p>
 </details>
