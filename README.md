@@ -58,7 +58,7 @@ Download a GitHub actions build here:
 
 Or from IzzyOnDroid:
 <p>
-  <a href="https://apt.izzysoft.de/packages/com.bl4ckswordsman.cerberustiles"><img src="assets/IzzyOnDroid.png" width="200"></a>
+  <a href="https://apt.izzysoft.de/packages/com.bl4ckswordsman.cerberustiles"><img src="assets/IzzyOnDroidButtonGreyBorder_nofont.png" width="200"></a>
 </p>
 
 ### Kudos to
