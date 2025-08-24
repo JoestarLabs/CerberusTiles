@@ -11,6 +11,7 @@
   <a href="https://github.com/bl4ckswordsman/CerberusTiles/releases"><img src="https://img.shields.io/github/downloads/bl4ckswordsman/CerberusTiles/total.svg" alt="Downloads"></a>
   <!-- Started counting 2025-07-28 -->
   <a href="https://hits.sh/github.com/bl4ckswordsman/CerberusTiles/"><img alt="Hits" src="https://hits.sh/github.com/bl4ckswordsman/CerberusTiles.svg?color=007ec6"/></a>
+  <a href="https://shields.rbtlog.dev/com.bl4ckswordsman.cerberustiles"><img src="https://shields.rbtlog.dev/simple/com.bl4ckswordsman.cerberustiles" alt="RB Status"></a>
   <!-- <a href="https://github.com/bl4ckswordsman/CerberusTiles/"><img src="https://badges.pufler.dev/visits/bl4ckswordsman/CerberusTiles/" alt="Visits Badge"></a> -->
   <!-- <a href="https://hits.seeyoufarm.com/api/count/graph/dailyhits.svg?url=https://github.com/bl4ckswordsman/CerberusTiles"> -->
   <!-- <img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fbl4ckswordsman%2FCerberusTiles&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=Daily+hits&edge_flat=false" alt="views"> -->
