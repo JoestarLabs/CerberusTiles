@@ -30,7 +30,8 @@ Tested in a Pixel 8 Pro.
   <summary> Screenshots (Click to expand)</summary>
 
 <p float="left">
-  <img src="assets/screenshot_1_merged.png" width="150" />
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_1.png" width="150" />
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_1_dark.png" width="150" />
   <img src="assets/recording_1.gif" width="156" />
 
 </p>
