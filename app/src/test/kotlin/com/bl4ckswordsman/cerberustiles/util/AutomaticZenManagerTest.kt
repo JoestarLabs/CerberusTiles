@@ -8,6 +8,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import android.widget.Toast
 import com.bl4ckswordsman.cerberustiles.SettingsUtils
+import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import io.mockk.verify
@@ -31,9 +32,8 @@ class AutomaticZenManagerTest {
         val mockToast = mockk<Toast>(relaxed = true)
         every { Toast.makeText(any(), any<CharSequence>(), any()) } returns mockToast
 
-        mockkStatic(SettingsUtils::class)
         // Just mock the entire object methods
-        io.mockk.mockkObject(SettingsUtils)
+        mockkObject(SettingsUtils)
         every { SettingsUtils.openDndPermissionSettings(any()) } returns Unit
     }
 
