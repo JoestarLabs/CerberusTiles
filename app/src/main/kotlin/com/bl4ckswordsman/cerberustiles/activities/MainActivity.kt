@@ -13,8 +13,6 @@ import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
-import com.bl4ckswordsman.cerberustiles.Constants.TOGGLE_ADAPTIVE_BRIGHTNESS_ACTION
-import com.bl4ckswordsman.cerberustiles.Constants.TOGGLE_VIBRATION_MODE_ACTION
 import com.bl4ckswordsman.cerberustiles.SettingsUtils
 import com.bl4ckswordsman.cerberustiles.SettingsUtils.openPermissionSettings
 import com.bl4ckswordsman.cerberustiles.ShortcutHelper
@@ -110,18 +108,6 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
                 }
             )
             OverlayDialog(params)
-            if (intent?.action == "com.bl4ckswordsman.cerberustiles.OPEN_OVERLAY") {
-                showOverlayDialog.value = true
-            }
-        }
-
-        handleIntentAction(intent?.action)
-    }
-
-    private fun handleIntentAction(action: String?) {
-        when (action) {
-            TOGGLE_ADAPTIVE_BRIGHTNESS_ACTION -> toggleAdaptiveBrightness()
-            TOGGLE_VIBRATION_MODE_ACTION -> toggleVibrationMode()
         }
     }
 

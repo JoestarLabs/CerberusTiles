@@ -32,21 +32,13 @@
         </activity>
         <activity
             android:name=".activities.ToggleAdaptiveBrightnessActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="com.bl4ckswordsman.cerberustiles.TOGGLE_ADAPTIVE_BRIGHTNESS" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
+            android:exported="false" />
         <activity
             android:name=".activities.ToggleVibrationModeActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="com.bl4ckswordsman.cerberustiles.TOGGLE_VIBRATION_MODE" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-        <activity android:name=".activities.OverlayActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.OverlayActivity"
+            android:exported="false"
             android:theme="@style/Theme.OverlayActivity" />
 
         <service
