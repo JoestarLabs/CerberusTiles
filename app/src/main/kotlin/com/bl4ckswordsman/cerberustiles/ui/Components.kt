@@ -18,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -41,7 +42,7 @@ fun SwitchWithLabel(isSwitchedOn: Boolean, onCheckedChange: (Boolean) -> Unit, l
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 16.dp, end = 16.dp, top = 12.dp), // Outside padding
-        shape = MaterialTheme.shapes.extraLarge,
+        shape = RoundedCornerShape(32.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
         ),
@@ -57,19 +58,25 @@ fun SwitchWithLabel(isSwitchedOn: Boolean, onCheckedChange: (Boolean) -> Unit, l
                     .weight(1f)
                     .padding(end = 8.dp) // Space between label and switch
             ) { Text(text = label) }
-            Switch(checked = isSwitchedOn,
+            Switch(
+                checked = isSwitchedOn,
                 onCheckedChange = { onCheckedChange(it) },
+                colors = SwitchDefaults.colors(
+                    checkedIconColor = MaterialTheme.colorScheme.onPrimary
+                ),
                 thumbContent = if (isSwitchedOn) {
                     {
                         Icon(
                             imageVector = Icons.Filled.Check,
                             contentDescription = null,
                             modifier = Modifier.size(SwitchDefaults.IconSize),
+                            tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 } else {
                     null
-                })
+                }
+            )
         }
     }
 }
