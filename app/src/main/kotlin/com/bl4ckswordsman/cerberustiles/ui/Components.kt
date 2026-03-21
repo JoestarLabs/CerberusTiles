@@ -62,7 +62,7 @@ fun SwitchWithLabel(isSwitchedOn: Boolean, onCheckedChange: (Boolean) -> Unit, l
                 checked = isSwitchedOn,
                 onCheckedChange = { onCheckedChange(it) },
                 colors = SwitchDefaults.colors(
-                    checkedIconColor = MaterialTheme.colorScheme.onPrimary
+                    checkedIconColor = MaterialTheme.colorScheme.primary
                 ),
                 thumbContent = if (isSwitchedOn) {
                     {
@@ -70,7 +70,6 @@ fun SwitchWithLabel(isSwitchedOn: Boolean, onCheckedChange: (Boolean) -> Unit, l
                             imageVector = Icons.Filled.Check,
                             contentDescription = null,
                             modifier = Modifier.size(SwitchDefaults.IconSize),
-                            tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 } else {
