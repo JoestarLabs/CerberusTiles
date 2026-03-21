@@ -2,37 +2,41 @@ package com.bl4ckswordsman.cerberustiles.util
 
 import android.app.NotificationManager
 import android.content.Context
-import io.mockk.every
-import io.mockk.mockk
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
 import android.widget.Toast
 import com.bl4ckswordsman.cerberustiles.SettingsUtils
+import io.mockk.MockKAnnotations
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import io.mockk.verify
 import org.junit.After
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
 class AutomaticZenManagerTest {
 
+    @MockK(relaxed = true)
     private lateinit var context: Context
+
+    @MockK(relaxed = true)
     private lateinit var notificationManager: NotificationManager
 
     @Before
     fun setUp() {
-        context = mockk(relaxed = true)
-        notificationManager = mockk(relaxed = true)
+        MockKAnnotations.init(this)
 
         every { context.getSystemService(Context.NOTIFICATION_SERVICE) } returns notificationManager
+        // Default: permission granted — individual tests override to false where needed
+        every { notificationManager.isNotificationPolicyAccessGranted } returns true
 
         mockkStatic(Toast::class)
-        val mockToast = mockk<Toast>(relaxed = true)
+        val mockToast = io.mockk.mockk<Toast>(relaxed = true)
         every { Toast.makeText(any(), any<CharSequence>(), any()) } returns mockToast
 
-        // Just mock the entire object methods
         mockkObject(SettingsUtils)
         every { SettingsUtils.openDndPermissionSettings(any()) } returns Unit
     }
@@ -44,10 +48,7 @@ class AutomaticZenManagerTest {
 
     @Test
     fun `canManageDndRules returns true when permission is granted`() {
-        every { notificationManager.isNotificationPolicyAccessGranted } returns true
-
         val result = AutomaticZenManager.canManageDndRules(context)
-
         assertTrue("Expected canManageDndRules to return true when access is granted", result)
     }
 
@@ -69,8 +70,6 @@ class AutomaticZenManagerTest {
 
     @Test
     fun `activateSilentMode returns true and sets filter when permission granted`() {
-        every { notificationManager.isNotificationPolicyAccessGranted } returns true
-
         val result = AutomaticZenManager.activateSilentMode(context)
 
         assertTrue("Expected activateSilentMode to return true", result)
@@ -90,7 +89,6 @@ class AutomaticZenManagerTest {
 
     @Test
     fun `activateSilentMode returns false and shows error message on exception`() {
-        every { notificationManager.isNotificationPolicyAccessGranted } returns true
         every { notificationManager.setInterruptionFilter(any()) } throws SecurityException("test exception")
 
         val result = AutomaticZenManager.activateSilentMode(context)
@@ -101,8 +99,6 @@ class AutomaticZenManagerTest {
 
     @Test
     fun `deactivateSilentMode returns true and sets filter when permission granted`() {
-        every { notificationManager.isNotificationPolicyAccessGranted } returns true
-
         val result = AutomaticZenManager.deactivateSilentMode(context)
 
         assertTrue("Expected deactivateSilentMode to return true", result)
@@ -120,7 +116,6 @@ class AutomaticZenManagerTest {
 
     @Test
     fun `deactivateSilentMode returns false and shows error message on exception`() {
-        every { notificationManager.isNotificationPolicyAccessGranted } returns true
         every { notificationManager.setInterruptionFilter(any()) } throws SecurityException("test exception")
 
         val result = AutomaticZenManager.deactivateSilentMode(context)
@@ -131,7 +126,6 @@ class AutomaticZenManagerTest {
 
     @Test
     fun `isSilentModeActive returns true when filter is NONE and permission granted`() {
-        every { notificationManager.isNotificationPolicyAccessGranted } returns true
         every { notificationManager.currentInterruptionFilter } returns NotificationManager.INTERRUPTION_FILTER_NONE
 
         val result = AutomaticZenManager.isSilentModeActive(context)
@@ -141,7 +135,6 @@ class AutomaticZenManagerTest {
 
     @Test
     fun `isSilentModeActive returns false when filter is not NONE and permission granted`() {
-        every { notificationManager.isNotificationPolicyAccessGranted } returns true
         every { notificationManager.currentInterruptionFilter } returns NotificationManager.INTERRUPTION_FILTER_PRIORITY
 
         val result = AutomaticZenManager.isSilentModeActive(context)
@@ -160,7 +153,6 @@ class AutomaticZenManagerTest {
 
     @Test
     fun `isSilentModeActive returns false on exception`() {
-        every { notificationManager.isNotificationPolicyAccessGranted } returns true
         every { notificationManager.currentInterruptionFilter } throws SecurityException("test exception")
 
         val result = AutomaticZenManager.isSilentModeActive(context)
