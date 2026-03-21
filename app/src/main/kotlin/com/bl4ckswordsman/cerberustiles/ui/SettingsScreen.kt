@@ -37,7 +37,7 @@ import kotlinx.coroutines.CoroutineScope
  * @property downloadManager The system's download manager.
  * @property versionManager The version manager for the app.
  * @property sharedPreferences The shared preferences for storing app settings.
- * @property navController Optional navigation controller for screen navigation.
+ * @property showLicensesDialog The state of the open source licenses dialog visibility.
  */
 data class SharedParams(
     val context: Context,
@@ -50,6 +50,7 @@ data class SharedParams(
     val downloadManager: DownloadManager,
     val versionManager: VersionManager,
     val sharedPreferences: SharedPreferences,
+    val showLicensesDialog: MutableState<Boolean>,
     val navController: NavController? = null
 )
 

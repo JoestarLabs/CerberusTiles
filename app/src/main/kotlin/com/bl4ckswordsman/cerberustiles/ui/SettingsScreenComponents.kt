@@ -2,6 +2,7 @@ package com.bl4ckswordsman.cerberustiles.ui
 
 import android.app.DownloadManager
 import android.content.Context
+import android.net.Uri
 import android.os.Environment
 import android.text.method.LinkMovementMethod
 import android.util.Log
@@ -33,8 +34,6 @@ import com.bl4ckswordsman.cerberustiles.VersionManager
 import com.bl4ckswordsman.cerberustiles.navbar.Screen
 import io.noties.markwon.Markwon
 import kotlinx.coroutines.launch
-import androidx.core.net.toUri
-import androidx.core.content.edit
 
 /**
  * The settings list item parameters.
@@ -76,6 +75,7 @@ fun createSharedParams(navController: NavController? = null): SharedParams {
     val versionManager = remember { VersionManager() }
     val coroutineScope = rememberCoroutineScope()
     val dialogType = rememberSaveable { mutableStateOf(DialogType.NONE) }
+    val showLicensesDialog = rememberSaveable { mutableStateOf(false) }
 
 
     return SharedParams(
@@ -89,6 +89,7 @@ fun createSharedParams(navController: NavController? = null): SharedParams {
         downloadManager = downloadManager,
         versionManager = versionManager,
         sharedPreferences = sharedPreferences,
+        showLicensesDialog = showLicensesDialog,
         navController = navController
     )
 }
@@ -99,8 +100,7 @@ fun createSharedParams(navController: NavController? = null): SharedParams {
  */
 @Composable
 fun CreateSettingsListItem(params: SettingsListItemParams) {
-    CreateSettingsListItem(
-        headlineText = "Component Visibility in Overlay Dialog",
+    CreateSettingsListItem(headlineText = "Component Visibility in Overlay Dialog",
         supportingText = "Select which components should be visible",
         onClick = {
             params.sharedParams.showDialog.value = true
@@ -120,12 +120,10 @@ fun CreateSettingsListItem(params: SettingsListItemParams) {
                 params.sharedParams.dialogType.value = DialogType.APP_VERSION
             }
         })
-    CreateSettingsListItem(
-        headlineText = "Open Source Licenses",
+    CreateSettingsListItem(headlineText = "Open Source Licenses",
         supportingText = "View licenses of the libraries that made this app possible",
         onClick = {
             params.sharedParams.navController?.navigate(Screen.Licenses.route)
-                ?: Log.w("SettingsScreen", "NavController is null, cannot navigate to licenses")
         })
 }
 
@@ -139,8 +137,7 @@ fun CreateDialog(params: DialogCreationParams) {
         when (params.sharedParams.dialogType.value) {
 
             DialogType.APP_VERSION -> {
-                val dialogParams = DialogParams(
-                    showDialog = params.sharedParams.showDialog,
+                val dialogParams = DialogParams(showDialog = params.sharedParams.showDialog,
                     titleText = if (params.sharedParams.isUpdateAvailable.value) "New update available" else "Release Information",
                     content = {
                         Column {
@@ -162,7 +159,7 @@ fun CreateDialog(params: DialogCreationParams) {
                                 val url =
                                     params.sharedParams.versionManager.getLatestReleaseApkUrl()
                                 if (url.startsWith("http://") || url.startsWith("https://")) {
-                                    val request = DownloadManager.Request(url.toUri())
+                                    val request = DownloadManager.Request(Uri.parse(url))
                                     request.setDestinationInExternalPublicDir(
                                         Environment.DIRECTORY_DOWNLOADS, "CerberusTiles-update.apk"
                                     )
@@ -201,35 +198,28 @@ fun CreateDialog(params: DialogCreationParams) {
 @Composable
 fun CreateComponentVisibilityDialog(params: DialogCreationParams) {
     if (params.sharedParams.showDialog.value) {
-        AlertDialog(
-            onDismissRequest = { params.sharedParams.showDialog.value = false },
+        AlertDialog(onDismissRequest = { params.sharedParams.showDialog.value = false },
             title = { Text("Component Visibility") },
             text = {
                 Column {
-                    SettingsCheckbox(
-                        initialValue = params.sharedParams.sharedPreferences.getBoolean(
-                            "adaptBrightnessSwitch", true
-                        ), text = "1. Adaptive Brightness Switch", onCheckedChange = { newValue ->
-                            params.sharedParams.sharedPreferences.edit {
-                                putBoolean("adaptBrightnessSwitch", newValue)
-                            }
-                        })
-                    SettingsCheckbox(
-                        initialValue = params.sharedParams.sharedPreferences.getBoolean(
-                            "brightnessSlider", true
-                        ), text = "2. Brightness Slider", onCheckedChange = { newValue ->
-                            params.sharedParams.sharedPreferences.edit {
-                                putBoolean("brightnessSlider", newValue)
-                            }
-                        })
-                    SettingsCheckbox(
-                        initialValue = params.sharedParams.sharedPreferences.getBoolean(
-                            "ringerModeSelector", true
-                        ), text = "3. Ringer Mode Selector", onCheckedChange = { newValue ->
-                            params.sharedParams.sharedPreferences.edit {
-                                putBoolean("ringerModeSelector", newValue)
-                            }
-                        })
+                    SettingsCheckbox(initialValue = params.sharedParams.sharedPreferences.getBoolean(
+                        "adaptBrightnessSwitch", true
+                    ), text = "1. Adaptive Brightness Switch", onCheckedChange = { newValue ->
+                        params.sharedParams.sharedPreferences.edit()
+                            .putBoolean("adaptBrightnessSwitch", newValue).apply()
+                    })
+                    SettingsCheckbox(initialValue = params.sharedParams.sharedPreferences.getBoolean(
+                        "brightnessSlider", true
+                    ), text = "2. Brightness Slider", onCheckedChange = { newValue ->
+                        params.sharedParams.sharedPreferences.edit()
+                            .putBoolean("brightnessSlider", newValue).apply()
+                    })
+                    SettingsCheckbox(initialValue = params.sharedParams.sharedPreferences.getBoolean(
+                        "ringerModeSelector", true
+                    ), text = "3. Ringer Mode Selector", onCheckedChange = { newValue ->
+                        params.sharedParams.sharedPreferences.edit()
+                            .putBoolean("ringerModeSelector", newValue).apply()
+                    })
                 }
             },
             confirmButton = {
@@ -275,8 +265,7 @@ fun MarkdownText(markdown: String) {
 fun CreateSettingsListItem(
     headlineText: String, supportingText: String, onClick: () -> Unit
 ) {
-    ListItem(
-        modifier = Modifier.clickable { onClick() },
+    ListItem(modifier = Modifier.clickable { onClick() },
         headlineContent = { Text(headlineText) },
         supportingContent = { Text(supportingText) })
 }
@@ -288,8 +277,7 @@ fun CreateSettingsListItem(
 @Composable
 fun CreateDialog(params: DialogParams) {
     if (params.showDialog.value) {
-        AlertDialog(
-            onDismissRequest = { params.showDialog.value = false },
+        AlertDialog(onDismissRequest = { params.showDialog.value = false },
             title = { Text(params.titleText) },
             text = { params.content() },
             confirmButton = {
