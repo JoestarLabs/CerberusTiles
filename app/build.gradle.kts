@@ -111,6 +111,7 @@ dependencies {
     implementation("io.noties.markwon:core:4.6.2")
     implementation("androidx.lifecycle:lifecycle-process:2.10.0")
     implementation("androidx.navigation:navigation-compose:2.9.6")
+    implementation("androidx.compose.material:material-icons-core")
     testImplementation("junit:junit:4.13.2")
     testImplementation("io.mockk:mockk:1.13.9")
     androidTestImplementation("androidx.test.ext:junit:1.3.0")
