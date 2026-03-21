@@ -71,13 +71,25 @@ android {
         // Show versions in the report - default is false
         showVersions = true
     }
+    testOptions {
+        unitTests {
+            isReturnDefaultValues = true
+            all {
+                it.jvmArgs(
+                    "-XX:+EnableDynamicAgentLoading",
+                    "-Djdk.attach.allowAttachSelf=true"
+                )
+            }
+        }
+    }
+
 }
 
 composeCompiler {
-    enableStrongSkippingMode = true
-
     reportsDestination = layout.buildDirectory.dir("compose_compiler")
-    stabilityConfigurationFile = rootProject.layout.projectDirectory.file("stability_config.conf")
+    stabilityConfigurationFiles.addAll(
+        rootProject.layout.projectDirectory.file("stability_config.conf")
+    )
 }
 
 dependencies {
@@ -98,6 +110,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-process:2.10.0")
     implementation("androidx.navigation:navigation-compose:2.9.6")
     testImplementation("junit:junit:4.13.2")
+    testImplementation("io.mockk:mockk:1.13.9")
     androidTestImplementation("androidx.test.ext:junit:1.3.0")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
     androidTestImplementation(platform("androidx.compose:compose-bom:2025.09.00"))
