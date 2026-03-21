@@ -25,7 +25,10 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = true
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
             //signingConfig = signingConfigs.getByName("debug")
         }
         debug {
@@ -36,14 +39,13 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
-    kotlinOptions {
-        jvmTarget = "1.8"
+    kotlin {
+        compilerOptions {
+            jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_1_8
+        }
     }
     buildFeatures {
         compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.11"
     }
     packaging {
         resources {
@@ -106,7 +108,7 @@ dependencies {
     implementation("androidx.compose.runtime:runtime-livedata:1.10.0")
     implementation("androidx.compose.runtime:runtime-rxjava2:1.10.0")
     implementation("androidx.appcompat:appcompat:1.7.1")
-    implementation ("io.noties.markwon:core:4.6.2")
+    implementation("io.noties.markwon:core:4.6.2")
     implementation("androidx.lifecycle:lifecycle-process:2.10.0")
     implementation("androidx.navigation:navigation-compose:2.9.6")
     testImplementation("junit:junit:4.13.2")
