@@ -10,10 +10,15 @@ on:
     branches: [ "main", "master" ]
   workflow_dispatch: # allows manual trigger from Actions tab
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   unit-tests:
     name: Unit Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
