@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Card
@@ -19,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -42,7 +42,7 @@ fun SwitchWithLabel(isSwitchedOn: Boolean, onCheckedChange: (Boolean) -> Unit, l
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 16.dp, end = 16.dp, top = 12.dp), // Outside padding
-        shape = CircleShape,
+        shape = RoundedCornerShape(32.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
         ),
@@ -62,7 +62,7 @@ fun SwitchWithLabel(isSwitchedOn: Boolean, onCheckedChange: (Boolean) -> Unit, l
                 checked = isSwitchedOn,
                 onCheckedChange = { onCheckedChange(it) },
                 colors = SwitchDefaults.colors(
-                    checkedIconColor = MaterialTheme.colorScheme.primary
+                    checkedIconColor = MaterialTheme.colorScheme.onPrimary
                 ),
                 thumbContent = if (isSwitchedOn) {
                     {
@@ -70,6 +70,7 @@ fun SwitchWithLabel(isSwitchedOn: Boolean, onCheckedChange: (Boolean) -> Unit, l
                             imageVector = Icons.Filled.Check,
                             contentDescription = null,
                             modifier = Modifier.size(SwitchDefaults.IconSize),
+                            tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 } else {
