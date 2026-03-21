@@ -71,6 +71,18 @@ android {
         // Show versions in the report - default is false
         showVersions = true
     }
+    testOptions {
+        unitTests {
+            isReturnDefaultValues = true
+            all {
+                it.jvmArgs(
+                    "-XX:+EnableDynamicAgentLoading",
+                    "-Djdk.attach.allowAttachSelf=true"
+                )
+            }
+        }
+    }
+
 }
 
 composeCompiler {
