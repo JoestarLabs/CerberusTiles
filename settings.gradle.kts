@@ -7,6 +7,7 @@ pluginManagement {
 }
 plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "0.10.0"
+    id("com.mikepenz.aboutlibraries.plugin") version "11.6.3" apply false
 }
 /*'getRepositoriesMode()' is marked unstable with @Incubating*/
 dependencyResolutionManagement {

@@ -31,6 +31,11 @@ sealed class Screen(val route: String) {
      * The settings screen of the app.
      */
     data object Settings : Screen(label.SETTINGS_SCREEN)
+
+    /**
+     * The open source licenses screen of the app.
+     */
+    data object Licenses : Screen("Licenses")
 }
 
 /**

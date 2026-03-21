@@ -9,6 +9,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -34,6 +35,7 @@ import androidx.navigation.compose.rememberNavController
 import com.bl4ckswordsman.cerberustiles.models.RingerMode
 import com.bl4ckswordsman.cerberustiles.navbar.BottomNavBar
 import com.bl4ckswordsman.cerberustiles.navbar.Screen
+import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 import com.bl4ckswordsman.cerberustiles.Constants as label
 
 /**
@@ -103,6 +105,7 @@ fun MainScreenScaffold(params: MainScreenScaffoldParams) {
                 text = when (params.selectedScreen) {
                     is Screen.Home -> label.HOME_SCREEN
                     is Screen.Settings -> label.SETTINGS_SCREEN
+                    is Screen.Licenses -> "Open Source Licenses"
                 }
             )
         })
@@ -158,7 +161,7 @@ fun MainScreenNavHost(params: MainScreenNavHostParams) {
                     isVibrationModeOn = params.isVibrationModeOn,
                     setVibrationMode = params.setVibrationMode,
                     toggleVibrationMode = params.toggleVibrationMode,
-                    sharedParams = createSharedParams(),
+                    sharedParams = createSharedParams(params.navController),
                     componentVisibilityParams = ComponentVisibilityDialogParams(
                         adaptBrightnessSwitch = rememberSaveable { mutableStateOf(true) },
                         brightnessSlider = rememberSaveable { mutableStateOf(true) },
@@ -176,13 +179,26 @@ fun MainScreenNavHost(params: MainScreenNavHostParams) {
             exitTransition = exitTrans
         )
         {
-            val sharedParams = createSharedParams()
+            val sharedParams = createSharedParams(params.navController)
             val settingsScreenParams = SettingsScreenParams(
                 paddingValues = params.innerPadding,
                 sharedParams = sharedParams
             )
 
             SettingsScreen(settingsScreenParams)
+        }
+        composable(
+            Screen.Licenses.route,
+            enterTransition = enterTrans,
+            exitTransition = exitTrans
+        ) {
+            Column(
+                modifier = Modifier.padding(params.innerPadding)
+            ) {
+                LibrariesContainer(
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
         }
     }
 }
@@ -216,6 +232,7 @@ fun MainScreen(params: MainScreenParams) {
     val selectedScreen = when (navBackStackEntry?.destination?.route) {
         Screen.Home.route -> Screen.Home
         Screen.Settings.route -> Screen.Settings
+        Screen.Licenses.route -> Screen.Licenses
         else -> Screen.Home
     }
 

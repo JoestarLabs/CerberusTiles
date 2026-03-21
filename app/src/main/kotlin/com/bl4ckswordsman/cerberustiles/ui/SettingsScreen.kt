@@ -19,7 +19,8 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.bl4ckswordsman.cerberustiles.OpenSourceLicensesDialog
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.bl4ckswordsman.cerberustiles.VersionManager
 import kotlinx.coroutines.CoroutineScope
 
@@ -49,7 +50,8 @@ data class SharedParams(
     val downloadManager: DownloadManager,
     val versionManager: VersionManager,
     val sharedPreferences: SharedPreferences,
-    val showLicensesDialog: MutableState<Boolean>
+    val showLicensesDialog: MutableState<Boolean>,
+    val navController: NavController? = null
 )
 
 /**
@@ -87,8 +89,6 @@ fun SettingsScreen(params: SettingsScreenParams) {
         )
     DownloadReceiver(params.sharedParams.context, onDownloadComplete)
     FetchLatestReleaseInfoOnCompose(params.sharedParams.context, params.sharedParams.releaseInfo)
-    OpenSourceLicensesDialog(params.sharedParams.showLicensesDialog)
-
 
     Column(modifier = Modifier.padding(params.paddingValues)) {
         val settingsListItemParams = SettingsListItemParams(
@@ -205,7 +205,7 @@ suspend fun fetchLatestReleaseInfo(context: Context): ReleaseInfo {
 @Composable
 fun SettingsScreenPreview() {
 
-    val sharedParams = createSharedParams()
+    val sharedParams = createSharedParams(rememberNavController())
     val settingsScreenParams = SettingsScreenParams(
         paddingValues = PaddingValues(16.dp),
         sharedParams = sharedParams

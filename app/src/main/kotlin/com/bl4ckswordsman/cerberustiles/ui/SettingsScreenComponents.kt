@@ -29,7 +29,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.navigation.NavController
 import com.bl4ckswordsman.cerberustiles.VersionManager
+import com.bl4ckswordsman.cerberustiles.navbar.Screen
 import io.noties.markwon.Markwon
 import kotlinx.coroutines.launch
 
@@ -62,7 +64,7 @@ enum class DialogType {
  * The shared parameters between the settings screen components.
  */
 @Composable
-fun createSharedParams(): SharedParams {
+fun createSharedParams(navController: NavController? = null): SharedParams {
     val context = LocalContext.current
     val sharedPreferences = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
     val showDialog = rememberSaveable { mutableStateOf(false) }
@@ -87,7 +89,8 @@ fun createSharedParams(): SharedParams {
         downloadManager = downloadManager,
         versionManager = versionManager,
         sharedPreferences = sharedPreferences,
-        showLicensesDialog = showLicensesDialog
+        showLicensesDialog = showLicensesDialog,
+        navController = navController
     )
 }
 
@@ -120,7 +123,7 @@ fun CreateSettingsListItem(params: SettingsListItemParams) {
     CreateSettingsListItem(headlineText = "Open Source Licenses",
         supportingText = "View licenses of the libraries that made this app possible",
         onClick = {
-            params.sharedParams.showLicensesDialog.value = true
+            params.sharedParams.navController?.navigate(Screen.Licenses.route)
         })
 }
 
