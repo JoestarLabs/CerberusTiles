@@ -36,6 +36,9 @@ import com.bl4ckswordsman.cerberustiles.models.RingerMode
 import com.bl4ckswordsman.cerberustiles.navbar.BottomNavBar
 import com.bl4ckswordsman.cerberustiles.navbar.Screen
 import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
+import com.mikepenz.aboutlibraries.ui.compose.android.produceLibraries
+import com.bl4ckswordsman.cerberustiles.R
+import androidx.compose.runtime.getValue
 import com.bl4ckswordsman.cerberustiles.Constants as label
 
 /**
@@ -192,10 +195,12 @@ fun MainScreenNavHost(params: MainScreenNavHostParams) {
             enterTransition = enterTrans,
             exitTransition = exitTrans
         ) {
+            val libraries by produceLibraries(R.raw.aboutlibraries)
             Column(
                 modifier = Modifier.padding(params.innerPadding)
             ) {
                 LibrariesContainer(
+                    libraries = libraries,
                     modifier = Modifier.fillMaxSize()
                 )
             }
