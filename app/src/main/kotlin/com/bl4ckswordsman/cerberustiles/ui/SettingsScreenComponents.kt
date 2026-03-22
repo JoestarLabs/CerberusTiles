@@ -76,7 +76,6 @@ fun createSharedParams(navController: NavController? = null): SharedParams {
     val versionManager = remember { VersionManager() }
     val coroutineScope = rememberCoroutineScope()
     val dialogType = rememberSaveable { mutableStateOf(DialogType.NONE) }
-    val showLicensesDialog = rememberSaveable { mutableStateOf(false) }
 
 
     return SharedParams(
@@ -90,7 +89,6 @@ fun createSharedParams(navController: NavController? = null): SharedParams {
         downloadManager = downloadManager,
         versionManager = versionManager,
         sharedPreferences = sharedPreferences,
-        showLicensesDialog = showLicensesDialog,
         navController = navController
     )
 }
