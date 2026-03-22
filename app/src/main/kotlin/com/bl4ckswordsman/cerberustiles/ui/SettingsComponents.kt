@@ -6,13 +6,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.ButtonGroupDefaults
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
-import androidx.compose.material3.ToggleButton
-import androidx.compose.material3.ToggleButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
@@ -92,7 +91,7 @@ fun SettingsComponents(params: SettingsComponentsParams) {
     }
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 @Composable
 private fun RingerModeSelectionButtonGroup(
     currentMode: RingerMode,
@@ -102,15 +101,13 @@ private fun RingerModeSelectionButtonGroup(
     val context = LocalContext.current
     val modes = RingerMode.entries
 
-    Row(
+    SingleChoiceSegmentedButtonRow(
         modifier = Modifier
             .fillMaxWidth()
             .padding(
                 horizontal = 16.dp,
                 vertical = 12.dp
-            ),
-        horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
-        verticalAlignment = Alignment.CenterVertically
+            )
     ) {
         modes.forEachIndexed { index, mode ->
             val isSelected = currentMode == mode
@@ -126,9 +123,9 @@ private fun RingerModeSelectionButtonGroup(
                 }
             }
             
-            ToggleButton(
-                checked = isSelected,
-                onCheckedChange = { 
+            SegmentedButton(
+                selected = isSelected,
+                onClick = {
                     if (!isSelected) {
                         ButtonGroupClickHandler(
                             context,
@@ -139,21 +136,20 @@ private fun RingerModeSelectionButtonGroup(
                     }
                 },
                 modifier = modifierWeight.semantics { role = Role.RadioButton },
-                shapes = when (index) {
-                    0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
-                    modes.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
-                    else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
+                shape = SegmentedButtonDefaults.itemShape(
+                    index = index,
+                    count = modes.size
+                ),
+                icon = {
+                    Icon(
+                        painter = getIconForMode(mode, currentMode),
+                        contentDescription = mode.name,
+                        modifier = if (isOverlayContext) Modifier.size(16.dp) else Modifier.size(SegmentedButtonDefaults.IconSize)
+                    )
                 }
             ) {
-                Icon(
-                    painter = getIconForMode(mode, currentMode),
-                    contentDescription = mode.name,
-                    modifier = if (isOverlayContext) Modifier.size(16.dp) else Modifier
-                )
-                
                 // Only show text when not in overlay context
                 if (!isOverlayContext) {
-                    Spacer(Modifier.size(ToggleButtonDefaults.IconSpacing))
                     Text(
                         text = mode.name.lowercase().replaceFirstChar { it.uppercase() },
                         style = LocalTextStyle.current
@@ -239,7 +235,6 @@ private class ButtonGroupClickHandler(
         }
     }
 }
-
 @Composable
 private fun getIconForMode(mode: RingerMode, currentMode: RingerMode) = when (mode) {
     RingerMode.NORMAL -> if (currentMode == mode)
