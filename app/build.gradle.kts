@@ -1,7 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.plugin.compose") version "2.3.0"
-    id("com.jaredsburrows.license") version "0.9.8"
+    id("com.mikepenz.aboutlibraries.plugin.android")
 }
 
 android {
@@ -47,26 +47,6 @@ android {
         }
     }
 
-    licenseReport {
-        // Generate reports
-        generateCsvReport = false
-        generateHtmlReport = true
-        generateJsonReport = false
-        generateTextReport = false
-
-        // Copy reports - These options are ignored for Java projects
-        copyCsvReportToAssets = false
-        copyHtmlReportToAssets = false
-        copyJsonReportToAssets = true
-        copyTextReportToAssets = false
-        useVariantSpecificAssetDirs = false
-
-        // Ignore licenses for certain artifact patterns
-        // ignoredPatterns = []
-
-        // Show versions in the report - default is false
-        showVersions = true
-    }
     testOptions {
         unitTests {
             isReturnDefaultValues = true
@@ -106,6 +86,8 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-process:2.10.0")
     implementation("androidx.navigation:navigation-compose:2.9.6")
     implementation("androidx.compose.material:material-icons-core")
+    implementation("com.mikepenz:aboutlibraries-compose-m3:14.0.0-b03")
+    implementation("com.mikepenz:aboutlibraries-core:14.0.0-b03")
     testImplementation("junit:junit:4.13.2")
     testImplementation("io.mockk:mockk:1.13.9")
     androidTestImplementation("androidx.test.ext:junit:1.3.0")
