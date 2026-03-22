@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Card
@@ -41,7 +42,7 @@ fun SwitchWithLabel(isSwitchedOn: Boolean, onCheckedChange: (Boolean) -> Unit, l
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 16.dp, end = 16.dp, top = 12.dp), // Outside padding
-        shape = MaterialTheme.shapes.extraLarge,
+        shape = CircleShape,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
         ),
@@ -57,8 +58,12 @@ fun SwitchWithLabel(isSwitchedOn: Boolean, onCheckedChange: (Boolean) -> Unit, l
                     .weight(1f)
                     .padding(end = 8.dp) // Space between label and switch
             ) { Text(text = label) }
-            Switch(checked = isSwitchedOn,
+            Switch(
+                checked = isSwitchedOn,
                 onCheckedChange = { onCheckedChange(it) },
+                colors = SwitchDefaults.colors(
+                    checkedIconColor = MaterialTheme.colorScheme.primary
+                ),
                 thumbContent = if (isSwitchedOn) {
                     {
                         Icon(
@@ -69,7 +74,8 @@ fun SwitchWithLabel(isSwitchedOn: Boolean, onCheckedChange: (Boolean) -> Unit, l
                     }
                 } else {
                     null
-                })
+                }
+            )
         }
     }
 }

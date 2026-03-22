@@ -1,0 +1,26 @@
+name: "VirusTotal Scan Release Assets"
+
+permissions:
+  # Required to read release assets and write to the GitHub Release body
+  contents: write
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  virustotal:
+    runs-on: ubuntu-latest
+    permissions:
+      # Required for the crazy-max/ghaction-virustotal action to update the release body
+      contents: write
+    steps:
+      - name: VirusTotal Scan
+        uses: crazy-max/ghaction-virustotal@v5
+        with:
+          vt_api_key: ${{ secrets.VT_API_KEY }}
+          update_release_body: true
+          # The release-build.yml workflow creates an APK file, so we target .apk$
+          files: |
+            .apk$
