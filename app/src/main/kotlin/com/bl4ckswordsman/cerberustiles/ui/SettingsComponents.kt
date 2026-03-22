@@ -9,13 +9,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleButton
 import androidx.compose.material3.ToggleButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -23,7 +21,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.bl4ckswordsman.cerberustiles.R
 import com.bl4ckswordsman.cerberustiles.SettingsUtils
 import com.bl4ckswordsman.cerberustiles.models.RingerMode
@@ -82,11 +79,12 @@ fun SettingsComponents(params: SettingsComponentsParams) {
     }
 
     if (params.componentVisibilityParams.ringerModeSelector.value) {
+        val context = LocalContext.current
         RingerModeSelectionButtonGroup(
             currentMode = params.currentRingerMode,
             isOverlayContext = params.isOverlayContext,
             onModeSelected = { newMode ->
-                RingerModeHandler(params, newMode).handleModeSelection()
+                RingerModeHandler(params, newMode, context).handleModeSelection()
             }
         )
     }
@@ -99,7 +97,6 @@ private fun RingerModeSelectionButtonGroup(
     isOverlayContext: Boolean = false,
     onModeSelected: (RingerMode) -> Unit
 ) {
-    val context = LocalContext.current
     val modes = RingerMode.entries
 
     Row(
@@ -109,54 +106,45 @@ private fun RingerModeSelectionButtonGroup(
                 horizontal = 16.dp,
                 vertical = 12.dp
             ),
-        horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
-        verticalAlignment = Alignment.CenterVertically
+        horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween)
     ) {
         modes.forEachIndexed { index, mode ->
             val isSelected = currentMode == mode
-            val modifierWeight = if (isOverlayContext) {
-                // In overlay context, all buttons have equal weight since they're icon-only
+
+            val weightModifier = if (isOverlayContext) {
                 Modifier.weight(1f)
             } else {
-                // In normal context, adjust weights for text length
                 when (mode) {
-                    RingerMode.NORMAL -> Modifier.weight(1f)
-                    RingerMode.VIBRATE -> Modifier.weight(1.2f) // Slightly wider for "Vibrate"
-                    RingerMode.SILENT -> Modifier.weight(1f)
+                    RingerMode.NORMAL  -> Modifier.weight(1f)
+                    RingerMode.VIBRATE -> Modifier.weight(1.2f)
+                    RingerMode.SILENT  -> Modifier.weight(1f)
                 }
             }
-            
+
             ToggleButton(
                 checked = isSelected,
-                onCheckedChange = { 
-                    if (!isSelected) {
-                        ButtonGroupClickHandler(
-                            context,
-                            currentMode,
-                            mode,
-                            onModeSelected
-                        ).handle()
-                    }
+                onCheckedChange = {
+                    if (!isSelected) onModeSelected(mode)
                 },
-                modifier = modifierWeight.semantics { role = Role.RadioButton },
+                modifier = weightModifier.semantics { role = Role.RadioButton },
                 shapes = when (index) {
-                    0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
+                    0               -> ButtonGroupDefaults.connectedLeadingButtonShapes()
                     modes.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
-                    else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
+                    else            -> ButtonGroupDefaults.connectedMiddleButtonShapes()
                 }
             ) {
                 Icon(
                     painter = getIconForMode(mode, currentMode),
                     contentDescription = mode.name,
-                    modifier = if (isOverlayContext) Modifier.size(16.dp) else Modifier
+                    modifier = if (isOverlayContext)
+                        Modifier.size(16.dp)
+                    else
+                        Modifier.size(ToggleButtonDefaults.IconSize)
                 )
-                
-                // Only show text when not in overlay context
                 if (!isOverlayContext) {
                     Spacer(Modifier.size(ToggleButtonDefaults.IconSpacing))
                     Text(
-                        text = mode.name.lowercase().replaceFirstChar { it.uppercase() },
-                        style = LocalTextStyle.current
+                        text = mode.name.lowercase().replaceFirstChar { it.uppercase() }
                     )
                 }
             }
@@ -164,18 +152,17 @@ private fun RingerModeSelectionButtonGroup(
     }
 }
 
+
 private fun triggerRingerModeChangeOnSelection(
     context: android.content.Context,
     mode: RingerMode,
-    onModeSelected: (RingerMode) -> Unit
+    onSettled: () -> Unit
 ) {
     runCatching {
         Ringer.setRingerMode(
             SettingsUtils.SettingsToggleParams(
                 context = context,
-                onSettingChanged = { _ ->
-                    onModeSelected(mode)
-                }
+                onSettingChanged = { _ -> onSettled() }
             ),
             mode
         )
@@ -185,11 +172,12 @@ private fun triggerRingerModeChangeOnSelection(
 }
 
 /**
- * Handles ringer mode selection logic to reduce complexity.
+ * Single authority for permission checks, ringer mode changes, and state updates.
  */
 private class RingerModeHandler(
     private val params: SettingsComponentsParams,
-    private val newMode: RingerMode
+    private val newMode: RingerMode,
+    private val context: android.content.Context
 ) {
     fun handleModeSelection() {
         if (params.canWriteState) {
@@ -200,45 +188,22 @@ private class RingerModeHandler(
     }
 
     private fun handleModeChangeWithPermission() {
-        // Only process if we're selecting a different mode
         if (newMode != params.currentRingerMode) {
-            updateVibrationMode()
-            params.onRingerModeChange(newMode)
+            triggerRingerModeChangeOnSelection(context, newMode) {
+                updateVibrationMode()
+                params.onRingerModeChange(newMode)
+            }
         }
     }
 
     private fun updateVibrationMode() {
         when (newMode) {
-            RingerMode.VIBRATE -> {
-                params.setVibrationMode(true)
-            }
-
-            RingerMode.NORMAL, RingerMode.SILENT -> {
-                params.setVibrationMode(false)
-            }
+            RingerMode.VIBRATE -> params.setVibrationMode(true)
+            RingerMode.NORMAL, RingerMode.SILENT -> params.setVibrationMode(false)
         }
     }
 }
 
-/**
- * Handles click events for button group buttons to reduce complexity.
- */
-private class ButtonGroupClickHandler(
-    private val context: android.content.Context,
-    private val currentMode: RingerMode,
-    private val selectedMode: RingerMode,
-    private val onModeSelected: (RingerMode) -> Unit
-) {
-    fun handle() {
-        if (currentMode != selectedMode) {
-            if (!SettingsUtils.canWriteSettings(context)) {
-                SettingsUtils.openPermissionSettings(context)
-            } else {
-                triggerRingerModeChangeOnSelection(context, selectedMode, onModeSelected)
-            }
-        }
-    }
-}
 
 @Composable
 private fun getIconForMode(mode: RingerMode, currentMode: RingerMode) = when (mode) {
