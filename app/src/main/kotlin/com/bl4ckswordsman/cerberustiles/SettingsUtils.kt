@@ -1,6 +1,8 @@
 package com.bl4ckswordsman.cerberustiles
 
 import android.app.NotificationManager
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.media.AudioManager
@@ -20,7 +22,8 @@ object SettingsUtils {
      */
     data class SettingsToggleParams(
         val context: Context,
-        val onSettingChanged: (Boolean) -> Unit
+        val onSettingChanged: (Boolean) -> Unit,
+        val onPermissionDenied: (() -> Unit)? = null
     )
 
     /**
@@ -277,11 +280,7 @@ object SettingsUtils {
                 showToast(params.context, "Charging optimization", !isEnabled)
                 params.onSettingChanged(!isEnabled)
             } catch (e: SecurityException) {
-                Toast.makeText(
-                    params.context,
-                    "Please grant WRITE_SECURE_SETTINGS via ADB:\nadb shell pm grant ${params.context.packageName} android.permission.WRITE_SECURE_SETTINGS",
-                    Toast.LENGTH_LONG
-                ).show()
+                params.onPermissionDenied?.invoke()
             }
         }
     }
@@ -315,6 +314,7 @@ object SettingsUtils {
         val isSwitchedOn = mutableStateOf(false)
         val isVibrationModeOn = mutableStateOf(false)
         val isChargingOptimizationOn = mutableStateOf(false)
+        val showAdbDialog = mutableStateOf(false)
 
         /**
          * Updates the state of the canWrite setting.

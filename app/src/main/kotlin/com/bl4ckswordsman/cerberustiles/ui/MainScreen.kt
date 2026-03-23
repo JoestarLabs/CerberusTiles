@@ -23,6 +23,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -73,6 +74,8 @@ data class MainScreenParams(
     val toggleVibrationMode: () -> Boolean,
     val isChargingOptimization: LiveData<Boolean>,
     val toggleChargingOptimization: () -> Unit,
+    val showAdbDialog: LiveData<Boolean>,
+    val onAdbDialogDismiss: () -> Unit,
     val openPermissionSettings: () -> Unit,
     val currentRingerMode: LiveData<RingerMode>,
     val onRingerModeChange: (RingerMode) -> Unit
@@ -263,6 +266,13 @@ fun MainScreen(params: MainScreenParams) {
         else -> Screen.Home
     }
 
+    if (params.showAdbDialog.observeAsState(initial = false).value) {
+        AdbPermissionDialog(
+            context = LocalContext.current,
+            onDismiss = params.onAdbDialogDismiss
+        )
+    }
+
     MainScreenScaffold(
         MainScreenScaffoldParams(
             navController,
@@ -299,6 +309,8 @@ fun MainScreenPreview() {
             toggleVibrationMode = { true },
             isChargingOptimization = MutableLiveData(true),
             toggleChargingOptimization = {},
+            showAdbDialog = MutableLiveData(false),
+            onAdbDialogDismiss = {},
             openPermissionSettings = {},
             currentRingerMode = MutableLiveData(RingerMode.NORMAL),
             onRingerModeChange = {})

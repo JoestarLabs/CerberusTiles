@@ -24,9 +24,10 @@ class AdaptiveBrightnessTileService : TileService() {
         super.onClick()
 
         val isAdaptive = SettingsUtils.Brightness.isAdaptiveBrightnessEnabled(this)
-        val params = SettingsUtils.SettingsToggleParams(this) { newValue ->
-            // Do nothing
-        }
+        val params = SettingsUtils.SettingsToggleParams(
+            context = this,
+            onSettingChanged = { _ -> }
+        )
         SettingsUtils.Brightness.toggleAdaptiveBrightness(params)
 
         qsTile.state = if (isAdaptive) Tile.STATE_INACTIVE else Tile.STATE_ACTIVE

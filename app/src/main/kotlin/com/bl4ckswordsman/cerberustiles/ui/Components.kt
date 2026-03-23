@@ -19,8 +19,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.text.font.FontFamily
+import android.content.ClipboardManager
+import android.content.ClipData
+import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -78,6 +84,41 @@ fun SwitchWithLabel(isSwitchedOn: Boolean, onCheckedChange: (Boolean) -> Unit, l
             )
         }
     }
+}
+
+/**
+ * A dialog showing the required ADB command to grant WRITE_SECURE_SETTINGS permission.
+ */
+@Composable
+fun AdbPermissionDialog(context: Context, onDismiss: () -> Unit) {
+    val adbCommand = "adb shell pm grant ${context.packageName} android.permission.WRITE_SECURE_SETTINGS"
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Permission Required") },
+        text = {
+            Text(
+                text = "To use this feature, please connect your device to a PC and grant the WRITE_SECURE_SETTINGS permission using the following ADB command:\n\n" +
+                        "$adbCommand\n\n" +
+                        "Note: Shizuku support is planned for the future."
+            )
+        },
+        confirmButton = {
+            Button(onClick = onDismiss) {
+                Text("OK")
+            }
+        },
+        dismissButton = {
+            Button(onClick = {
+                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                val clip = ClipData.newPlainText("ADB Command", adbCommand)
+                clipboard.setPrimaryClip(clip)
+                Toast.makeText(context, "Copied to clipboard", Toast.LENGTH_SHORT).show()
+            }) {
+                Text("Copy")
+            }
+        }
+    )
 }
 
 /**

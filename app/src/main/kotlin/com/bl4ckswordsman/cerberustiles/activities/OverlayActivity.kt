@@ -57,28 +57,34 @@ class OverlayActivity : ComponentActivity() {
                 isSwitchedOn = viewModel.isSwitchedOn.value,
                 setSwitchedOn = { viewModel.isSwitchedOn.value = it },
                 toggleAdaptiveBrightness = {
-                    val params = SettingsUtils.SettingsToggleParams(this) { newValue ->
-                        viewModel.isSwitchedOn.value = newValue
-                    }
+                    val params = SettingsUtils.SettingsToggleParams(
+                        context = this,
+                        onSettingChanged = { newValue -> viewModel.isSwitchedOn.value = newValue }
+                    )
                     Brightness.toggleAdaptiveBrightness(params)
                 },
                 openPermissionSettings = { openPermissionSettings(this) },
                 isVibrationModeOn = viewModel.isVibrationModeOn.value,
                 setVibrationMode = { viewModel.isVibrationModeOn.value = it },
                 toggleVibrationMode = {
-                    val params = SettingsUtils.SettingsToggleParams(this) { newValue ->
-                        viewModel.isVibrationModeOn.value = newValue
-                    }
+                    val params = SettingsUtils.SettingsToggleParams(
+                        context = this,
+                        onSettingChanged = { newValue -> viewModel.isVibrationModeOn.value = newValue }
+                    )
                     toggleVibrationMode(params)
                 },
                 isChargingOptimizationOn = viewModel.isChargingOptimizationOn.value,
                 setChargingOptimization = { viewModel.isChargingOptimizationOn.value = it },
                 toggleChargingOptimization = {
-                    val params = SettingsUtils.SettingsToggleParams(this) { newValue ->
-                        viewModel.isChargingOptimizationOn.value = newValue
-                    }
+                    val params = SettingsUtils.SettingsToggleParams(
+                        context = this,
+                        onSettingChanged = { newValue -> viewModel.isChargingOptimizationOn.value = newValue },
+                        onPermissionDenied = { viewModel.showAdbDialog.value = true }
+                    )
                     SettingsUtils.Charging.toggleChargingOptimization(params)
                 },
+                showAdbDialog = viewModel.showAdbDialog.value,
+                onAdbDialogDismiss = { viewModel.showAdbDialog.value = false },
                 sharedParams = createSharedParams(),
                 currentRingerMode = _currentRingerMode.value,
                 onRingerModeChange = { newMode ->

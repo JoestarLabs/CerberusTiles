@@ -44,6 +44,8 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
     private val isVibrationMode: LiveData<Boolean> get() = _isVibrationMode
     private val _isChargingOptimization = MutableLiveData<Boolean>()
     private val isChargingOptimization: LiveData<Boolean> get() = _isChargingOptimization
+    private val _showAdbDialog = MutableLiveData<Boolean>()
+    private val showAdbDialog: LiveData<Boolean> get() = _showAdbDialog
     private val _currentRingerMode = MutableLiveData<RingerMode>()
     val currentRingerMode: LiveData<RingerMode> get() = _currentRingerMode
 
@@ -84,6 +86,8 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
                         toggleVibrationMode = ::toggleVibrationMode,
                         isChargingOptimization = isChargingOptimization,
                         toggleChargingOptimization = ::toggleChargingOptimization,
+                        showAdbDialog = showAdbDialog,
+                        onAdbDialogDismiss = { _showAdbDialog.value = false },
                         openPermissionSettings = { openPermissionSettings(this) },
                         currentRingerMode = currentRingerMode,
                         onRingerModeChange = { newMode ->
@@ -107,6 +111,8 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
                 isChargingOptimizationOn = _isChargingOptimization.value == true,
                 setChargingOptimization = { _isChargingOptimization.value = it },
                 toggleChargingOptimization = ::toggleChargingOptimization,
+                showAdbDialog = _showAdbDialog.value == true,
+                onAdbDialogDismiss = { _showAdbDialog.value = false },
                 sharedParams = createSharedParams(),
                 currentRingerMode = _currentRingerMode.value ?: RingerMode.NORMAL,
                 onRingerModeChange = { newMode ->
@@ -120,23 +126,27 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
     }
 
     private fun toggleAdaptiveBrightness() {
-        val params = SettingsUtils.SettingsToggleParams(this) { newValue ->
-            _isAdaptive.value = newValue
-        }
+        val params = SettingsUtils.SettingsToggleParams(
+            context = this,
+            onSettingChanged = { newValue -> _isAdaptive.value = newValue }
+        )
         SettingsUtils.Brightness.toggleAdaptiveBrightness(params)
     }
 
     private fun toggleVibrationMode(): Boolean {
-        val params = SettingsUtils.SettingsToggleParams(this) { newValue ->
-            _isVibrationMode.value = newValue
-        }
+        val params = SettingsUtils.SettingsToggleParams(
+            context = this,
+            onSettingChanged = { newValue -> _isVibrationMode.value = newValue }
+        )
         return SettingsUtils.Vibration.toggleVibrationMode(params)
     }
 
     private fun toggleChargingOptimization() {
-        val params = SettingsUtils.SettingsToggleParams(this) { newValue ->
-            _isChargingOptimization.value = newValue
-        }
+        val params = SettingsUtils.SettingsToggleParams(
+            context = this,
+            onSettingChanged = { newValue -> _isChargingOptimization.value = newValue },
+            onPermissionDenied = { _showAdbDialog.value = true }
+        )
         SettingsUtils.Charging.toggleChargingOptimization(params)
     }
 }

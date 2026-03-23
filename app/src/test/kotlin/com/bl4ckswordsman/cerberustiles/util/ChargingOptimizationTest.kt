@@ -1,6 +1,8 @@
 package com.bl4ckswordsman.cerberustiles.util
 
 import android.content.ContentResolver
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.provider.Settings
 import android.widget.Toast
@@ -88,10 +90,13 @@ class ChargingOptimizationTest {
 
         var callbackCalled = false
         var newValue = false
-        val params = SettingsUtils.SettingsToggleParams(context) { value ->
-            callbackCalled = true
-            newValue = value
-        }
+        val params = SettingsUtils.SettingsToggleParams(
+            context = context,
+            onSettingChanged = { value ->
+                callbackCalled = true
+                newValue = value
+            }
+        )
 
         SettingsUtils.Charging.toggleChargingOptimization(params)
 
@@ -113,10 +118,13 @@ class ChargingOptimizationTest {
 
         var callbackCalled = false
         var newValue = true
-        val params = SettingsUtils.SettingsToggleParams(context) { value ->
-            callbackCalled = true
-            newValue = value
-        }
+        val params = SettingsUtils.SettingsToggleParams(
+            context = context,
+            onSettingChanged = { value ->
+                callbackCalled = true
+                newValue = value
+            }
+        )
 
         SettingsUtils.Charging.toggleChargingOptimization(params)
 
@@ -127,7 +135,7 @@ class ChargingOptimizationTest {
     }
 
     @Test
-    fun `toggleChargingOptimization shows adb toast when SecurityException is thrown`() {
+    fun `toggleChargingOptimization invokes onPermissionDenied when SecurityException is thrown`() {
         every {
             Settings.Secure.getInt(contentResolver, "charge_optimization_mode", 0)
         } returns 0
@@ -136,12 +144,15 @@ class ChargingOptimizationTest {
             Settings.Secure.putInt(contentResolver, "charge_optimization_mode", 1)
         } throws SecurityException("Permission denial")
 
-        val params = SettingsUtils.SettingsToggleParams(context) {}
+        var deniedCalled = false
+        val params = SettingsUtils.SettingsToggleParams(
+            context = context,
+            onSettingChanged = {},
+            onPermissionDenied = { deniedCalled = true }
+        )
 
         SettingsUtils.Charging.toggleChargingOptimization(params)
 
-        val expectedToastMessage = "Please grant WRITE_SECURE_SETTINGS via ADB:\nadb shell pm grant $packageName android.permission.WRITE_SECURE_SETTINGS"
-
-        verify { Toast.makeText(context, expectedToastMessage, Toast.LENGTH_LONG) }
+        assertTrue("Expected onPermissionDenied to be called", deniedCalled)
     }
 }
