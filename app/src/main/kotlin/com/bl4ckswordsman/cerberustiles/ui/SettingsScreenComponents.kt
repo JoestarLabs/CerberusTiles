@@ -138,19 +138,33 @@ fun CreateDialog(params: DialogCreationParams) {
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Row(
-                                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp)
+                                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(
+                                    8.dp
+                                )
                             ) {
                                 androidx.compose.material3.TextButton(onClick = {
-                                    val intent = Intent(Intent.ACTION_VIEW,
-                                        "https://apt.izzysoft.de/fdroid/index/apk/com.bl4ckswordsman.cerberustiles".toUri())
-                                    context.startActivity(intent)
+                                    val intent = Intent(
+                                        Intent.ACTION_VIEW,
+                                        "https://apt.izzysoft.de/fdroid/index/apk/com.bl4ckswordsman.cerberustiles".toUri()
+                                    )
+                                    try {
+                                        context.startActivity(Intent.createChooser(intent, null))
+                                    } catch (e: Exception) {
+                                        Log.w("SettingsScreenComponents", "No app to handle URL", e)
+                                    }
                                 }) {
                                     Text("IzzyOnDroid")
                                 }
                                 androidx.compose.material3.TextButton(onClick = {
-                                    val intent = Intent(Intent.ACTION_VIEW,
-                                        "https://github.com/JoestarLabs/CerberusTiles".toUri())
-                                    context.startActivity(intent)
+                                    val intent = Intent(
+                                        Intent.ACTION_VIEW,
+                                        "https://github.com/JoestarLabs/CerberusTiles".toUri()
+                                    )
+                                    try {
+                                        context.startActivity(Intent.createChooser(intent, null))
+                                    } catch (e: Exception) {
+                                        Log.w("SettingsScreenComponents", "No app to handle URL", e)
+                                    }
                                 }) {
                                     Text("GitHub")
                                 }
