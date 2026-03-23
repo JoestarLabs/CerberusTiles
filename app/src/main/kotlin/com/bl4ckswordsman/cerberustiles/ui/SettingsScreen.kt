@@ -62,7 +62,6 @@ data class SettingsScreenParams(
  * The settings screen of the app.
  * @param params The parameters of the settings screen.
  */
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun SettingsScreen(params: SettingsScreenParams) {
     Column(modifier = Modifier.padding(params.paddingValues)) {
@@ -84,7 +83,6 @@ fun SettingsScreen(params: SettingsScreenParams) {
 
 
 /** A preview of the settings screen. */
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Preview(showBackground = true)
 @Composable
 fun SettingsScreenPreview() {
