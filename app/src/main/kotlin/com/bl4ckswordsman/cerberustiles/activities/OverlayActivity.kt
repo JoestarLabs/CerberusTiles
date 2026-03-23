@@ -37,6 +37,7 @@ class OverlayActivity : ComponentActivity() {
         viewModel.updateCanWrite(this)
         viewModel.updateIsSwitchedOn(this)
         viewModel.updateIsVibrationModeOn(this)
+        viewModel.updateIsChargingOptimizationOn(this)
         _currentRingerMode.value = Ringer.getCurrentRingerMode(this)
     }
 
@@ -69,6 +70,14 @@ class OverlayActivity : ComponentActivity() {
                         viewModel.isVibrationModeOn.value = newValue
                     }
                     toggleVibrationMode(params)
+                },
+                isChargingOptimizationOn = viewModel.isChargingOptimizationOn.value,
+                setChargingOptimization = { viewModel.isChargingOptimizationOn.value = it },
+                toggleChargingOptimization = {
+                    val params = SettingsUtils.SettingsToggleParams(this) { newValue ->
+                        viewModel.isChargingOptimizationOn.value = newValue
+                    }
+                    SettingsUtils.Charging.toggleChargingOptimization(params)
                 },
                 sharedParams = createSharedParams(),
                 currentRingerMode = _currentRingerMode.value,

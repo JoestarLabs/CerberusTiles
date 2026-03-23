@@ -42,6 +42,8 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
     private val isAdaptive: LiveData<Boolean> get() = _isAdaptive
     private val _isVibrationMode = MutableLiveData<Boolean>()
     private val isVibrationMode: LiveData<Boolean> get() = _isVibrationMode
+    private val _isChargingOptimization = MutableLiveData<Boolean>()
+    private val isChargingOptimization: LiveData<Boolean> get() = _isChargingOptimization
     private val _currentRingerMode = MutableLiveData<RingerMode>()
     val currentRingerMode: LiveData<RingerMode> get() = _currentRingerMode
 
@@ -59,6 +61,7 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
         _canWrite.value = Settings.System.canWrite(this)
         _isAdaptive.value = SettingsUtils.Brightness.isAdaptiveBrightnessEnabled(this)
         _isVibrationMode.value = SettingsUtils.Vibration.isVibrationModeEnabled(this)
+        _isChargingOptimization.value = SettingsUtils.Charging.isChargingOptimizationEnabled(this)
         val currentMode = Ringer.getCurrentRingerMode(this)
         println("Debug - MainActivity onResume current mode: $currentMode")
         _currentRingerMode.value = currentMode
@@ -79,6 +82,8 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
                         toggleAdaptiveBrightness = ::toggleAdaptiveBrightness,
                         isVibrationMode = isVibrationMode,
                         toggleVibrationMode = ::toggleVibrationMode,
+                        isChargingOptimization = isChargingOptimization,
+                        toggleChargingOptimization = ::toggleChargingOptimization,
                         openPermissionSettings = { openPermissionSettings(this) },
                         currentRingerMode = currentRingerMode,
                         onRingerModeChange = { newMode ->
@@ -99,6 +104,9 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
                 isVibrationModeOn = _isVibrationMode.value == true,
                 setVibrationMode = { _isVibrationMode.value = it },
                 toggleVibrationMode = ::toggleVibrationMode,
+                isChargingOptimizationOn = _isChargingOptimization.value == true,
+                setChargingOptimization = { _isChargingOptimization.value = it },
+                toggleChargingOptimization = ::toggleChargingOptimization,
                 sharedParams = createSharedParams(),
                 currentRingerMode = _currentRingerMode.value ?: RingerMode.NORMAL,
                 onRingerModeChange = { newMode ->
@@ -123,5 +131,12 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
             _isVibrationMode.value = newValue
         }
         return SettingsUtils.Vibration.toggleVibrationMode(params)
+    }
+
+    private fun toggleChargingOptimization() {
+        val params = SettingsUtils.SettingsToggleParams(this) { newValue ->
+            _isChargingOptimization.value = newValue
+        }
+        SettingsUtils.Charging.toggleChargingOptimization(params)
     }
 }

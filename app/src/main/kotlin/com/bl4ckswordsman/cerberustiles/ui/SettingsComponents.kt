@@ -32,7 +32,8 @@ import com.bl4ckswordsman.cerberustiles.util.Ringer
 data class ComponentVisibilityDialogParams(
     val adaptBrightnessSwitch: MutableState<Boolean>,
     val brightnessSlider: MutableState<Boolean>,
-    val ringerModeSelector: MutableState<Boolean>
+    val ringerModeSelector: MutableState<Boolean>,
+    val chargingOptimizationSwitch: MutableState<Boolean>
 )
 
 /**
@@ -48,6 +49,9 @@ data class SettingsComponentsParams(
     val isVibrationModeOn: Boolean,
     val setVibrationMode: (Boolean) -> Unit,
     val toggleVibrationMode: () -> Boolean,
+    val isChargingOptimizationOn: Boolean,
+    val setChargingOptimization: (Boolean) -> Unit,
+    val toggleChargingOptimization: () -> Unit,
     val sharedParams: SharedParams,
     val currentRingerMode: RingerMode,
     val onRingerModeChange: (RingerMode) -> Unit,
@@ -71,6 +75,17 @@ fun SettingsComponents(params: SettingsComponentsParams) {
                 }
             },
             label = if (params.isSwitchedOn) "Adaptive Brightness is ON" else "Adaptive Brightness is OFF"
+        )
+    }
+
+    if (params.componentVisibilityParams.chargingOptimizationSwitch.value) {
+        SwitchWithLabel(
+            isSwitchedOn = params.isChargingOptimizationOn,
+            onCheckedChange = {
+                params.setChargingOptimization(it)
+                params.toggleChargingOptimization()
+            },
+            label = if (params.isChargingOptimizationOn) "Charging Optimization is ON" else "Charging Optimization is OFF"
         )
     }
 

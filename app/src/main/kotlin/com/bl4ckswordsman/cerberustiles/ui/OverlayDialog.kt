@@ -30,6 +30,9 @@ data class OverlayDialogParams(
     val isVibrationModeOn: Boolean,
     val setVibrationMode: (Boolean) -> Unit,
     val toggleVibrationMode: () -> Boolean,
+    val isChargingOptimizationOn: Boolean,
+    val setChargingOptimization: (Boolean) -> Unit,
+    val toggleChargingOptimization: () -> Unit,
     val sharedParams: SharedParams,
     val currentRingerMode: RingerMode,
     val onRingerModeChange: (RingerMode) -> Unit
@@ -78,6 +81,9 @@ fun OverlayDialog(params: OverlayDialogParams) {
                                     mutableStateOf(
                                         ringerModeSelector
                                     )
+                                },
+                                chargingOptimizationSwitch = rememberSaveable {
+                                    mutableStateOf(true) // Adjust logic if it should be configurable via SharedPreferences
                                 }
                             )
                             val settingsComponentsParams = SettingsComponentsParams(
@@ -89,6 +95,9 @@ fun OverlayDialog(params: OverlayDialogParams) {
                                 isVibrationModeOn = params.isVibrationModeOn,
                                 setVibrationMode = params.setVibrationMode,
                                 toggleVibrationMode = params.toggleVibrationMode,
+                                isChargingOptimizationOn = params.isChargingOptimizationOn,
+                                setChargingOptimization = params.setChargingOptimization,
+                                toggleChargingOptimization = params.toggleChargingOptimization,
                                 componentVisibilityParams = componentVisibilityDialogParams,
                                 sharedParams = createSharedParams(),
                                 currentRingerMode = currentRingerMode.value,

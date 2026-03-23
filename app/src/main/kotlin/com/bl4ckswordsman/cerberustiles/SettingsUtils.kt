@@ -245,6 +245,48 @@ object SettingsUtils {
     }
 
     /**
+     * Utilities for charging settings.
+     */
+    object Charging {
+        private const val CHARGE_OPTIMIZATION_MODE = "charge_optimization_mode"
+
+        /**
+         * Checks if charging optimization (80% limit) is enabled.
+         */
+        fun isChargingOptimizationEnabled(context: Context): Boolean {
+            return try {
+                Settings.Secure.getInt(
+                    context.contentResolver, CHARGE_OPTIMIZATION_MODE, 0
+                ) == 1
+            } catch (e: Exception) {
+                false
+            }
+        }
+
+        /**
+         * Toggles the charging optimization (80% limit).
+         */
+        fun toggleChargingOptimization(params: SettingsToggleParams) {
+            val isEnabled = isChargingOptimizationEnabled(params.context)
+            val newState = if (isEnabled) 0 else 1
+
+            try {
+                Settings.Secure.putInt(
+                    params.context.contentResolver, CHARGE_OPTIMIZATION_MODE, newState
+                )
+                showToast(params.context, "Charging optimization", !isEnabled)
+                params.onSettingChanged(!isEnabled)
+            } catch (e: SecurityException) {
+                Toast.makeText(
+                    params.context,
+                    "Please grant WRITE_SECURE_SETTINGS via ADB:\nadb shell pm grant ${params.context.packageName} android.permission.WRITE_SECURE_SETTINGS",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+
+    /**
      * Opens the screen to allow the user to write system settings.
      */
     fun openPermissionSettings(context: Context) {
@@ -272,6 +314,7 @@ object SettingsUtils {
         val canWrite = MutableLiveData<Boolean>()
         val isSwitchedOn = mutableStateOf(false)
         val isVibrationModeOn = mutableStateOf(false)
+        val isChargingOptimizationOn = mutableStateOf(false)
 
         /**
          * Updates the state of the canWrite setting.
@@ -292,6 +335,13 @@ object SettingsUtils {
          */
         fun updateIsVibrationModeOn(context: Context) {
             isVibrationModeOn.value = Vibration.isVibrationModeEnabled(context)
+        }
+
+        /**
+         * Updates the state of the charging optimization setting.
+         */
+        fun updateIsChargingOptimizationOn(context: Context) {
+            isChargingOptimizationOn.value = Charging.isChargingOptimizationEnabled(context)
         }
     }
 }
