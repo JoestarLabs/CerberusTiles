@@ -128,7 +128,7 @@ fun CreateDialog(params: DialogCreationParams) {
                         Column {
                             Text("Current Version: v$appVersion")
                             Spacer(modifier = Modifier.padding(8.dp))
-                            Text("Updates are available via IzzyOnDroid or F-Droid.")
+                            Text("Updates are available via IzzyOnDroid and GitHub.")
                         }
                     },
                     confirmButton = {
