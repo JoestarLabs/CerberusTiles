@@ -2,12 +2,14 @@ package com.bl4ckswordsman.cerberustiles.ui
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
@@ -25,7 +27,6 @@ import androidx.navigation.NavController
 import com.bl4ckswordsman.cerberustiles.Constants.UNKNOWN
 import com.bl4ckswordsman.cerberustiles.navbar.Screen
 import androidx.core.content.edit
-import androidx.core.net.toUri
 
 /**
  * The settings list item parameters.
@@ -116,36 +117,47 @@ fun CreateDialog(params: DialogCreationParams) {
                 val appVersion = try {
                     context.packageManager.getPackageInfo(context.packageName, 0).versionName
                 } catch (e: Exception) {
-                    Log.w("SettingsScreenComponents", "Failed to retrieve app version", e)
                     UNKNOWN
                 }
 
-                val dialogParams = DialogParams(
-                    showDialog = params.sharedParams.showDialog,
-                    titleText = "App Version",
-                    content = {
+                AlertDialog(
+                    onDismissRequest = { params.sharedParams.showDialog.value = false },
+                    title = { Text("App Version") },
+                    text = {
                         Column {
                             Text("Current Version: v$appVersion")
                             Spacer(modifier = Modifier.padding(8.dp))
                             Text("Updates are available via IzzyOnDroid or F-Droid.")
                         }
                     },
-                    confirmButtonText = "Close",
-                    onConfirmButtonClick = { params.sharedParams.showDialog.value = false },
-                    dismissButtonText = "GitHub",
-                    onDismissButtonClick = {
-                        val intent = Intent(Intent.ACTION_VIEW,
-                            "https://github.com/JoestarLabs/CerberusTiles".toUri())
-                        context.startActivity(intent)
-                    },
-                    neutralButtonText = "IzzyOnDroid",
-                    onNeutralButtonClick = {
-                        val intent = Intent(Intent.ACTION_VIEW,
-                            "https://apt.izzysoft.de/fdroid/index/apk/com.bl4ckswordsman.cerberustiles".toUri())
-                        context.startActivity(intent)
+                    confirmButton = {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(
+                                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp)
+                            ) {
+                                androidx.compose.material3.TextButton(onClick = {
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://apt.izzysoft.de/fdroid/index/apk/com.bl4ckswordsman.cerberustiles"))
+                                    context.startActivity(intent)
+                                }) {
+                                    Text("IzzyOnDroid")
+                                }
+                                androidx.compose.material3.TextButton(onClick = {
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/JoestarLabs/CerberusTiles"))
+                                    context.startActivity(intent)
+                                }) {
+                                    Text("GitHub")
+                                }
+                            }
+                            Button(onClick = { params.sharedParams.showDialog.value = false }) {
+                                Text("Close")
+                            }
+                        }
                     }
                 )
-                CreateDialog(dialogParams)
             }
 
             DialogType.COMPONENT_VISIBILITY -> {
@@ -246,13 +258,6 @@ fun CreateDialog(params: DialogParams) {
                 if (params.dismissButtonText != null && params.onDismissButtonClick != null) {
                     Button(onClick = params.onDismissButtonClick) {
                         Text(params.dismissButtonText)
-                    }
-                }
-
-                if (params.neutralButtonText != null && params.onNeutralButtonClick != null) {
-                    Spacer(modifier = Modifier.padding(4.dp))
-                    Button(onClick = params.onNeutralButtonClick) {
-                        Text(params.neutralButtonText)
                     }
                 }
             }
