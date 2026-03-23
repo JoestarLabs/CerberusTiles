@@ -132,6 +132,14 @@ fun CreateDialog(params: DialogCreationParams) {
                         }
                     },
                     confirmButton = {
+                        fun openExternalLink(url: String) {
+                            val intent = Intent(Intent.ACTION_VIEW, url.toUri())
+                            try {
+                                context.startActivity(Intent.createChooser(intent, null))
+                            } catch (e: Exception) {
+                                Log.w("SettingsScreenComponents", "No app to handle URL: $url", e)
+                            }
+                        }
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween,
@@ -143,28 +151,12 @@ fun CreateDialog(params: DialogCreationParams) {
                                 )
                             ) {
                                 androidx.compose.material3.TextButton(onClick = {
-                                    val intent = Intent(
-                                        Intent.ACTION_VIEW,
-                                        "https://apt.izzysoft.de/fdroid/index/apk/com.bl4ckswordsman.cerberustiles".toUri()
-                                    )
-                                    try {
-                                        context.startActivity(Intent.createChooser(intent, null))
-                                    } catch (e: Exception) {
-                                        Log.w("SettingsScreenComponents", "No app to handle URL", e)
-                                    }
+                                    openExternalLink("https://apt.izzysoft.de/fdroid/index/apk/com.bl4ckswordsman.cerberustiles")
                                 }) {
                                     Text("IzzyOnDroid")
                                 }
                                 androidx.compose.material3.TextButton(onClick = {
-                                    val intent = Intent(
-                                        Intent.ACTION_VIEW,
-                                        "https://github.com/JoestarLabs/CerberusTiles".toUri()
-                                    )
-                                    try {
-                                        context.startActivity(Intent.createChooser(intent, null))
-                                    } catch (e: Exception) {
-                                        Log.w("SettingsScreenComponents", "No app to handle URL", e)
-                                    }
+                                    openExternalLink("https://github.com/JoestarLabs/CerberusTiles")
                                 }) {
                                     Text("GitHub")
                                 }
