@@ -2,7 +2,6 @@ package com.bl4ckswordsman.cerberustiles.ui
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -26,6 +25,7 @@ import androidx.navigation.NavController
 import com.bl4ckswordsman.cerberustiles.Constants.UNKNOWN
 import com.bl4ckswordsman.cerberustiles.navbar.Screen
 import androidx.core.content.edit
+import androidx.core.net.toUri
 
 /**
  * The settings list item parameters.
@@ -116,6 +116,7 @@ fun CreateDialog(params: DialogCreationParams) {
                 val appVersion = try {
                     context.packageManager.getPackageInfo(context.packageName, 0).versionName
                 } catch (e: Exception) {
+                    Log.w("SettingsScreenComponents", "Failed to retrieve app version", e)
                     UNKNOWN
                 }
 
@@ -133,12 +134,14 @@ fun CreateDialog(params: DialogCreationParams) {
                     onConfirmButtonClick = { params.sharedParams.showDialog.value = false },
                     dismissButtonText = "GitHub",
                     onDismissButtonClick = {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/JoestarLabs/CerberusTiles"))
+                        val intent = Intent(Intent.ACTION_VIEW,
+                            "https://github.com/JoestarLabs/CerberusTiles".toUri())
                         context.startActivity(intent)
                     },
                     neutralButtonText = "IzzyOnDroid",
                     onNeutralButtonClick = {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://apt.izzysoft.de/fdroid/index/apk/com.bl4ckswordsman.cerberustiles"))
+                        val intent = Intent(Intent.ACTION_VIEW,
+                            "https://apt.izzysoft.de/fdroid/index/apk/com.bl4ckswordsman.cerberustiles".toUri())
                         context.startActivity(intent)
                     }
                 )
