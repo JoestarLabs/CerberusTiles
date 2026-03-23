@@ -1,40 +1,32 @@
 package com.bl4ckswordsman.cerberustiles.ui
 
-import android.app.DownloadManager
 import android.content.Context
-import android.os.Environment
-import android.text.method.LinkMovementMethod
+import android.content.Intent
 import android.util.Log
-import android.widget.TextView
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
-import com.bl4ckswordsman.cerberustiles.VersionManager
+import com.bl4ckswordsman.cerberustiles.Constants.UNKNOWN
 import com.bl4ckswordsman.cerberustiles.navbar.Screen
-import io.noties.markwon.Markwon
-import kotlinx.coroutines.launch
-import androidx.core.net.toUri
 import androidx.core.content.edit
+import androidx.core.net.toUri
 
 /**
  * The settings list item parameters.
@@ -69,25 +61,14 @@ fun createSharedParams(navController: NavController? = null): SharedParams {
     val context = LocalContext.current
     val sharedPreferences = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
     val showDialog = rememberSaveable { mutableStateOf(false) }
-    val releaseInfo = remember { mutableStateOf(ReleaseInfo("", "", "")) }
-    val downloadId = rememberSaveable { mutableLongStateOf(-1L) }
-    val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-    val isUpdateAvailable = rememberSaveable { mutableStateOf(false) }
-    val versionManager = remember { VersionManager() }
     val coroutineScope = rememberCoroutineScope()
     val dialogType = rememberSaveable { mutableStateOf(DialogType.NONE) }
-
 
     return SharedParams(
         context = context,
         coroutineScope = coroutineScope,
         showDialog = showDialog,
         dialogType = dialogType,
-        isUpdateAvailable = isUpdateAvailable,
-        releaseInfo = releaseInfo,
-        downloadId = downloadId,
-        downloadManager = downloadManager,
-        versionManager = versionManager,
         sharedPreferences = sharedPreferences,
         navController = navController
     )
@@ -108,17 +89,10 @@ fun CreateSettingsListItem(params: SettingsListItemParams) {
         })
     CreateSettingsListItem(
         headlineText = "App version",
-        supportingText = "Click to view release notes",
+        supportingText = "Click to view app version",
         onClick = {
-            params.sharedParams.coroutineScope.launch {
-                val (updateAvailable, info) = params.sharedParams.versionManager.fetchAndParseVersionInfo(
-                    params.sharedParams.context, params.sharedParams.versionManager
-                )
-                params.sharedParams.isUpdateAvailable.value = updateAvailable
-                params.sharedParams.releaseInfo.value = info
-                params.sharedParams.showDialog.value = true
-                params.sharedParams.dialogType.value = DialogType.APP_VERSION
-            }
+            params.sharedParams.showDialog.value = true
+            params.sharedParams.dialogType.value = DialogType.APP_VERSION
         })
     CreateSettingsListItem(
         headlineText = "Open Source Licenses",
@@ -139,43 +113,60 @@ fun CreateDialog(params: DialogCreationParams) {
         when (params.sharedParams.dialogType.value) {
 
             DialogType.APP_VERSION -> {
-                val dialogParams = DialogParams(
-                    showDialog = params.sharedParams.showDialog,
-                    titleText = if (params.sharedParams.isUpdateAvailable.value) "New update available" else "Release Information",
-                    content = {
+                val context = params.sharedParams.context
+                val appVersion = try {
+                    context.packageManager.getPackageInfo(context.packageName, 0).versionName
+                } catch (e: Exception) {
+                    Log.w("SettingsScreenComponents", "Failed to retrieve app version", e)
+                    UNKNOWN
+                }
+
+                AlertDialog(
+                    onDismissRequest = { params.sharedParams.showDialog.value = false },
+                    title = { Text("App Version") },
+                    text = {
                         Column {
-                            HorizontalDivider()
-                            Text("Current Version: v${params.sharedParams.releaseInfo.value.currentVersion}")
-                            Text("Latest Version: ${params.sharedParams.releaseInfo.value.latestVersion}")
-                            HorizontalDivider()
+                            Text("Current Version: v$appVersion")
                             Spacer(modifier = Modifier.padding(8.dp))
-                            Text("Latest Release Notes:")
-                            MarkdownText(params.sharedParams.releaseInfo.value.releaseNotes)
+                            Text("Updates are available via IzzyOnDroid and GitHub.")
                         }
                     },
-                    confirmButtonText = "Close",
-                    onConfirmButtonClick = { params.sharedParams.showDialog.value = false },
-                    dismissButtonText = if (params.sharedParams.isUpdateAvailable.value) "Download update" else null,
-                    onDismissButtonClick = if (params.sharedParams.isUpdateAvailable.value) {
-                        {
-                            params.sharedParams.coroutineScope.launch {
-                                val url =
-                                    params.sharedParams.versionManager.getLatestReleaseApkUrl()
-                                if (url.startsWith("http://") || url.startsWith("https://")) {
-                                    val request = DownloadManager.Request(url.toUri())
-                                    request.setDestinationInExternalPublicDir(
-                                        Environment.DIRECTORY_DOWNLOADS, "CerberusTiles-update.apk"
-                                    )
-                                    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                                    params.sharedParams.downloadId.value =
-                                        params.sharedParams.downloadManager.enqueue(request)
-                                } else {
-                                    Log.d("Download Error", "Invalid URL: $url")
-                                }
+                    confirmButton = {
+                        fun openExternalLink(url: String) {
+                            val intent = Intent(Intent.ACTION_VIEW, url.toUri())
+                            try {
+                                context.startActivity(Intent.createChooser(intent, null))
+                            } catch (e: Exception) {
+                                Log.w("SettingsScreenComponents", "No app to handle URL: $url", e)
                             }
                         }
-                    } else null)
-                CreateDialog(dialogParams)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(
+                                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(
+                                    8.dp
+                                )
+                            ) {
+                                androidx.compose.material3.TextButton(onClick = {
+                                    openExternalLink("https://apt.izzysoft.de/fdroid/index/apk/com.bl4ckswordsman.cerberustiles")
+                                }) {
+                                    Text("IzzyOnDroid")
+                                }
+                                androidx.compose.material3.TextButton(onClick = {
+                                    openExternalLink("https://github.com/JoestarLabs/CerberusTiles")
+                                }) {
+                                    Text("GitHub")
+                                }
+                            }
+                            Button(onClick = { params.sharedParams.showDialog.value = false }) {
+                                Text("Close")
+                            }
+                        }
+                    }
+                )
             }
 
             DialogType.COMPONENT_VISIBILITY -> {
@@ -241,31 +232,6 @@ fun CreateComponentVisibilityDialog(params: DialogCreationParams) {
 }
 
 /**
- * Pads the list with the specified value to the specified size.
- */
-fun List<Int>.padEnd(size: Int, value: Int = 0): List<Int> {
-    return if (size > this.size) this + List(size - this.size) { value } else this
-}
-
-/**
- * A composable that displays markdown text using Markwon.
- * @param markdown The markdown text to display.
- */
-@Composable
-fun MarkdownText(markdown: String) {
-    val markdownContext = LocalContext.current
-    val markwon = remember { Markwon.create(markdownContext) }
-
-    AndroidView(factory = { context ->
-        TextView(context).apply {
-            movementMethod = LinkMovementMethod.getInstance()
-        }
-    }, update = { view ->
-        markwon.setMarkdown(view, markdown)
-    })
-}
-
-/**
  * Creates a settings list item.
  * @param headlineText The headline text of the item.
  * @param supportingText The supporting text of the item.
@@ -279,32 +245,6 @@ fun CreateSettingsListItem(
         modifier = Modifier.clickable { onClick() },
         headlineContent = { Text(headlineText) },
         supportingContent = { Text(supportingText) })
-}
-
-/**
- * Creates a dialog.
- * @param params The dialog parameters.
- */
-@Composable
-fun CreateDialog(params: DialogParams) {
-    if (params.showDialog.value) {
-        AlertDialog(
-            onDismissRequest = { params.showDialog.value = false },
-            title = { Text(params.titleText) },
-            text = { params.content() },
-            confirmButton = {
-                Button(onClick = params.onConfirmButtonClick) {
-                    Text(params.confirmButtonText)
-                }
-            },
-            dismissButton = {
-                if (params.dismissButtonText != null && params.onDismissButtonClick != null) {
-                    Button(onClick = params.onDismissButtonClick) {
-                        Text(params.dismissButtonText)
-                    }
-                }
-            })
-    }
 }
 
 /**
