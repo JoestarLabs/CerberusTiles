@@ -29,6 +29,10 @@ class ChargingOptimizationTest {
 
     private val packageName = "com.bl4ckswordsman.cerberustiles"
 
+    companion object {
+        private const val CHARGE_OPTIMIZATION_KEY = "charge_optimization_mode"
+    }
+
     @Before
     fun setUp() {
         MockKAnnotations.init(this)
@@ -51,7 +55,7 @@ class ChargingOptimizationTest {
     @Test
     fun `isChargingOptimizationEnabled returns true when setting is 1`() {
         every {
-            Settings.Secure.getInt(contentResolver, "charge_optimization_mode", 0)
+            Settings.Secure.getInt(contentResolver, CHARGE_OPTIMIZATION_KEY, 0)
         } returns 1
 
         val result = SettingsUtils.Charging.isChargingOptimizationEnabled(context)
@@ -61,7 +65,7 @@ class ChargingOptimizationTest {
     @Test
     fun `isChargingOptimizationEnabled returns false when setting is 0`() {
         every {
-            Settings.Secure.getInt(contentResolver, "charge_optimization_mode", 0)
+            Settings.Secure.getInt(contentResolver, CHARGE_OPTIMIZATION_KEY, 0)
         } returns 0
 
         val result = SettingsUtils.Charging.isChargingOptimizationEnabled(context)
@@ -71,7 +75,7 @@ class ChargingOptimizationTest {
     @Test
     fun `isChargingOptimizationEnabled returns false on exception`() {
         every {
-            Settings.Secure.getInt(contentResolver, "charge_optimization_mode", 0)
+            Settings.Secure.getInt(contentResolver, CHARGE_OPTIMIZATION_KEY, 0)
         } throws SecurityException("Test exception")
 
         val result = SettingsUtils.Charging.isChargingOptimizationEnabled(context)
@@ -81,7 +85,7 @@ class ChargingOptimizationTest {
     @Test
     fun `isChargingOptimizationSupported returns true when setting read succeeds`() {
         every {
-            Settings.Secure.getInt(contentResolver, "charge_optimization_mode", -1)
+            Settings.Secure.getInt(contentResolver, CHARGE_OPTIMIZATION_KEY, -1)
         } returns 0
 
         val result = SettingsUtils.Charging.isChargingOptimizationSupported(context)
@@ -91,7 +95,7 @@ class ChargingOptimizationTest {
     @Test
     fun `isChargingOptimizationSupported returns false when setting read returns -1`() {
         every {
-            Settings.Secure.getInt(contentResolver, "charge_optimization_mode", -1)
+            Settings.Secure.getInt(contentResolver, CHARGE_OPTIMIZATION_KEY, -1)
         } returns -1
 
         val result = SettingsUtils.Charging.isChargingOptimizationSupported(context)
@@ -101,7 +105,7 @@ class ChargingOptimizationTest {
     @Test
     fun `isChargingOptimizationSupported returns false when setting read throws exception`() {
         every {
-            Settings.Secure.getInt(contentResolver, "charge_optimization_mode", -1)
+            Settings.Secure.getInt(contentResolver, CHARGE_OPTIMIZATION_KEY, -1)
         } throws Exception("Test exception")
 
         val result = SettingsUtils.Charging.isChargingOptimizationSupported(context)
@@ -111,7 +115,7 @@ class ChargingOptimizationTest {
     @Test
     fun `setChargingOptimization sets to 1 when enabled is true`() {
         every {
-            Settings.Secure.putInt(contentResolver, "charge_optimization_mode", 1)
+            Settings.Secure.putInt(contentResolver, CHARGE_OPTIMIZATION_KEY, 1)
         } returns true
 
         var callbackCalled = false
@@ -126,7 +130,7 @@ class ChargingOptimizationTest {
 
         SettingsUtils.Charging.setChargingOptimization(true, params)
 
-        verify { Settings.Secure.putInt(contentResolver, "charge_optimization_mode", 1) }
+        verify { Settings.Secure.putInt(contentResolver, CHARGE_OPTIMIZATION_KEY, 1) }
         verify { Toast.makeText(context, "Charging optimization enabled", Toast.LENGTH_SHORT) }
         assertTrue("Expected callback to be called", callbackCalled)
         assertTrue("Expected new value to be true", newValue)
@@ -135,7 +139,7 @@ class ChargingOptimizationTest {
     @Test
     fun `setChargingOptimization sets to 0 when enabled is false`() {
         every {
-            Settings.Secure.putInt(contentResolver, "charge_optimization_mode", 0)
+            Settings.Secure.putInt(contentResolver, CHARGE_OPTIMIZATION_KEY, 0)
         } returns true
 
         var callbackCalled = false
@@ -150,7 +154,7 @@ class ChargingOptimizationTest {
 
         SettingsUtils.Charging.setChargingOptimization(false, params)
 
-        verify { Settings.Secure.putInt(contentResolver, "charge_optimization_mode", 0) }
+        verify { Settings.Secure.putInt(contentResolver, CHARGE_OPTIMIZATION_KEY, 0) }
         verify { Toast.makeText(context, "Charging optimization disabled", Toast.LENGTH_SHORT) }
         assertTrue("Expected callback to be called", callbackCalled)
         assertFalse("Expected new value to be false", newValue)
@@ -159,7 +163,7 @@ class ChargingOptimizationTest {
     @Test
     fun `setChargingOptimization handles putInt returning false`() {
         every {
-            Settings.Secure.putInt(contentResolver, "charge_optimization_mode", 1)
+            Settings.Secure.putInt(contentResolver, CHARGE_OPTIMIZATION_KEY, 1)
         } returns false
 
         var callbackCalled = false
@@ -172,7 +176,7 @@ class ChargingOptimizationTest {
 
         SettingsUtils.Charging.setChargingOptimization(true, params)
 
-        verify { Settings.Secure.putInt(contentResolver, "charge_optimization_mode", 1) }
+        verify { Settings.Secure.putInt(contentResolver, CHARGE_OPTIMIZATION_KEY, 1) }
         verify { Toast.makeText(context, "Failed to change charging optimization setting. It may be restricted.", Toast.LENGTH_SHORT) }
         assertFalse("Expected callback to not be called", callbackCalled)
     }
@@ -180,7 +184,7 @@ class ChargingOptimizationTest {
     @Test
     fun `setChargingOptimization invokes onPermissionDenied when SecurityException is thrown`() {
         every {
-            Settings.Secure.putInt(contentResolver, "charge_optimization_mode", 1)
+            Settings.Secure.putInt(contentResolver, CHARGE_OPTIMIZATION_KEY, 1)
         } throws SecurityException("Permission denial")
 
         var deniedCalled = false
