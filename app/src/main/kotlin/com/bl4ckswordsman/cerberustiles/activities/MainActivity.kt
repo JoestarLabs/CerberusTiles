@@ -2,19 +2,19 @@ package com.bl4ckswordsman.cerberustiles.activities
 
 import android.os.Build
 import android.os.Bundle
-import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.lifecycle.LifecycleObserver
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
+import com.bl4ckswordsman.cerberustiles.MainViewModel
 import com.bl4ckswordsman.cerberustiles.SettingsUtils
 import com.bl4ckswordsman.cerberustiles.SettingsUtils.openPermissionSettings
 import com.bl4ckswordsman.cerberustiles.ShortcutHelper
@@ -25,62 +25,67 @@ import com.bl4ckswordsman.cerberustiles.ui.OverlayDialog
 import com.bl4ckswordsman.cerberustiles.ui.OverlayDialogParams
 import com.bl4ckswordsman.cerberustiles.ui.createSharedParams
 import com.bl4ckswordsman.cerberustiles.ui.theme.CustomTilesTheme
-import com.bl4ckswordsman.cerberustiles.util.Ringer
 import kotlinx.coroutines.launch
 
-/** Main activity of the app. */
+/**
+ * Main activity of the app.
+ *
+ * All mutable settings state is owned by [MainViewModel], which is obtained via
+ * `by viewModels()`. This keeps state consistent with [OverlayActivity], which
+ * uses the same ViewModel class (each activity has its own instance because they
+ * run in separate tasks, but both follow the identical pattern and field set).
+ */
 @RequiresApi(Build.VERSION_CODES.N_MR1)
 class MainActivity : ComponentActivity(), LifecycleObserver {
-    /** TODO: Use viewModelScope for LiveData instead of using MutableLiveData, this ensures that
-     * the LiveData is cleared when the ViewModel is cleared.**/
 
-
+    private val viewModel: MainViewModel by viewModels()
     private val shortcutHelper by lazy { ShortcutHelper(this) }
 
-    private val _canWrite = MutableLiveData<Boolean>()
-    private val canWrite: LiveData<Boolean> get() = _canWrite
-
-    private val _isAdaptive = MutableLiveData<Boolean>()
-    private val isAdaptive: LiveData<Boolean> get() = _isAdaptive
-    private val _isVibrationMode = MutableLiveData<Boolean>()
-    private val isVibrationMode: LiveData<Boolean> get() = _isVibrationMode
-    private val _isChargingOptimization = MutableLiveData<Boolean>()
-    private val isChargingOptimization: LiveData<Boolean> get() = _isChargingOptimization
-    private val _isChargingOptimizationSupported = MutableLiveData<Boolean>()
-    private val isChargingOptimizationSupported: LiveData<Boolean> get() = _isChargingOptimizationSupported
-    private val _showAdbDialog = MutableLiveData<Boolean>()
-    private val showAdbDialog: LiveData<Boolean> get() = _showAdbDialog
-    private val _currentRingerMode = MutableLiveData<RingerMode>()
-    val currentRingerMode: LiveData<RingerMode> get() = _currentRingerMode
-
+    // LiveData wrappers for MainScreenParams (which expects LiveData<Boolean>).
+    // These are updated in the toggle callbacks and onResume so MainScreen
+    // reacts to changes via observeAsState inside the composable.
+    private val isAdaptiveLiveData = MutableLiveData(false)
+    private val isVibrationModeLiveData = MutableLiveData(false)
+    private val isChargingOptimizationLiveData = MutableLiveData(false)
+    private val isChargingOptimizationSupportedLiveData = MutableLiveData(false)
+    private val showAdbDialogLiveData = MutableLiveData(false)
 
     /**
      * Creates all app shortcuts via [ShortcutHelper] when the activity becomes visible.
      */
     override fun onStart() {
         super.onStart()
-
         lifecycleScope.launch {
             shortcutHelper.createAllShortcuts()
         }
     }
 
     /**
-     * Refreshes all LiveData state values from the device settings each time the activity resumes,
-     * ensuring the UI reflects any changes made while the app was in the background.
+     * Refreshes all ViewModel state values from the device settings each time the activity
+     * resumes, ensuring the UI reflects any changes made while the app was in the background.
+     * Also syncs the LiveData wrappers used by [MainScreenParams].
      */
     override fun onResume() {
         super.onResume()
-        _canWrite.value = Settings.System.canWrite(this)
-        _isAdaptive.value = SettingsUtils.Brightness.isAdaptiveBrightnessEnabled(this)
-        _isVibrationMode.value = SettingsUtils.Vibration.isVibrationModeEnabled(this)
-        _isChargingOptimizationSupported.value = SettingsUtils.Charging.isChargingOptimizationSupported(this)
-        if (_isChargingOptimizationSupported.value == true) {
-            _isChargingOptimization.value = SettingsUtils.Charging.isChargingOptimizationEnabled(this)
-        }
-        val currentMode = Ringer.getCurrentRingerMode(this)
-        println("Debug - MainActivity onResume current mode: $currentMode")
-        _currentRingerMode.value = currentMode
+        viewModel.updateCanWrite(this)
+        viewModel.updateIsAdaptiveBrightnessOn(this)
+        viewModel.updateIsVibrationModeOn(this)
+        viewModel.updateIsChargingOptimizationOn(this)
+        viewModel.updateCurrentRingerMode(this)
+        syncLiveDataWrappers()
+    }
+
+    /**
+     * Copies the current [MainViewModel] [androidx.compose.runtime.MutableState] values into
+     * the corresponding [MutableLiveData] wrappers so [MainScreen] can observe them.
+     */
+    private fun syncLiveDataWrappers() {
+        isAdaptiveLiveData.value = viewModel.isAdaptiveBrightnessOn.value
+        isVibrationModeLiveData.value = viewModel.isVibrationModeOn.value
+        isChargingOptimizationLiveData.value = viewModel.isChargingOptimizationOn.value
+        isChargingOptimizationSupportedLiveData.value =
+            viewModel.isChargingOptimizationSupported.value
+        showAdbDialogLiveData.value = viewModel.showAdbDialog.value
     }
 
     /**
@@ -89,103 +94,117 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
      */
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
-
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         lifecycle.addObserver(this)
         setContent {
             val showOverlayDialog = rememberSaveable { mutableStateOf(false) }
-            val overlayIsAdaptive by _isAdaptive.observeAsState(false)
-            val overlayIsVibrationModeOn by _isVibrationMode.observeAsState(false)
-            val overlayIsChargingOptimizationOn by _isChargingOptimization.observeAsState(false)
-            val overlayIsChargingOptimizationSupported by _isChargingOptimizationSupported.observeAsState(false)
-            val overlayShowAdbDialog by _showAdbDialog.observeAsState(false)
-            val overlayCurrentRingerMode by _currentRingerMode.observeAsState(RingerMode.NORMAL)
+            val currentRingerMode by viewModel.currentRingerMode.observeAsState(RingerMode.NORMAL)
 
             CustomTilesTheme {
                 MainScreen(
-                    MainScreenParams(canWrite = canWrite,
-                        isAdaptive = isAdaptive,
+                    MainScreenParams(
+                        canWrite = viewModel.canWrite,
+                        isAdaptive = isAdaptiveLiveData,
                         toggleAdaptiveBrightness = ::toggleAdaptiveBrightness,
-                        isVibrationMode = isVibrationMode,
+                        isVibrationMode = isVibrationModeLiveData,
                         toggleVibrationMode = ::toggleVibrationMode,
-                        isChargingOptimization = isChargingOptimization,
-                        isChargingOptimizationSupported = isChargingOptimizationSupported,
+                        isChargingOptimization = isChargingOptimizationLiveData,
+                        isChargingOptimizationSupported = isChargingOptimizationSupportedLiveData,
                         toggleChargingOptimization = ::toggleChargingOptimization,
-                        showAdbDialog = showAdbDialog,
-                        onAdbDialogDismiss = { _showAdbDialog.value = false },
+                        showAdbDialog = showAdbDialogLiveData,
+                        onAdbDialogDismiss = {
+                            viewModel.showAdbDialog.value = false
+                            showAdbDialogLiveData.value = false
+                        },
                         openPermissionSettings = { openPermissionSettings(this) },
-                        currentRingerMode = currentRingerMode,
+                        currentRingerMode = viewModel.currentRingerMode,
                         onRingerModeChange = { newMode ->
-                            _currentRingerMode.value = newMode
-                            _isVibrationMode.value = newMode == RingerMode.VIBRATE
+                            viewModel.currentRingerMode.value = newMode
+                            viewModel.isVibrationModeOn.value = newMode == RingerMode.VIBRATE
+                            isVibrationModeLiveData.value = newMode == RingerMode.VIBRATE
                         }
                     )
                 )
             }
-            val params = OverlayDialogParams(
-                showDialog = showOverlayDialog,
-                onDismiss = { showOverlayDialog.value = false },
-                canWrite = _canWrite,
-                isSwitchedOn = overlayIsAdaptive,
-                setSwitchedOn = { _isAdaptive.value = it },
-                toggleAdaptiveBrightness = ::toggleAdaptiveBrightness,
-                openPermissionSettings = { openPermissionSettings(this) },
-                isVibrationModeOn = overlayIsVibrationModeOn,
-                setVibrationMode = { _isVibrationMode.value = it },
-                toggleVibrationMode = ::toggleVibrationMode,
-                isChargingOptimizationOn = overlayIsChargingOptimizationOn,
-                isChargingOptimizationSupported = overlayIsChargingOptimizationSupported,
-                setChargingOptimization = { _isChargingOptimization.value = it },
-                toggleChargingOptimization = ::toggleChargingOptimization,
-                showAdbDialog = overlayShowAdbDialog,
-                onAdbDialogDismiss = { _showAdbDialog.value = false },
-                sharedParams = createSharedParams(),
-                currentRingerMode = overlayCurrentRingerMode,
-                onRingerModeChange = { newMode ->
-                    println("Debug - MainActivity onRingerModeChange: $newMode")
-                    _currentRingerMode.value = newMode
-                    _isVibrationMode.value = newMode == RingerMode.VIBRATE
-                }
+            OverlayDialog(
+                OverlayDialogParams(
+                    showDialog = showOverlayDialog,
+                    onDismiss = { showOverlayDialog.value = false },
+                    canWrite = viewModel.canWrite,
+                    isSwitchedOn = viewModel.isAdaptiveBrightnessOn.value,
+                    setSwitchedOn = { viewModel.isAdaptiveBrightnessOn.value = it },
+                    toggleAdaptiveBrightness = ::toggleAdaptiveBrightness,
+                    openPermissionSettings = { openPermissionSettings(this) },
+                    isVibrationModeOn = viewModel.isVibrationModeOn.value,
+                    setVibrationMode = { viewModel.isVibrationModeOn.value = it },
+                    toggleVibrationMode = ::toggleVibrationMode,
+                    isChargingOptimizationOn = viewModel.isChargingOptimizationOn.value,
+                    isChargingOptimizationSupported = viewModel.isChargingOptimizationSupported.value,
+                    setChargingOptimization = { viewModel.isChargingOptimizationOn.value = it },
+                    toggleChargingOptimization = ::toggleChargingOptimization,
+                    showAdbDialog = viewModel.showAdbDialog.value,
+                    onAdbDialogDismiss = { viewModel.showAdbDialog.value = false },
+                    sharedParams = createSharedParams(),
+                    currentRingerMode = currentRingerMode,
+                    onRingerModeChange = { newMode ->
+                        viewModel.currentRingerMode.value = newMode
+                        viewModel.isVibrationModeOn.value = newMode == RingerMode.VIBRATE
+                    }
+                )
             )
-            OverlayDialog(params)
         }
     }
 
     /**
-     * Toggles adaptive brightness and updates [_isAdaptive] via the settings changed callback.
+     * Toggles adaptive brightness and updates [MainViewModel.isAdaptiveBrightnessOn] and
+     * [isAdaptiveLiveData] via the settings changed callback.
      */
     private fun toggleAdaptiveBrightness() {
-        val params = SettingsUtils.SettingsToggleParams(
+        val brightnessParams = SettingsUtils.SettingsToggleParams(
             context = this,
-            onSettingChanged = { newValue -> _isAdaptive.value = newValue }
+            onSettingChanged = { newValue ->
+                viewModel.isAdaptiveBrightnessOn.value = newValue
+                isAdaptiveLiveData.value = newValue
+            }
         )
-        SettingsUtils.Brightness.toggleAdaptiveBrightness(params)
+        SettingsUtils.Brightness.toggleAdaptiveBrightness(brightnessParams)
     }
 
     /**
-     * Toggles vibration mode and updates [_isVibrationMode] via the settings changed callback.
+     * Toggles vibration mode and updates [MainViewModel.isVibrationModeOn] and
+     * [isVibrationModeLiveData] via the settings changed callback.
      * Returns true if the toggle succeeded.
      */
     private fun toggleVibrationMode(): Boolean {
-        val params = SettingsUtils.SettingsToggleParams(
+        val vibrationParams = SettingsUtils.SettingsToggleParams(
             context = this,
-            onSettingChanged = { newValue -> _isVibrationMode.value = newValue }
+            onSettingChanged = { newValue ->
+                viewModel.isVibrationModeOn.value = newValue
+                isVibrationModeLiveData.value = newValue
+            }
         )
-        return SettingsUtils.Vibration.toggleVibrationMode(params)
+        return SettingsUtils.Vibration.toggleVibrationMode(vibrationParams)
     }
 
     /**
-     * Sets charging optimization to [enabled] and updates [_isChargingOptimization].
-     * If the WRITE_SECURE_SETTINGS permission is missing, [_showAdbDialog] is set to true
-     * to prompt the user with ADB instructions.
+     * Sets charging optimization to [enabled] and updates [MainViewModel.isChargingOptimizationOn]
+     * and [isChargingOptimizationLiveData].
+     * If the WRITE_SECURE_SETTINGS permission is missing, [MainViewModel.showAdbDialog] and
+     * [showAdbDialogLiveData] are set to true to prompt the user with ADB instructions.
      */
     private fun toggleChargingOptimization(enabled: Boolean) {
-        val params = SettingsUtils.SettingsToggleParams(
+        val chargingParams = SettingsUtils.SettingsToggleParams(
             context = this,
-            onSettingChanged = { newValue -> _isChargingOptimization.value = newValue },
-            onPermissionDenied = { _showAdbDialog.value = true }
+            onSettingChanged = { newValue ->
+                viewModel.isChargingOptimizationOn.value = newValue
+                isChargingOptimizationLiveData.value = newValue
+            },
+            onPermissionDenied = {
+                viewModel.showAdbDialog.value = true
+                showAdbDialogLiveData.value = true
+            }
         )
-        SettingsUtils.Charging.setChargingOptimization(enabled, params)
+        SettingsUtils.Charging.setChargingOptimization(enabled, chargingParams)
     }
 }
