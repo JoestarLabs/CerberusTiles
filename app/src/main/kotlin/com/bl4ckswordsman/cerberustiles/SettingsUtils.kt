@@ -255,13 +255,25 @@ object SettingsUtils {
  * [com.bl4ckswordsman.cerberustiles.activities.OverlayActivity] use this ViewModel
  * via `by viewModels<MainViewModel>()` for structural consistency. Each activity
  * has its own instance; state is refreshed from device settings in onResume().
+ *
+ * ## State type rationale
+ * Two fields use [MutableLiveData] and the rest use Compose [mutableStateOf].
+ * This split is intentional:
+ * - [canWrite] and [currentRingerMode] are [MutableLiveData] because
+ *   [com.bl4ckswordsman.cerberustiles.ui.MainScreenParams] and
+ *   [com.bl4ckswordsman.cerberustiles.ui.OverlayDialogParams] declare those
+ *   parameters as `LiveData<T>`, so they must stay as LiveData to satisfy
+ *   the shared UI contract.
+ * - The remaining five fields are [mutableStateOf] because they are read as
+ *   plain `.value` (Boolean) in OverlayDialogParams, which does not accept
+ *   LiveData for those slots.
  */
 class MainViewModel : ViewModel() {
     /** Whether the app has WRITE_SETTINGS permission. */
     val canWrite = MutableLiveData<Boolean>()
 
     /** Whether adaptive brightness is currently enabled. */
-    val isSwitchedOn = mutableStateOf(false)
+    val isAdaptiveBrightnessOn = mutableStateOf(false)
 
     /** Whether vibration mode is currently active. */
     val isVibrationModeOn = mutableStateOf(false)
@@ -288,8 +300,8 @@ class MainViewModel : ViewModel() {
     /**
      * Updates the state of the adaptive brightness setting.
      */
-    fun updateIsSwitchedOn(context: Context) {
-        isSwitchedOn.value = SettingsUtils.Brightness.isAdaptiveBrightnessEnabled(context)
+    fun updateIsAdaptiveBrightnessOn(context: Context) {
+        isAdaptiveBrightnessOn.value = SettingsUtils.Brightness.isAdaptiveBrightnessEnabled(context)
     }
 
     /**

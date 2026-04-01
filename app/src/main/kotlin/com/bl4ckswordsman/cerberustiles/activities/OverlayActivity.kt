@@ -46,7 +46,7 @@ class OverlayActivity : ComponentActivity() {
      */
     private fun updateViewModelState() {
         viewModel.updateCanWrite(this)
-        viewModel.updateIsSwitchedOn(this)
+        viewModel.updateIsAdaptiveBrightnessOn(this)
         viewModel.updateIsVibrationModeOn(this)
         viewModel.updateIsChargingOptimizationOn(this)
         viewModel.updateCurrentRingerMode(this)
@@ -69,12 +69,14 @@ class OverlayActivity : ComponentActivity() {
                 showDialog = showOverlayDialog,
                 onDismiss = { finish() },
                 canWrite = viewModel.canWrite,
-                isSwitchedOn = viewModel.isSwitchedOn.value,
-                setSwitchedOn = { viewModel.isSwitchedOn.value = it },
+                isSwitchedOn = viewModel.isAdaptiveBrightnessOn.value,
+                setSwitchedOn = { viewModel.isAdaptiveBrightnessOn.value = it },
                 toggleAdaptiveBrightness = {
                     val brightnessParams = SettingsUtils.SettingsToggleParams(
                         context = this,
-                        onSettingChanged = { newValue -> viewModel.isSwitchedOn.value = newValue }
+                        onSettingChanged = { newValue ->
+                            viewModel.isAdaptiveBrightnessOn.value = newValue
+                        }
                     )
                     Brightness.toggleAdaptiveBrightness(brightnessParams)
                 },

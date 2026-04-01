@@ -68,7 +68,7 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
     override fun onResume() {
         super.onResume()
         viewModel.updateCanWrite(this)
-        viewModel.updateIsSwitchedOn(this)
+        viewModel.updateIsAdaptiveBrightnessOn(this)
         viewModel.updateIsVibrationModeOn(this)
         viewModel.updateIsChargingOptimizationOn(this)
         viewModel.updateCurrentRingerMode(this)
@@ -80,7 +80,7 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
      * the corresponding [MutableLiveData] wrappers so [MainScreen] can observe them.
      */
     private fun syncLiveDataWrappers() {
-        isAdaptiveLiveData.value = viewModel.isSwitchedOn.value
+        isAdaptiveLiveData.value = viewModel.isAdaptiveBrightnessOn.value
         isVibrationModeLiveData.value = viewModel.isVibrationModeOn.value
         isChargingOptimizationLiveData.value = viewModel.isChargingOptimizationOn.value
         isChargingOptimizationSupportedLiveData.value =
@@ -132,8 +132,8 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
                     showDialog = showOverlayDialog,
                     onDismiss = { showOverlayDialog.value = false },
                     canWrite = viewModel.canWrite,
-                    isSwitchedOn = viewModel.isSwitchedOn.value,
-                    setSwitchedOn = { viewModel.isSwitchedOn.value = it },
+                    isSwitchedOn = viewModel.isAdaptiveBrightnessOn.value,
+                    setSwitchedOn = { viewModel.isAdaptiveBrightnessOn.value = it },
                     toggleAdaptiveBrightness = ::toggleAdaptiveBrightness,
                     openPermissionSettings = { openPermissionSettings(this) },
                     isVibrationModeOn = viewModel.isVibrationModeOn.value,
@@ -157,14 +157,14 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
     }
 
     /**
-     * Toggles adaptive brightness and updates [MainViewModel.isSwitchedOn] and
+     * Toggles adaptive brightness and updates [MainViewModel.isAdaptiveBrightnessOn] and
      * [isAdaptiveLiveData] via the settings changed callback.
      */
     private fun toggleAdaptiveBrightness() {
         val brightnessParams = SettingsUtils.SettingsToggleParams(
             context = this,
             onSettingChanged = { newValue ->
-                viewModel.isSwitchedOn.value = newValue
+                viewModel.isAdaptiveBrightnessOn.value = newValue
                 isAdaptiveLiveData.value = newValue
             }
         )
