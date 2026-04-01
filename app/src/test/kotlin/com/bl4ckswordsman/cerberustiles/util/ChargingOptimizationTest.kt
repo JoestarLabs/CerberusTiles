@@ -200,4 +200,71 @@ class ChargingOptimizationTest {
         assertTrue("Expected onPermissionDenied to be called", deniedCalled)
         assertFalse("Expected onSettingChanged to not be called", settingChangedCalled)
     }
+
+    @Test
+    fun `setChargingOptimization does not crash when onPermissionDenied is null and SecurityException is thrown`() {
+        every {
+            Settings.Secure.putInt(contentResolver, CHARGE_OPTIMIZATION_KEY, 1)
+        } throws SecurityException("Permission denial")
+
+        var settingChangedCalled = false
+        val params = SettingsUtils.SettingsToggleParams(
+            context = context,
+            onSettingChanged = { settingChangedCalled = true }
+            // onPermissionDenied is null by default
+        )
+
+        // Should not throw
+        SettingsUtils.Charging.setChargingOptimization(true, params)
+
+        assertFalse("Expected onSettingChanged to not be called", settingChangedCalled)
+    }
+
+    @Test
+    fun `isChargingOptimizationEnabled returns false when value is non-standard (e g 2)`() {
+        every {
+            Settings.Secure.getInt(contentResolver, CHARGE_OPTIMIZATION_KEY, 0)
+        } returns 2
+
+        val result = SettingsUtils.Charging.isChargingOptimizationEnabled(context)
+        assertFalse("Expected isChargingOptimizationEnabled to return false for non-standard value 2", result)
+    }
+
+    @Test
+    fun `isChargingOptimizationSupported returns true when setting returns 1`() {
+        every {
+            Settings.Secure.getInt(contentResolver, CHARGE_OPTIMIZATION_KEY, -1)
+        } returns 1
+
+        val result = SettingsUtils.Charging.isChargingOptimizationSupported(context)
+        assertTrue("Expected isChargingOptimizationSupported to return true when value is 1", result)
+    }
+
+    @Test
+    fun `SettingsToggleParams onPermissionDenied is null by default`() {
+        val params = SettingsUtils.SettingsToggleParams(
+            context = context,
+            onSettingChanged = { }
+        )
+
+        org.junit.Assert.assertNull("Expected onPermissionDenied to be null by default", params.onPermissionDenied)
+    }
+
+    @Test
+    fun `setChargingOptimization with putInt false does not invoke onPermissionDenied`() {
+        every {
+            Settings.Secure.putInt(contentResolver, CHARGE_OPTIMIZATION_KEY, 1)
+        } returns false
+
+        var deniedCalled = false
+        val params = SettingsUtils.SettingsToggleParams(
+            context = context,
+            onSettingChanged = { },
+            onPermissionDenied = { deniedCalled = true }
+        )
+
+        SettingsUtils.Charging.setChargingOptimization(true, params)
+
+        assertFalse("Expected onPermissionDenied to not be called when putInt returns false", deniedCalled)
+    }
 }
