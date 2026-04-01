@@ -184,14 +184,17 @@ class ChargingOptimizationTest {
         } throws SecurityException("Permission denial")
 
         var deniedCalled = false
+        var settingChangedCalled = false
         val params = SettingsUtils.SettingsToggleParams(
             context = context,
-            onSettingChanged = {},
+            onSettingChanged = { settingChangedCalled = true },
             onPermissionDenied = { deniedCalled = true }
         )
 
         SettingsUtils.Charging.setChargingOptimization(true, params)
 
         assertTrue("Expected onPermissionDenied to be called", deniedCalled)
+        assertFalse("Expected onSettingChanged to not be called", settingChangedCalled)
+    }
     }
 }
