@@ -7,6 +7,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.core.view.WindowCompat
@@ -19,14 +21,16 @@ import com.bl4ckswordsman.cerberustiles.models.RingerMode
 import com.bl4ckswordsman.cerberustiles.ui.OverlayDialog
 import com.bl4ckswordsman.cerberustiles.ui.OverlayDialogParams
 import com.bl4ckswordsman.cerberustiles.ui.createSharedParams
-import com.bl4ckswordsman.cerberustiles.util.Ringer
 
 /**
  * A [ComponentActivity] that shows an overlay dialog with settings components.
+ *
+ * State is owned by [MainViewModel], following the same pattern as [MainActivity].
+ * The ringer mode is now stored in [MainViewModel.currentRingerMode] instead of a
+ * local [androidx.compose.runtime.MutableState] field.
  */
 class OverlayActivity : ComponentActivity() {
     private val viewModel: MainViewModel by viewModels()
-    private val _currentRingerMode = mutableStateOf(RingerMode.NORMAL)
 
     /**
      * Refreshes the ViewModel state from current device settings each time the overlay resumes.
@@ -38,14 +42,14 @@ class OverlayActivity : ComponentActivity() {
 
     /**
      * Reads all relevant settings values from the device and updates the corresponding
-     * ViewModel fields and the local ringer mode state.
+     * ViewModel fields.
      */
     private fun updateViewModelState() {
         viewModel.updateCanWrite(this)
         viewModel.updateIsSwitchedOn(this)
         viewModel.updateIsVibrationModeOn(this)
         viewModel.updateIsChargingOptimizationOn(this)
-        _currentRingerMode.value = Ringer.getCurrentRingerMode(this)
+        viewModel.updateCurrentRingerMode(this)
     }
 
     /**
@@ -56,11 +60,11 @@ class OverlayActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        // window.statusBarColor = Color.TRANSPARENT // Deprecated in API 35
-        // window.navigationBarColor = Color.TRANSPARENT
         window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         setContent {
             val showOverlayDialog = rememberSaveable { mutableStateOf(true) }
+            val currentRingerMode by viewModel.currentRingerMode.observeAsState(RingerMode.NORMAL)
+
             val params = OverlayDialogParams(
                 showDialog = showOverlayDialog,
                 onDismiss = { finish() },
@@ -98,9 +102,9 @@ class OverlayActivity : ComponentActivity() {
                 showAdbDialog = viewModel.showAdbDialog.value,
                 onAdbDialogDismiss = { viewModel.showAdbDialog.value = false },
                 sharedParams = createSharedParams(),
-                currentRingerMode = _currentRingerMode.value,
+                currentRingerMode = currentRingerMode,
                 onRingerModeChange = { newMode ->
-                    _currentRingerMode.value = newMode
+                    viewModel.currentRingerMode.value = newMode
                     viewModel.isVibrationModeOn.value = newMode == RingerMode.VIBRATE
                 }
             )
