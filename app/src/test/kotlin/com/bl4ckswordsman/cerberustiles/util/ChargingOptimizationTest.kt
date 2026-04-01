@@ -196,5 +196,4 @@ class ChargingOptimizationTest {
         assertTrue("Expected onPermissionDenied to be called", deniedCalled)
         assertFalse("Expected onSettingChanged to not be called", settingChangedCalled)
     }
-    }
 }
