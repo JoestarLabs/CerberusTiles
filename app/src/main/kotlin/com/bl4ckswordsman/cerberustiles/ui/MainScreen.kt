@@ -7,6 +7,7 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import android.content.Context
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -173,6 +174,8 @@ fun MainScreenNavHost(params: MainScreenNavHostParams) {
             Column(
                 modifier = Modifier.padding(params.innerPadding)
             ) {
+                val context = LocalContext.current
+                val sharedPreferences = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
                 val settingsCompParams = SettingsComponentsParams(
                     canWriteState = params.canWriteState,
                     isSwitchedOn = params.isSwitchedOn,
@@ -187,10 +190,18 @@ fun MainScreenNavHost(params: MainScreenNavHostParams) {
                     toggleChargingOptimization = params.toggleChargingOptimization,
                     sharedParams = createSharedParams(params.navController),
                     componentVisibilityParams = ComponentVisibilityDialogParams(
-                        adaptBrightnessSwitch = rememberSaveable { mutableStateOf(true) },
-                        brightnessSlider = rememberSaveable { mutableStateOf(true) },
-                        ringerModeSelector = rememberSaveable { mutableStateOf(true) },
-                        chargingOptimizationSwitch = rememberSaveable { mutableStateOf(true) }
+                        adaptBrightnessSwitch = rememberSaveable {
+                            mutableStateOf(sharedPreferences.getBoolean("adaptBrightnessSwitch", true))
+                        },
+                        brightnessSlider = rememberSaveable {
+                            mutableStateOf(sharedPreferences.getBoolean("brightnessSlider", true))
+                        },
+                        ringerModeSelector = rememberSaveable {
+                            mutableStateOf(sharedPreferences.getBoolean("ringerModeSelector", true))
+                        },
+                        chargingOptimizationSwitch = rememberSaveable {
+                            mutableStateOf(sharedPreferences.getBoolean("chargingOptimizationSwitch", true))
+                        }
                     ),
                     currentRingerMode = currentRingerMode,
                     onRingerModeChange = params.onRingerModeChange
