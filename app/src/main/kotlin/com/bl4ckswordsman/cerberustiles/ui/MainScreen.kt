@@ -190,7 +190,7 @@ fun MainScreenNavHost(params: MainScreenNavHostParams) {
                         adaptBrightnessSwitch = rememberSaveable { mutableStateOf(true) },
                         brightnessSlider = rememberSaveable { mutableStateOf(true) },
                         ringerModeSelector = rememberSaveable { mutableStateOf(true) },
-                        chargingOptimizationSwitch = rememberSaveable { mutableStateOf(params.isChargingOptimizationSupported) }
+                        chargingOptimizationSwitch = rememberSaveable { mutableStateOf(true) }
                     ),
                     currentRingerMode = currentRingerMode,
                     onRingerModeChange = params.onRingerModeChange

@@ -221,6 +221,14 @@ fun CreateComponentVisibilityDialog(params: DialogCreationParams) {
                                 putBoolean("ringerModeSelector", newValue)
                             }
                         })
+                    SettingsCheckbox(
+                        initialValue = params.sharedParams.sharedPreferences.getBoolean(
+                            "chargingOptimizationSwitch", true
+                        ), text = "4. Charging Optimization", onCheckedChange = { newValue ->
+                            params.sharedParams.sharedPreferences.edit {
+                                putBoolean("chargingOptimizationSwitch", newValue)
+                            }
+                        })
                 }
             },
             confirmButton = {
