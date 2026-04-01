@@ -8,6 +8,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LiveData
@@ -82,6 +84,13 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
         lifecycle.addObserver(this)
         setContent {
             val showOverlayDialog = rememberSaveable { mutableStateOf(false) }
+            val overlayIsAdaptive by _isAdaptive.observeAsState(false)
+            val overlayIsVibrationModeOn by _isVibrationMode.observeAsState(false)
+            val overlayIsChargingOptimizationOn by _isChargingOptimization.observeAsState(false)
+            val overlayIsChargingOptimizationSupported by _isChargingOptimizationSupported.observeAsState(false)
+            val overlayShowAdbDialog by _showAdbDialog.observeAsState(false)
+            val overlayCurrentRingerMode by _currentRingerMode.observeAsState(RingerMode.NORMAL)
+
             CustomTilesTheme {
                 MainScreen(
                     MainScreenParams(canWrite = canWrite,
@@ -107,21 +116,21 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
                 showDialog = showOverlayDialog,
                 onDismiss = { showOverlayDialog.value = false },
                 canWrite = _canWrite,
-                isSwitchedOn = _isAdaptive.value == true,
+                isSwitchedOn = overlayIsAdaptive,
                 setSwitchedOn = { _isAdaptive.value = it },
                 toggleAdaptiveBrightness = ::toggleAdaptiveBrightness,
                 openPermissionSettings = { openPermissionSettings(this) },
-                isVibrationModeOn = _isVibrationMode.value == true,
+                isVibrationModeOn = overlayIsVibrationModeOn,
                 setVibrationMode = { _isVibrationMode.value = it },
                 toggleVibrationMode = ::toggleVibrationMode,
-                isChargingOptimizationOn = _isChargingOptimization.value == true,
-                isChargingOptimizationSupported = _isChargingOptimizationSupported.value == true,
+                isChargingOptimizationOn = overlayIsChargingOptimizationOn,
+                isChargingOptimizationSupported = overlayIsChargingOptimizationSupported,
                 setChargingOptimization = { _isChargingOptimization.value = it },
                 toggleChargingOptimization = ::toggleChargingOptimization,
-                showAdbDialog = _showAdbDialog.value == true,
+                showAdbDialog = overlayShowAdbDialog,
                 onAdbDialogDismiss = { _showAdbDialog.value = false },
                 sharedParams = createSharedParams(),
-                currentRingerMode = _currentRingerMode.value ?: RingerMode.NORMAL,
+                currentRingerMode = overlayCurrentRingerMode,
                 onRingerModeChange = { newMode ->
                     println("Debug - MainActivity onRingerModeChange: $newMode")
                     _currentRingerMode.value = newMode

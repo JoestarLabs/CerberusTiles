@@ -261,8 +261,7 @@ object SettingsUtils {
             return try {
                 // If it doesn't throw a Settings.SettingNotFoundException (or we can at least read a default),
                 // we assume it is supported on this device.
-                Settings.Secure.getInt(context.contentResolver, CHARGE_OPTIMIZATION_MODE, -1)
-                true
+                Settings.Secure.getInt(context.contentResolver, CHARGE_OPTIMIZATION_MODE, -1) != -1
             } catch (e: Exception) {
                 false
             }

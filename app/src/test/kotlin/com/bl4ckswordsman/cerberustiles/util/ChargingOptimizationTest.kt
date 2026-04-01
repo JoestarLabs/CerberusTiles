@@ -89,6 +89,16 @@ class ChargingOptimizationTest {
     }
 
     @Test
+    fun `isChargingOptimizationSupported returns false when setting read returns -1`() {
+        every {
+            Settings.Secure.getInt(contentResolver, "charge_optimization_mode", -1)
+        } returns -1
+
+        val result = SettingsUtils.Charging.isChargingOptimizationSupported(context)
+        assertFalse("Expected isChargingOptimizationSupported to return false", result)
+    }
+
+    @Test
     fun `isChargingOptimizationSupported returns false when setting read throws exception`() {
         every {
             Settings.Secure.getInt(contentResolver, "charge_optimization_mode", -1)
