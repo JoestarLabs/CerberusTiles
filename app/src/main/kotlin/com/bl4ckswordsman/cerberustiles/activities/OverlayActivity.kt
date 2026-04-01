@@ -1,7 +1,6 @@
 package com.bl4ckswordsman.cerberustiles.activities
 
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -11,10 +10,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.WindowCompat
+import com.bl4ckswordsman.cerberustiles.MainViewModel
 import com.bl4ckswordsman.cerberustiles.SettingsUtils
 import com.bl4ckswordsman.cerberustiles.SettingsUtils.Brightness
-import com.bl4ckswordsman.cerberustiles.SettingsUtils.MainViewModel
 import com.bl4ckswordsman.cerberustiles.SettingsUtils.Vibration.toggleVibrationMode
 import com.bl4ckswordsman.cerberustiles.SettingsUtils.openPermissionSettings
 import com.bl4ckswordsman.cerberustiles.models.RingerMode
@@ -60,7 +60,7 @@ class OverlayActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        window.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
         setContent {
             val showOverlayDialog = rememberSaveable { mutableStateOf(true) }
             val currentRingerMode by viewModel.currentRingerMode.observeAsState(RingerMode.NORMAL)
@@ -84,7 +84,9 @@ class OverlayActivity : ComponentActivity() {
                 toggleVibrationMode = {
                     val vibrationParams = SettingsUtils.SettingsToggleParams(
                         context = this,
-                        onSettingChanged = { newValue -> viewModel.isVibrationModeOn.value = newValue }
+                        onSettingChanged = { newValue ->
+                            viewModel.isVibrationModeOn.value = newValue
+                        }
                     )
                     toggleVibrationMode(vibrationParams)
                 },
@@ -94,7 +96,9 @@ class OverlayActivity : ComponentActivity() {
                 toggleChargingOptimization = { enabled ->
                     val chargingParams = SettingsUtils.SettingsToggleParams(
                         context = this,
-                        onSettingChanged = { newValue -> viewModel.isChargingOptimizationOn.value = newValue },
+                        onSettingChanged = { newValue ->
+                            viewModel.isChargingOptimizationOn.value = newValue
+                        },
                         onPermissionDenied = { viewModel.showAdbDialog.value = true }
                     )
                     SettingsUtils.Charging.setChargingOptimization(enabled, chargingParams)

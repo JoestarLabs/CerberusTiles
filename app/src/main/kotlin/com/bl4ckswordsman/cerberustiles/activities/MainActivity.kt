@@ -14,8 +14,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
+import com.bl4ckswordsman.cerberustiles.MainViewModel
 import com.bl4ckswordsman.cerberustiles.SettingsUtils
-import com.bl4ckswordsman.cerberustiles.SettingsUtils.MainViewModel
 import com.bl4ckswordsman.cerberustiles.SettingsUtils.openPermissionSettings
 import com.bl4ckswordsman.cerberustiles.ShortcutHelper
 import com.bl4ckswordsman.cerberustiles.models.RingerMode
@@ -83,7 +83,8 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
         isAdaptiveLiveData.value = viewModel.isSwitchedOn.value
         isVibrationModeLiveData.value = viewModel.isVibrationModeOn.value
         isChargingOptimizationLiveData.value = viewModel.isChargingOptimizationOn.value
-        isChargingOptimizationSupportedLiveData.value = viewModel.isChargingOptimizationSupported.value
+        isChargingOptimizationSupportedLiveData.value =
+            viewModel.isChargingOptimizationSupported.value
         showAdbDialogLiveData.value = viewModel.showAdbDialog.value
     }
 
