@@ -31,8 +31,9 @@ data class OverlayDialogParams(
     val setVibrationMode: (Boolean) -> Unit,
     val toggleVibrationMode: () -> Boolean,
     val isChargingOptimizationOn: Boolean,
+    val isChargingOptimizationSupported: Boolean,
     val setChargingOptimization: (Boolean) -> Unit,
-    val toggleChargingOptimization: () -> Unit,
+    val toggleChargingOptimization: (Boolean) -> Unit,
     val showAdbDialog: Boolean,
     val onAdbDialogDismiss: () -> Unit,
     val sharedParams: SharedParams,
@@ -92,7 +93,7 @@ fun OverlayDialog(params: OverlayDialogParams) {
                                     )
                                 },
                                 chargingOptimizationSwitch = rememberSaveable {
-                                    mutableStateOf(true) // Adjust logic if it should be configurable via SharedPreferences
+                                    mutableStateOf(params.isChargingOptimizationSupported) // Adjust logic if it should be configurable via SharedPreferences
                                 }
                             )
                             val settingsComponentsParams = SettingsComponentsParams(

@@ -57,8 +57,9 @@ data class MainScreenScaffoldParams(
     val setVibrationMode: (Boolean) -> Unit,
     val toggleVibrationMode: () -> Boolean,
     val isChargingOptimizationOn: Boolean,
+    val isChargingOptimizationSupported: Boolean,
     val setChargingOptimization: (Boolean) -> Unit,
-    val toggleChargingOptimization: () -> Unit,
+    val toggleChargingOptimization: (Boolean) -> Unit,
     val currentRingerMode: LiveData<RingerMode>,    // Add this
     val onRingerModeChange: (RingerMode) -> Unit    // Add this
 )
@@ -73,7 +74,8 @@ data class MainScreenParams(
     val isVibrationMode: LiveData<Boolean>,
     val toggleVibrationMode: () -> Boolean,
     val isChargingOptimization: LiveData<Boolean>,
-    val toggleChargingOptimization: () -> Unit,
+    val isChargingOptimizationSupported: LiveData<Boolean>,
+    val toggleChargingOptimization: (Boolean) -> Unit,
     val showAdbDialog: LiveData<Boolean>,
     val onAdbDialogDismiss: () -> Unit,
     val openPermissionSettings: () -> Unit,
@@ -96,8 +98,9 @@ data class MainScreenNavHostParams(
     val setVibrationMode: (Boolean) -> Unit,
     val toggleVibrationMode: () -> Boolean,
     val isChargingOptimizationOn: Boolean,
+    val isChargingOptimizationSupported: Boolean,
     val setChargingOptimization: (Boolean) -> Unit,
-    val toggleChargingOptimization: () -> Unit,
+    val toggleChargingOptimization: (Boolean) -> Unit,
     val currentRingerMode: LiveData<RingerMode>,
     val onRingerModeChange: (RingerMode) -> Unit
 )
@@ -137,6 +140,7 @@ fun MainScreenScaffold(params: MainScreenScaffoldParams) {
                 params.setVibrationMode,
                 params.toggleVibrationMode,
                 params.isChargingOptimizationOn,
+                params.isChargingOptimizationSupported,
                 params.setChargingOptimization,
                 params.toggleChargingOptimization,
                 params.currentRingerMode,
@@ -186,7 +190,7 @@ fun MainScreenNavHost(params: MainScreenNavHostParams) {
                         adaptBrightnessSwitch = rememberSaveable { mutableStateOf(true) },
                         brightnessSlider = rememberSaveable { mutableStateOf(true) },
                         ringerModeSelector = rememberSaveable { mutableStateOf(true) },
-                        chargingOptimizationSwitch = rememberSaveable { mutableStateOf(true) }
+                        chargingOptimizationSwitch = rememberSaveable { mutableStateOf(params.isChargingOptimizationSupported) }
                     ),
                     currentRingerMode = currentRingerMode,
                     onRingerModeChange = params.onRingerModeChange
@@ -239,6 +243,7 @@ fun MainScreen(params: MainScreenParams) {
     val isAdaptiveState by params.isAdaptive.observeAsState(initial = false)
     val isVibrationModeState by params.isVibrationMode.observeAsState(initial = false)
     val isChargingOptimizationState by params.isChargingOptimization.observeAsState(initial = false)
+    val isChargingOptimizationSupportedState by params.isChargingOptimizationSupported.observeAsState(initial = false)
 
     val (isSwitchedOn, setSwitchedOn) = rememberSaveable { mutableStateOf(isAdaptiveState) }
     val (isVibrationModeOn, setVibrationMode) = rememberSaveable {
@@ -286,6 +291,7 @@ fun MainScreen(params: MainScreenParams) {
             setVibrationMode,
             params.toggleVibrationMode,
             isChargingOptimizationOn,
+            isChargingOptimizationSupportedState,
             setChargingOptimization,
             params.toggleChargingOptimization,
             params.currentRingerMode,
@@ -308,6 +314,7 @@ fun MainScreenPreview() {
             isVibrationMode = MutableLiveData(true),
             toggleVibrationMode = { true },
             isChargingOptimization = MutableLiveData(true),
+            isChargingOptimizationSupported = MutableLiveData(true),
             toggleChargingOptimization = {},
             showAdbDialog = MutableLiveData(false),
             onAdbDialogDismiss = {},

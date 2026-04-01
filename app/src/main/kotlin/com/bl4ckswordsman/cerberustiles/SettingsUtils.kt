@@ -254,6 +254,21 @@ object SettingsUtils {
         private const val CHARGE_OPTIMIZATION_MODE = "charge_optimization_mode"
 
         /**
+         * Checks if charging optimization (80% limit) is supported.
+         * A guarded read is attempted to verify if the setting is recognized.
+         */
+        fun isChargingOptimizationSupported(context: Context): Boolean {
+            return try {
+                // If it doesn't throw a Settings.SettingNotFoundException (or we can at least read a default),
+                // we assume it is supported on this device.
+                Settings.Secure.getInt(context.contentResolver, CHARGE_OPTIMIZATION_MODE, -1)
+                true
+            } catch (e: Exception) {
+                false
+            }
+        }
+
+        /**
          * Checks if charging optimization (80% limit) is enabled.
          */
         fun isChargingOptimizationEnabled(context: Context): Boolean {
@@ -267,18 +282,25 @@ object SettingsUtils {
         }
 
         /**
-         * Toggles the charging optimization (80% limit).
+         * Sets the charging optimization (80% limit).
          */
-        fun toggleChargingOptimization(params: SettingsToggleParams) {
-            val isEnabled = isChargingOptimizationEnabled(params.context)
-            val newState = if (isEnabled) 0 else 1
+        fun setChargingOptimization(enabled: Boolean, params: SettingsToggleParams) {
+            val newState = if (enabled) 1 else 0
 
             try {
-                Settings.Secure.putInt(
+                val success = Settings.Secure.putInt(
                     params.context.contentResolver, CHARGE_OPTIMIZATION_MODE, newState
                 )
-                showToast(params.context, "Charging optimization", !isEnabled)
-                params.onSettingChanged(!isEnabled)
+                if (success) {
+                    showToast(params.context, "Charging optimization", enabled)
+                    params.onSettingChanged(enabled)
+                } else {
+                    Toast.makeText(
+                        params.context,
+                        "Failed to change charging optimization setting. It may be restricted.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             } catch (e: SecurityException) {
                 params.onPermissionDenied?.invoke()
             }
@@ -314,6 +336,7 @@ object SettingsUtils {
         val isSwitchedOn = mutableStateOf(false)
         val isVibrationModeOn = mutableStateOf(false)
         val isChargingOptimizationOn = mutableStateOf(false)
+        val isChargingOptimizationSupported = mutableStateOf(false)
         val showAdbDialog = mutableStateOf(false)
 
         /**
@@ -341,7 +364,10 @@ object SettingsUtils {
          * Updates the state of the charging optimization setting.
          */
         fun updateIsChargingOptimizationOn(context: Context) {
-            isChargingOptimizationOn.value = Charging.isChargingOptimizationEnabled(context)
+            isChargingOptimizationSupported.value = Charging.isChargingOptimizationSupported(context)
+            if (isChargingOptimizationSupported.value) {
+                isChargingOptimizationOn.value = Charging.isChargingOptimizationEnabled(context)
+            }
         }
     }
 }

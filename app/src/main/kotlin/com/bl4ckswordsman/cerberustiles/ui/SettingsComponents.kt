@@ -51,7 +51,7 @@ data class SettingsComponentsParams(
     val toggleVibrationMode: () -> Boolean,
     val isChargingOptimizationOn: Boolean,
     val setChargingOptimization: (Boolean) -> Unit,
-    val toggleChargingOptimization: () -> Unit,
+    val toggleChargingOptimization: (Boolean) -> Unit,
     val sharedParams: SharedParams,
     val currentRingerMode: RingerMode,
     val onRingerModeChange: (RingerMode) -> Unit,
@@ -82,8 +82,8 @@ fun SettingsComponents(params: SettingsComponentsParams) {
         SwitchWithLabel(
             isSwitchedOn = params.isChargingOptimizationOn,
             onCheckedChange = {
-                params.setChargingOptimization(it)
-                params.toggleChargingOptimization()
+                // UI updates its state optimistically; we'll let the ViewModel callback handle actual success/failure
+                params.toggleChargingOptimization(it)
             },
             label = if (params.isChargingOptimizationOn) "Charging Optimization is ON" else "Charging Optimization is OFF"
         )

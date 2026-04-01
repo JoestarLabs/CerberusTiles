@@ -79,11 +79,27 @@ class ChargingOptimizationTest {
     }
 
     @Test
-    fun `toggleChargingOptimization toggles to 1 when currently 0`() {
+    fun `isChargingOptimizationSupported returns true when setting read succeeds`() {
         every {
-            Settings.Secure.getInt(contentResolver, "charge_optimization_mode", 0)
+            Settings.Secure.getInt(contentResolver, "charge_optimization_mode", -1)
         } returns 0
 
+        val result = SettingsUtils.Charging.isChargingOptimizationSupported(context)
+        assertTrue("Expected isChargingOptimizationSupported to return true", result)
+    }
+
+    @Test
+    fun `isChargingOptimizationSupported returns false when setting read throws exception`() {
+        every {
+            Settings.Secure.getInt(contentResolver, "charge_optimization_mode", -1)
+        } throws Exception("Test exception")
+
+        val result = SettingsUtils.Charging.isChargingOptimizationSupported(context)
+        assertFalse("Expected isChargingOptimizationSupported to return false", result)
+    }
+
+    @Test
+    fun `setChargingOptimization sets to 1 when enabled is true`() {
         every {
             Settings.Secure.putInt(contentResolver, "charge_optimization_mode", 1)
         } returns true
@@ -98,7 +114,7 @@ class ChargingOptimizationTest {
             }
         )
 
-        SettingsUtils.Charging.toggleChargingOptimization(params)
+        SettingsUtils.Charging.setChargingOptimization(true, params)
 
         verify { Settings.Secure.putInt(contentResolver, "charge_optimization_mode", 1) }
         verify { Toast.makeText(context, "Charging optimization enabled", Toast.LENGTH_SHORT) }
@@ -107,11 +123,7 @@ class ChargingOptimizationTest {
     }
 
     @Test
-    fun `toggleChargingOptimization toggles to 0 when currently 1`() {
-        every {
-            Settings.Secure.getInt(contentResolver, "charge_optimization_mode", 0)
-        } returns 1
-
+    fun `setChargingOptimization sets to 0 when enabled is false`() {
         every {
             Settings.Secure.putInt(contentResolver, "charge_optimization_mode", 0)
         } returns true
@@ -126,7 +138,7 @@ class ChargingOptimizationTest {
             }
         )
 
-        SettingsUtils.Charging.toggleChargingOptimization(params)
+        SettingsUtils.Charging.setChargingOptimization(false, params)
 
         verify { Settings.Secure.putInt(contentResolver, "charge_optimization_mode", 0) }
         verify { Toast.makeText(context, "Charging optimization disabled", Toast.LENGTH_SHORT) }
@@ -135,11 +147,28 @@ class ChargingOptimizationTest {
     }
 
     @Test
-    fun `toggleChargingOptimization invokes onPermissionDenied when SecurityException is thrown`() {
+    fun `setChargingOptimization handles putInt returning false`() {
         every {
-            Settings.Secure.getInt(contentResolver, "charge_optimization_mode", 0)
-        } returns 0
+            Settings.Secure.putInt(contentResolver, "charge_optimization_mode", 1)
+        } returns false
 
+        var callbackCalled = false
+        val params = SettingsUtils.SettingsToggleParams(
+            context = context,
+            onSettingChanged = { _ ->
+                callbackCalled = true
+            }
+        )
+
+        SettingsUtils.Charging.setChargingOptimization(true, params)
+
+        verify { Settings.Secure.putInt(contentResolver, "charge_optimization_mode", 1) }
+        verify { Toast.makeText(context, "Failed to change charging optimization setting. It may be restricted.", Toast.LENGTH_SHORT) }
+        assertFalse("Expected callback to not be called", callbackCalled)
+    }
+
+    @Test
+    fun `setChargingOptimization invokes onPermissionDenied when SecurityException is thrown`() {
         every {
             Settings.Secure.putInt(contentResolver, "charge_optimization_mode", 1)
         } throws SecurityException("Permission denial")
@@ -151,7 +180,7 @@ class ChargingOptimizationTest {
             onPermissionDenied = { deniedCalled = true }
         )
 
-        SettingsUtils.Charging.toggleChargingOptimization(params)
+        SettingsUtils.Charging.setChargingOptimization(true, params)
 
         assertTrue("Expected onPermissionDenied to be called", deniedCalled)
     }

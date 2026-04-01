@@ -44,6 +44,8 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
     private val isVibrationMode: LiveData<Boolean> get() = _isVibrationMode
     private val _isChargingOptimization = MutableLiveData<Boolean>()
     private val isChargingOptimization: LiveData<Boolean> get() = _isChargingOptimization
+    private val _isChargingOptimizationSupported = MutableLiveData<Boolean>()
+    private val isChargingOptimizationSupported: LiveData<Boolean> get() = _isChargingOptimizationSupported
     private val _showAdbDialog = MutableLiveData<Boolean>()
     private val showAdbDialog: LiveData<Boolean> get() = _showAdbDialog
     private val _currentRingerMode = MutableLiveData<RingerMode>()
@@ -63,7 +65,10 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
         _canWrite.value = Settings.System.canWrite(this)
         _isAdaptive.value = SettingsUtils.Brightness.isAdaptiveBrightnessEnabled(this)
         _isVibrationMode.value = SettingsUtils.Vibration.isVibrationModeEnabled(this)
-        _isChargingOptimization.value = SettingsUtils.Charging.isChargingOptimizationEnabled(this)
+        _isChargingOptimizationSupported.value = SettingsUtils.Charging.isChargingOptimizationSupported(this)
+        if (_isChargingOptimizationSupported.value == true) {
+            _isChargingOptimization.value = SettingsUtils.Charging.isChargingOptimizationEnabled(this)
+        }
         val currentMode = Ringer.getCurrentRingerMode(this)
         println("Debug - MainActivity onResume current mode: $currentMode")
         _currentRingerMode.value = currentMode
@@ -85,6 +90,7 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
                         isVibrationMode = isVibrationMode,
                         toggleVibrationMode = ::toggleVibrationMode,
                         isChargingOptimization = isChargingOptimization,
+                        isChargingOptimizationSupported = isChargingOptimizationSupported,
                         toggleChargingOptimization = ::toggleChargingOptimization,
                         showAdbDialog = showAdbDialog,
                         onAdbDialogDismiss = { _showAdbDialog.value = false },
@@ -109,6 +115,7 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
                 setVibrationMode = { _isVibrationMode.value = it },
                 toggleVibrationMode = ::toggleVibrationMode,
                 isChargingOptimizationOn = _isChargingOptimization.value == true,
+                isChargingOptimizationSupported = _isChargingOptimizationSupported.value == true,
                 setChargingOptimization = { _isChargingOptimization.value = it },
                 toggleChargingOptimization = ::toggleChargingOptimization,
                 showAdbDialog = _showAdbDialog.value == true,
@@ -141,12 +148,12 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
         return SettingsUtils.Vibration.toggleVibrationMode(params)
     }
 
-    private fun toggleChargingOptimization() {
+    private fun toggleChargingOptimization(enabled: Boolean) {
         val params = SettingsUtils.SettingsToggleParams(
             context = this,
             onSettingChanged = { newValue -> _isChargingOptimization.value = newValue },
             onPermissionDenied = { _showAdbDialog.value = true }
         )
-        SettingsUtils.Charging.toggleChargingOptimization(params)
+        SettingsUtils.Charging.setChargingOptimization(enabled, params)
     }
 }

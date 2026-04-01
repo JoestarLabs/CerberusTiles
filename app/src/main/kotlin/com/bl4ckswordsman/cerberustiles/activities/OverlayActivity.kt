@@ -74,14 +74,15 @@ class OverlayActivity : ComponentActivity() {
                     toggleVibrationMode(params)
                 },
                 isChargingOptimizationOn = viewModel.isChargingOptimizationOn.value,
+                isChargingOptimizationSupported = viewModel.isChargingOptimizationSupported.value,
                 setChargingOptimization = { viewModel.isChargingOptimizationOn.value = it },
-                toggleChargingOptimization = {
+                toggleChargingOptimization = { enabled ->
                     val params = SettingsUtils.SettingsToggleParams(
                         context = this,
                         onSettingChanged = { newValue -> viewModel.isChargingOptimizationOn.value = newValue },
                         onPermissionDenied = { viewModel.showAdbDialog.value = true }
                     )
-                    SettingsUtils.Charging.toggleChargingOptimization(params)
+                    SettingsUtils.Charging.setChargingOptimization(enabled, params)
                 },
                 showAdbDialog = viewModel.showAdbDialog.value,
                 onAdbDialogDismiss = { viewModel.showAdbDialog.value = false },
