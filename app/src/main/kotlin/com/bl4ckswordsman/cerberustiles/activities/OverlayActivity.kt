@@ -88,6 +88,8 @@ class OverlayActivity : ComponentActivity() {
                         context = this,
                         onSettingChanged = { newValue ->
                             viewModel.isVibrationModeOn.value = newValue
+                            viewModel.currentRingerMode.value =
+                                if (newValue) RingerMode.VIBRATE else RingerMode.NORMAL
                         }
                     )
                     toggleVibrationMode(vibrationParams)
