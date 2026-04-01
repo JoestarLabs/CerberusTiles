@@ -337,12 +337,14 @@ object SettingsUtils {
     }
 
     /**
-     * The main ViewModel that holds the canonical state for all settings screens.
-     *
-     * Both [com.bl4ckswordsman.cerberustiles.activities.MainActivity] and
-     * [com.bl4ckswordsman.cerberustiles.activities.OverlayActivity] obtain this ViewModel
-     * via `by viewModels<MainViewModel>()` so they share a single source of truth.
-     */
+     /**
+      * The main ViewModel that holds the canonical state for all settings screens.
+      *
+      * Both [com.bl4ckswordsman.cerberustiles.activities.MainActivity] and
+      * [com.bl4ckswordsman.cerberustiles.activities.OverlayActivity] use this ViewModel
+      * via `by viewModels<MainViewModel>()` for structural consistency. Each activity
+      * has its own instance; state is refreshed from device settings in onResume().
+      */
     class MainViewModel : ViewModel() {
         /** Whether the app has WRITE_SETTINGS permission. */
         val canWrite = MutableLiveData<Boolean>()
