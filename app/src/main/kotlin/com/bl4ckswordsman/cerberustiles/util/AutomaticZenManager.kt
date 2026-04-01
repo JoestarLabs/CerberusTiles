@@ -49,6 +49,10 @@ object AutomaticZenManager {
         private val notificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
+        /**
+         * Activates silent mode by setting the interruption filter to NONE.
+         * Returns true on success, false if permission is missing or an error occurs.
+         */
         fun activate(): Boolean {
             if (!canManageDndRules(context)) {
                 showPermissionRequiredMessage()
@@ -64,6 +68,10 @@ object AutomaticZenManager {
             }
         }
 
+        /**
+         * Deactivates silent mode by restoring the interruption filter to ALL.
+         * Returns true on success, false if permission is missing or an error occurs.
+         */
         fun deactivate(): Boolean {
             if (!canManageDndRules(context)) {
                 return false
@@ -78,6 +86,10 @@ object AutomaticZenManager {
             }
         }
 
+        /**
+         * Returns true if the current interruption filter is set to NONE (silent mode active).
+         * Returns false if permission is missing or an error occurs.
+         */
         fun isActive(): Boolean {
             if (!canManageDndRules(context)) {
                 return false
@@ -90,6 +102,10 @@ object AutomaticZenManager {
             }
         }
 
+        /**
+         * Shows a toast informing the user that DND permission is required and redirects
+         * them to the notification policy access settings screen.
+         */
         private fun showPermissionRequiredMessage() {
             Toast.makeText(
                 context,
@@ -99,6 +115,9 @@ object AutomaticZenManager {
             SettingsUtils.openDndPermissionSettings(context)
         }
 
+        /**
+         * Shows a toast informing the user that activating silent mode failed.
+         */
         private fun showActivationErrorMessage() {
             Toast.makeText(
                 context,
@@ -107,6 +126,9 @@ object AutomaticZenManager {
             ).show()
         }
 
+        /**
+         * Shows a toast informing the user that deactivating silent mode failed.
+         */
         private fun showDeactivationErrorMessage() {
             Toast.makeText(
                 context,

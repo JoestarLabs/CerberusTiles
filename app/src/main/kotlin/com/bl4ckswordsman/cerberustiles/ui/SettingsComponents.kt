@@ -105,6 +105,16 @@ fun SettingsComponents(params: SettingsComponentsParams) {
     }
 }
 
+/**
+ * A horizontally arranged group of connected toggle buttons for selecting the ringer mode.
+ * Each button represents one [RingerMode] and is sized proportionally based on [isOverlayContext].
+ *
+ * @param currentMode The currently active [RingerMode], used to highlight the selected button.
+ * @param isOverlayContext When true, all buttons are equal width and icons are rendered smaller
+ *   to fit the compact overlay layout.
+ * @param onModeSelected Callback invoked with the newly selected [RingerMode] when the user
+ *   taps a button that is not already selected.
+ */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun RingerModeSelectionButtonGroup(
@@ -168,6 +178,15 @@ private fun RingerModeSelectionButtonGroup(
 }
 
 
+/**
+ * Triggers a ringer mode change for the given [mode] using [Ringer.setRingerMode].
+ * Any exception is caught and logged without crashing.
+ *
+ * @param context The application context used to interact with the audio system.
+ * @param mode The [RingerMode] to apply.
+ * @param onSettled Callback invoked after [SettingsUtils.SettingsToggleParams.onSettingChanged]
+ *   is called, indicating the mode change was accepted by the system.
+ */
 private fun triggerRingerModeChangeOnSelection(
     context: android.content.Context,
     mode: RingerMode,
@@ -194,6 +213,11 @@ private class RingerModeHandler(
     private val newMode: RingerMode,
     private val context: android.content.Context
 ) {
+    /**
+     * Handles the user selecting a new ringer mode.
+     * If the app has write-settings permission the mode change is triggered;
+     * otherwise the user is redirected to the permission settings screen.
+     */
     fun handleModeSelection() {
         if (params.canWriteState) {
             handleModeChangeWithPermission()
@@ -202,6 +226,11 @@ private class RingerModeHandler(
         }
     }
 
+    /**
+     * Triggers the ringer mode change when the app has the required permission
+     * and [newMode] differs from the currently active mode.
+     * On success, updates vibration state and notifies [SettingsComponentsParams.onRingerModeChange].
+     */
     private fun handleModeChangeWithPermission() {
         if (newMode != params.currentRingerMode) {
             triggerRingerModeChangeOnSelection(context, newMode) {
@@ -211,6 +240,10 @@ private class RingerModeHandler(
         }
     }
 
+    /**
+     * Updates the vibration mode state to reflect the selected [newMode]:
+     * sets vibration to true for [RingerMode.VIBRATE], false for all other modes.
+     */
     private fun updateVibrationMode() {
         when (newMode) {
             RingerMode.VIBRATE -> params.setVibrationMode(true)
@@ -220,6 +253,14 @@ private class RingerModeHandler(
 }
 
 
+/**
+ * Returns the appropriate painter resource for the given [mode] toggle button.
+ * A filled icon is returned when [mode] matches [currentMode] (selected state);
+ * an outlined icon is returned otherwise.
+ *
+ * @param mode The [RingerMode] this icon represents.
+ * @param currentMode The currently active [RingerMode].
+ */
 @Composable
 private fun getIconForMode(mode: RingerMode, currentMode: RingerMode) = when (mode) {
     RingerMode.NORMAL -> if (currentMode == mode)

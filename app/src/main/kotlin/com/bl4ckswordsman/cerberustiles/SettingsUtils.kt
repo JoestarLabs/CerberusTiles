@@ -137,6 +137,11 @@ object SettingsUtils {
                 return performVibrationToggle()
             }
 
+            /**
+             * Reads the current vibration mode state and switches it, shows a confirmation toast,
+             * and invokes [SettingsToggleParams.onSettingChanged] with the new value.
+             * Returns true on success, false if a [SecurityException] is caught.
+             */
             private fun performVibrationToggle(): Boolean {
                 val audioManager =
                     params.context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
@@ -157,6 +162,10 @@ object SettingsUtils {
                 }
             }
 
+            /**
+             * Shows a toast informing the user that vibration settings cannot be changed
+             * while Do Not Disturb mode is active.
+             */
             private fun handleVibrationSecurityException() {
                 Toast.makeText(
                     params.context,
@@ -213,6 +222,11 @@ object SettingsUtils {
                 }
             }
 
+            /**
+             * Activates silent mode via [AutomaticZenManager], sets the ringer to silent,
+             * shows a toast, and invokes [SettingsToggleParams.onSettingChanged].
+             * Returns true on success.
+             */
             private fun activateSilentMode(): Boolean {
                 val success = AutomaticZenManager.activateSilentMode(params.context)
                 if (success) {
@@ -225,6 +239,11 @@ object SettingsUtils {
                 return success
             }
 
+            /**
+             * Deactivates silent mode via [AutomaticZenManager], restores normal ringer mode,
+             * shows a toast, and invokes [SettingsToggleParams.onSettingChanged].
+             * Returns true on success.
+             */
             private fun deactivateSilentMode(): Boolean {
                 val success = AutomaticZenManager.deactivateSilentMode(params.context)
                 if (success) {
@@ -237,6 +256,10 @@ object SettingsUtils {
                 return success
             }
 
+            /**
+             * Shows a toast informing the user that silent mode cannot be changed and prompts
+             * them to check permissions.
+             */
             private fun handleSilentModeSecurityException() {
                 Toast.makeText(
                     params.context,

@@ -28,11 +28,18 @@ class OverlayActivity : ComponentActivity() {
     private val viewModel: MainViewModel by viewModels()
     private val _currentRingerMode = mutableStateOf(RingerMode.NORMAL)
 
+    /**
+     * Refreshes the ViewModel state from current device settings each time the overlay resumes.
+     */
     override fun onResume() {
         super.onResume()
         updateViewModelState()
     }
 
+    /**
+     * Reads all relevant settings values from the device and updates the corresponding
+     * ViewModel fields and the local ringer mode state.
+     */
     private fun updateViewModelState() {
         viewModel.updateCanWrite(this)
         viewModel.updateIsSwitchedOn(this)
@@ -41,6 +48,10 @@ class OverlayActivity : ComponentActivity() {
         _currentRingerMode.value = Ringer.getCurrentRingerMode(this)
     }
 
+    /**
+     * Initialises the overlay activity with a transparent window background and sets up the
+     * Compose content tree with [OverlayDialog], wiring all settings toggles to the ViewModel.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)

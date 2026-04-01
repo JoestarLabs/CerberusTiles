@@ -54,6 +54,9 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
     val currentRingerMode: LiveData<RingerMode> get() = _currentRingerMode
 
 
+    /**
+     * Creates all app shortcuts via [ShortcutHelper] when the activity becomes visible.
+     */
     override fun onStart() {
         super.onStart()
 
@@ -62,6 +65,10 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
         }
     }
 
+    /**
+     * Refreshes all LiveData state values from the device settings each time the activity resumes,
+     * ensuring the UI reflects any changes made while the app was in the background.
+     */
     override fun onResume() {
         super.onResume()
         _canWrite.value = Settings.System.canWrite(this)
@@ -76,6 +83,10 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
         _currentRingerMode.value = currentMode
     }
 
+    /**
+     * Initialises the activity, registers it as a lifecycle observer, and sets up the Compose
+     * content tree with [MainScreen] and [OverlayDialog].
+     */
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -141,6 +152,9 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
         }
     }
 
+    /**
+     * Toggles adaptive brightness and updates [_isAdaptive] via the settings changed callback.
+     */
     private fun toggleAdaptiveBrightness() {
         val params = SettingsUtils.SettingsToggleParams(
             context = this,
@@ -149,6 +163,10 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
         SettingsUtils.Brightness.toggleAdaptiveBrightness(params)
     }
 
+    /**
+     * Toggles vibration mode and updates [_isVibrationMode] via the settings changed callback.
+     * Returns true if the toggle succeeded.
+     */
     private fun toggleVibrationMode(): Boolean {
         val params = SettingsUtils.SettingsToggleParams(
             context = this,
@@ -157,6 +175,11 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
         return SettingsUtils.Vibration.toggleVibrationMode(params)
     }
 
+    /**
+     * Sets charging optimization to [enabled] and updates [_isChargingOptimization].
+     * If the WRITE_SECURE_SETTINGS permission is missing, [_showAdbDialog] is set to true
+     * to prompt the user with ADB instructions.
+     */
     private fun toggleChargingOptimization(enabled: Boolean) {
         val params = SettingsUtils.SettingsToggleParams(
             context = this,

@@ -58,6 +58,10 @@ object Ringer {
     ) {
         data class ChangeResult(val success: Boolean, val message: String? = null)
 
+        /**
+         * Executes the ringer mode change, applying the new mode and verifying the result.
+         * Returns a [ChangeResult] indicating success or failure.
+         */
         fun execute(): ChangeResult {
             return try {
                 applyRingerModeChange()
@@ -68,6 +72,9 @@ object Ringer {
             }
         }
 
+        /**
+         * Dispatches to the appropriate mode-specific change method based on [newMode].
+         */
         private fun applyRingerModeChange() {
             val audioManager =
                 params.context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
@@ -78,6 +85,10 @@ object Ringer {
             }
         }
 
+        /**
+         * Activates silent mode via [AutomaticZenManager] and sets the audio manager ringer
+         * mode to silent if the DND activation succeeds.
+         */
         private fun applySilentMode(audioManager: AudioManager) {
             val success = AutomaticZenManager.activateSilentMode(params.context)
             if (success) {
@@ -85,6 +96,10 @@ object Ringer {
             }
         }
 
+        /**
+         * Deactivates any active silent mode via [AutomaticZenManager] if needed, then sets
+         * the audio manager to the requested non-silent [newMode].
+         */
         private fun applyNonSilentMode(audioManager: AudioManager) {
             if (AutomaticZenManager.isSilentModeActive(params.context)) {
                 AutomaticZenManager.deactivateSilentMode(params.context)
@@ -98,6 +113,10 @@ object Ringer {
             audioManager.ringerMode = systemMode
         }
 
+        /**
+         * Reads back the current ringer mode after the change and shows a confirmation toast
+         * if the mode matches [newMode]. Returns a [ChangeResult] reflecting the verification outcome.
+         */
         private fun verifyAndNotifyModeChange(): ChangeResult {
             val updatedMode = getCurrentRingerMode(params.context)
 
@@ -110,6 +129,10 @@ object Ringer {
             }
         }
 
+        /**
+         * Handles a [SecurityException] thrown during mode change by showing an appropriate
+         * error message or redirecting to DND permission settings for silent mode.
+         */
         private fun handleSecurityException(e: SecurityException) {
             when (newMode) {
                 RingerMode.SILENT -> showSilentModeError()
@@ -117,6 +140,10 @@ object Ringer {
             }
         }
 
+        /**
+         * Shows a long toast prompting the user to grant Do Not Disturb permission and
+         * redirects them to the notification policy access settings.
+         */
         private fun showSilentModeError() {
             Toast.makeText(
                 params.context,
@@ -126,6 +153,12 @@ object Ringer {
             SettingsUtils.openDndPermissionSettings(params.context)
         }
 
+        /**
+         * Shows a long toast with a generic error message when ringer mode change fails
+         * for reasons other than silent mode DND permission.
+         *
+         * @param message The error detail from the [SecurityException], or null.
+         */
         private fun showGeneralError(message: String?) {
             Toast.makeText(
                 params.context,
@@ -134,6 +167,12 @@ object Ringer {
             ).show()
         }
 
+        /**
+         * Returns a human-readable display name for the given [RingerMode].
+         *
+         * @param mode The ringer mode to get the display name for.
+         * @return A user-facing string such as "Sound mode", "Silent mode", or "Vibrate mode".
+         */
         private fun getModeDisplayName(mode: RingerMode): String {
             return when (mode) {
                 RingerMode.NORMAL -> "Sound mode"
