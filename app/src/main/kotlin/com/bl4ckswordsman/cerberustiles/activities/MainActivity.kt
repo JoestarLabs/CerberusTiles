@@ -2,7 +2,6 @@ package com.bl4ckswordsman.cerberustiles.activities
 
 import android.os.Build
 import android.os.Bundle
-import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -13,6 +12,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
 import com.bl4ckswordsman.cerberustiles.SettingsUtils
 import com.bl4ckswordsman.cerberustiles.SettingsUtils.MainViewModel
@@ -41,6 +41,15 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
     private val viewModel: MainViewModel by viewModels()
     private val shortcutHelper by lazy { ShortcutHelper(this) }
 
+    // LiveData wrappers for MainScreenParams (which expects LiveData<Boolean>).
+    // These are updated in the toggle callbacks and onResume so MainScreen
+    // reacts to changes via observeAsState inside the composable.
+    private val isAdaptiveLiveData = MutableLiveData(false)
+    private val isVibrationModeLiveData = MutableLiveData(false)
+    private val isChargingOptimizationLiveData = MutableLiveData(false)
+    private val isChargingOptimizationSupportedLiveData = MutableLiveData(false)
+    private val showAdbDialogLiveData = MutableLiveData(false)
+
     /**
      * Creates all app shortcuts via [ShortcutHelper] when the activity becomes visible.
      */
@@ -54,6 +63,7 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
     /**
      * Refreshes all ViewModel state values from the device settings each time the activity
      * resumes, ensuring the UI reflects any changes made while the app was in the background.
+     * Also syncs the LiveData wrappers used by [MainScreenParams].
      */
     override fun onResume() {
         super.onResume()
@@ -62,6 +72,19 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
         viewModel.updateIsVibrationModeOn(this)
         viewModel.updateIsChargingOptimizationOn(this)
         viewModel.updateCurrentRingerMode(this)
+        syncLiveDataWrappers()
+    }
+
+    /**
+     * Copies the current [MainViewModel] [androidx.compose.runtime.MutableState] values into
+     * the corresponding [MutableLiveData] wrappers so [MainScreen] can observe them.
+     */
+    private fun syncLiveDataWrappers() {
+        isAdaptiveLiveData.value = viewModel.isSwitchedOn.value
+        isVibrationModeLiveData.value = viewModel.isVibrationModeOn.value
+        isChargingOptimizationLiveData.value = viewModel.isChargingOptimizationOn.value
+        isChargingOptimizationSupportedLiveData.value = viewModel.isChargingOptimizationSupported.value
+        showAdbDialogLiveData.value = viewModel.showAdbDialog.value
     }
 
     /**
@@ -75,31 +98,30 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
         lifecycle.addObserver(this)
         setContent {
             val showOverlayDialog = rememberSaveable { mutableStateOf(false) }
-            val isAdaptive by viewModel.canWrite.observeAsState(false)
-            val isVibrationModeOn by viewModel.canWrite.observeAsState(false)
-            val isChargingOptimizationOn by viewModel.canWrite.observeAsState(false)
-            val isChargingOptimizationSupported by viewModel.canWrite.observeAsState(false)
-            val showAdbDialog by viewModel.canWrite.observeAsState(false)
             val currentRingerMode by viewModel.currentRingerMode.observeAsState(RingerMode.NORMAL)
 
             CustomTilesTheme {
                 MainScreen(
                     MainScreenParams(
                         canWrite = viewModel.canWrite,
-                        isAdaptive = viewModel.canWrite,
+                        isAdaptive = isAdaptiveLiveData,
                         toggleAdaptiveBrightness = ::toggleAdaptiveBrightness,
-                        isVibrationMode = viewModel.canWrite,
+                        isVibrationMode = isVibrationModeLiveData,
                         toggleVibrationMode = ::toggleVibrationMode,
-                        isChargingOptimization = viewModel.canWrite,
-                        isChargingOptimizationSupported = viewModel.canWrite,
+                        isChargingOptimization = isChargingOptimizationLiveData,
+                        isChargingOptimizationSupported = isChargingOptimizationSupportedLiveData,
                         toggleChargingOptimization = ::toggleChargingOptimization,
-                        showAdbDialog = viewModel.canWrite,
-                        onAdbDialogDismiss = { viewModel.showAdbDialog.value = false },
+                        showAdbDialog = showAdbDialogLiveData,
+                        onAdbDialogDismiss = {
+                            viewModel.showAdbDialog.value = false
+                            showAdbDialogLiveData.value = false
+                        },
                         openPermissionSettings = { openPermissionSettings(this) },
                         currentRingerMode = viewModel.currentRingerMode,
                         onRingerModeChange = { newMode ->
                             viewModel.currentRingerMode.value = newMode
                             viewModel.isVibrationModeOn.value = newMode == RingerMode.VIBRATE
+                            isVibrationModeLiveData.value = newMode == RingerMode.VIBRATE
                         }
                     )
                 )
@@ -134,39 +156,53 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
     }
 
     /**
-     * Toggles adaptive brightness and updates [MainViewModel.isSwitchedOn] via the settings
-     * changed callback.
+     * Toggles adaptive brightness and updates [MainViewModel.isSwitchedOn] and
+     * [isAdaptiveLiveData] via the settings changed callback.
      */
     private fun toggleAdaptiveBrightness() {
         val brightnessParams = SettingsUtils.SettingsToggleParams(
             context = this,
-            onSettingChanged = { newValue -> viewModel.isSwitchedOn.value = newValue }
+            onSettingChanged = { newValue ->
+                viewModel.isSwitchedOn.value = newValue
+                isAdaptiveLiveData.value = newValue
+            }
         )
         SettingsUtils.Brightness.toggleAdaptiveBrightness(brightnessParams)
     }
 
     /**
-     * Toggles vibration mode and updates [MainViewModel.isVibrationModeOn] via the settings
-     * changed callback. Returns true if the toggle succeeded.
+     * Toggles vibration mode and updates [MainViewModel.isVibrationModeOn] and
+     * [isVibrationModeLiveData] via the settings changed callback.
+     * Returns true if the toggle succeeded.
      */
     private fun toggleVibrationMode(): Boolean {
         val vibrationParams = SettingsUtils.SettingsToggleParams(
             context = this,
-            onSettingChanged = { newValue -> viewModel.isVibrationModeOn.value = newValue }
+            onSettingChanged = { newValue ->
+                viewModel.isVibrationModeOn.value = newValue
+                isVibrationModeLiveData.value = newValue
+            }
         )
         return SettingsUtils.Vibration.toggleVibrationMode(vibrationParams)
     }
 
     /**
-     * Sets charging optimization to [enabled] and updates [MainViewModel.isChargingOptimizationOn].
-     * If the WRITE_SECURE_SETTINGS permission is missing, [MainViewModel.showAdbDialog] is set
-     * to true to prompt the user with ADB instructions.
+     * Sets charging optimization to [enabled] and updates [MainViewModel.isChargingOptimizationOn]
+     * and [isChargingOptimizationLiveData].
+     * If the WRITE_SECURE_SETTINGS permission is missing, [MainViewModel.showAdbDialog] and
+     * [showAdbDialogLiveData] are set to true to prompt the user with ADB instructions.
      */
     private fun toggleChargingOptimization(enabled: Boolean) {
         val chargingParams = SettingsUtils.SettingsToggleParams(
             context = this,
-            onSettingChanged = { newValue -> viewModel.isChargingOptimizationOn.value = newValue },
-            onPermissionDenied = { viewModel.showAdbDialog.value = true }
+            onSettingChanged = { newValue ->
+                viewModel.isChargingOptimizationOn.value = newValue
+                isChargingOptimizationLiveData.value = newValue
+            },
+            onPermissionDenied = {
+                viewModel.showAdbDialog.value = true
+                showAdbDialogLiveData.value = true
+            }
         )
         SettingsUtils.Charging.setChargingOptimization(enabled, chargingParams)
     }
