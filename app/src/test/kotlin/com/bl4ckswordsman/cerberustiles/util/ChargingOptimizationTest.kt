@@ -1,8 +1,6 @@
 package com.bl4ckswordsman.cerberustiles.util
 
 import android.content.ContentResolver
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Context
 import android.provider.Settings
 import android.widget.Toast
