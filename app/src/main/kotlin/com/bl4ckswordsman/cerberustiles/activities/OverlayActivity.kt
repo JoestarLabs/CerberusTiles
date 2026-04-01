@@ -68,32 +68,32 @@ class OverlayActivity : ComponentActivity() {
                 isSwitchedOn = viewModel.isSwitchedOn.value,
                 setSwitchedOn = { viewModel.isSwitchedOn.value = it },
                 toggleAdaptiveBrightness = {
-                    val params = SettingsUtils.SettingsToggleParams(
+                    val brightnessParams = SettingsUtils.SettingsToggleParams(
                         context = this,
                         onSettingChanged = { newValue -> viewModel.isSwitchedOn.value = newValue }
                     )
-                    Brightness.toggleAdaptiveBrightness(params)
+                    Brightness.toggleAdaptiveBrightness(brightnessParams)
                 },
                 openPermissionSettings = { openPermissionSettings(this) },
                 isVibrationModeOn = viewModel.isVibrationModeOn.value,
                 setVibrationMode = { viewModel.isVibrationModeOn.value = it },
                 toggleVibrationMode = {
-                    val params = SettingsUtils.SettingsToggleParams(
+                    val vibrationParams = SettingsUtils.SettingsToggleParams(
                         context = this,
                         onSettingChanged = { newValue -> viewModel.isVibrationModeOn.value = newValue }
                     )
-                    toggleVibrationMode(params)
+                    toggleVibrationMode(vibrationParams)
                 },
                 isChargingOptimizationOn = viewModel.isChargingOptimizationOn.value,
                 isChargingOptimizationSupported = viewModel.isChargingOptimizationSupported.value,
                 setChargingOptimization = { viewModel.isChargingOptimizationOn.value = it },
                 toggleChargingOptimization = { enabled ->
-                    val params = SettingsUtils.SettingsToggleParams(
+                    val chargingParams = SettingsUtils.SettingsToggleParams(
                         context = this,
                         onSettingChanged = { newValue -> viewModel.isChargingOptimizationOn.value = newValue },
                         onPermissionDenied = { viewModel.showAdbDialog.value = true }
                     )
-                    SettingsUtils.Charging.setChargingOptimization(enabled, params)
+                    SettingsUtils.Charging.setChargingOptimization(enabled, chargingParams)
                 },
                 showAdbDialog = viewModel.showAdbDialog.value,
                 onAdbDialogDismiss = { viewModel.showAdbDialog.value = false },

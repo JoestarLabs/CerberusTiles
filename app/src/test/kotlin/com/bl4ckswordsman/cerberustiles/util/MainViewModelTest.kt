@@ -10,6 +10,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
+import io.mockk.verify
 import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -88,6 +89,9 @@ class MainViewModelTest {
             "Expected isChargingOptimizationOn to remain false when not supported",
             viewModel.isChargingOptimizationOn.value
         )
+        verify(exactly = 0) {
+            SettingsUtils.Charging.isChargingOptimizationEnabled(context)
+        }
     }
 
     @Test
