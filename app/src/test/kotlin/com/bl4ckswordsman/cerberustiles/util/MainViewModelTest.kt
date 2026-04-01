@@ -3,6 +3,7 @@ package com.bl4ckswordsman.cerberustiles.util
 import android.content.ContentResolver
 import android.content.Context
 import android.provider.Settings
+import com.bl4ckswordsman.cerberustiles.MainViewModel
 import com.bl4ckswordsman.cerberustiles.SettingsUtils
 import io.mockk.MockKAnnotations
 import io.mockk.every
@@ -25,7 +26,7 @@ class MainViewModelTest {
     @MockK(relaxed = true)
     private lateinit var contentResolver: ContentResolver
 
-    private lateinit var viewModel: SettingsUtils.MainViewModel
+    private lateinit var viewModel: MainViewModel
 
     @Before
     fun setUp() {
@@ -33,7 +34,7 @@ class MainViewModelTest {
         every { context.contentResolver } returns contentResolver
         mockkStatic(Settings.Secure::class)
         mockkObject(SettingsUtils.Charging)
-        viewModel = SettingsUtils.MainViewModel()
+        viewModel = MainViewModel()
     }
 
     @After
