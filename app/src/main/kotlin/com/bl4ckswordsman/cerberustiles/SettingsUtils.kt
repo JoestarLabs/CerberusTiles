@@ -183,19 +183,34 @@ object SettingsUtils {
         private const val CHARGE_OPTIMIZATION_MODE = "charge_optimization_mode"
 
         /**
-         * Checks if charging optimization (80% limit) is supported.
+         * Checks if charging optimization (80% limit) is supported on this device.
+         *
+         * Returns false if the [CHARGE_OPTIMIZATION_MODE] secure setting does not exist
+         * (default value of -1 is returned) or if reading it throws any exception.
          */
         fun isChargingOptimizationSupported(context: Context): Boolean {
-            return Settings.Secure.getInt(
-                context.contentResolver, CHARGE_OPTIMIZATION_MODE, -1
-            ) != -1
+            return try {
+                Settings.Secure.getInt(
+                    context.contentResolver, CHARGE_OPTIMIZATION_MODE, -1
+                ) != -1
+            } catch (_: Exception) {
+                false
+            }
         }
 
         /**
          * Checks if charging optimization (80% limit) is enabled.
+         *
+         * Returns false if the setting is 0, absent, or if reading it throws any exception.
          */
         fun isChargingOptimizationEnabled(context: Context): Boolean {
-            return Settings.Secure.getInt(context.contentResolver, CHARGE_OPTIMIZATION_MODE, 0) == 1
+            return try {
+                Settings.Secure.getInt(
+                    context.contentResolver, CHARGE_OPTIMIZATION_MODE, 0
+                ) == 1
+            } catch (_: Exception) {
+                false
+            }
         }
 
         /**
