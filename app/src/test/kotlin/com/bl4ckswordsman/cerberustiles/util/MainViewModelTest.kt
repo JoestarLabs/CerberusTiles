@@ -61,8 +61,7 @@ class MainViewModelTest {
     @Test
     fun `initial showAdbDialog state is false`() {
         assertFalse(
-            "Expected showAdbDialog initial value to be false",
-            viewModel.showAdbDialog.value
+            "Expected showAdbDialog initial value to be false", viewModel.showAdbDialog.value
         )
     }
 
@@ -107,8 +106,7 @@ class MainViewModelTest {
             viewModel.isChargingOptimizationSupported.value
         )
         assertTrue(
-            "Expected isChargingOptimizationOn to be true",
-            viewModel.isChargingOptimizationOn.value
+            "Expected isChargingOptimizationOn to be true", viewModel.isChargingOptimizationOn.value
         )
     }
 
@@ -137,8 +135,7 @@ class MainViewModelTest {
         viewModel.updateIsChargingOptimizationOn(context)
 
         assertTrue(
-            "Pre-condition: should be supported",
-            viewModel.isChargingOptimizationSupported.value
+            "Pre-condition: should be supported", viewModel.isChargingOptimizationSupported.value
         )
         assertTrue("Pre-condition: should be on", viewModel.isChargingOptimizationOn.value)
 
@@ -151,8 +148,8 @@ class MainViewModelTest {
             viewModel.isChargingOptimizationSupported.value
         )
         // isChargingOptimizationOn should NOT have been updated in the second call
-        assertTrue(
-            "Expected isChargingOptimizationOn to retain its previous value since the branch was not entered",
+        assertFalse(
+            "Expected isChargingOptimizationOn to be reset to false when not supported",
             viewModel.isChargingOptimizationOn.value
         )
     }
