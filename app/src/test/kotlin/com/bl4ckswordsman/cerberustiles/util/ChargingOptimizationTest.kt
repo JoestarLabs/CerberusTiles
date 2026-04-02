@@ -175,7 +175,13 @@ class ChargingOptimizationTest {
         SettingsUtils.Charging.setChargingOptimization(true, params)
 
         verify { Settings.Secure.putInt(contentResolver, CHARGE_OPTIMIZATION_KEY, 1) }
-        verify { Toast.makeText(context, "Failed to change charging optimization setting. It may be restricted.", Toast.LENGTH_SHORT) }
+        verify {
+            Toast.makeText(
+                context,
+                "Failed to change charging optimization setting. It may be restricted.",
+                Toast.LENGTH_SHORT
+            )
+        }
         assertFalse("Expected callback to not be called", callbackCalled)
     }
 
@@ -225,7 +231,10 @@ class ChargingOptimizationTest {
         } returns 2
 
         val result = SettingsUtils.Charging.isChargingOptimizationEnabled(context)
-        assertFalse("Expected isChargingOptimizationEnabled to return false for non-standard value 2", result)
+        assertFalse(
+            "Expected isChargingOptimizationEnabled to return false for non-standard value 2",
+            result
+        )
     }
 
     @Test
@@ -235,7 +244,10 @@ class ChargingOptimizationTest {
         } returns 1
 
         val result = SettingsUtils.Charging.isChargingOptimizationSupported(context)
-        assertTrue("Expected isChargingOptimizationSupported to return true when value is 1", result)
+        assertTrue(
+            "Expected isChargingOptimizationSupported to return true when value is 1",
+            result
+        )
     }
 
     @Test
@@ -245,7 +257,10 @@ class ChargingOptimizationTest {
             onSettingChanged = { }
         )
 
-        org.junit.Assert.assertNull("Expected onPermissionDenied to be null by default", params.onPermissionDenied)
+        org.junit.Assert.assertNull(
+            "Expected onPermissionDenied to be null by default",
+            params.onPermissionDenied
+        )
     }
 
     @Test
@@ -263,6 +278,9 @@ class ChargingOptimizationTest {
 
         SettingsUtils.Charging.setChargingOptimization(true, params)
 
-        assertFalse("Expected onPermissionDenied to not be called when putInt returns false", deniedCalled)
+        assertFalse(
+            "Expected onPermissionDenied to not be called when putInt returns false",
+            deniedCalled
+        )
     }
 }

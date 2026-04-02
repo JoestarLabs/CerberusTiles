@@ -1,5 +1,6 @@
 package com.bl4ckswordsman.cerberustiles.ui
 
+import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContentTransitionScope
@@ -7,7 +8,6 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import android.content.Context
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,13 +34,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.bl4ckswordsman.cerberustiles.R
 import com.bl4ckswordsman.cerberustiles.models.RingerMode
 import com.bl4ckswordsman.cerberustiles.navbar.BottomNavBar
 import com.bl4ckswordsman.cerberustiles.navbar.Screen
-import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 import com.mikepenz.aboutlibraries.ui.compose.android.produceLibraries
-import com.bl4ckswordsman.cerberustiles.R
-import androidx.compose.runtime.getValue
+import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 import com.bl4ckswordsman.cerberustiles.Constants as label
 
 /**
@@ -116,17 +115,18 @@ data class MainScreenNavHostParams(
 @Composable
 fun MainScreenScaffold(params: MainScreenScaffoldParams) {
     Scaffold(topBar = {
-        TopAppBar(colors = TopAppBarDefaults.topAppBarColors(
+        TopAppBar(
+            colors = TopAppBarDefaults.topAppBarColors(
 
-        ), title = {
-            Text(
-                text = when (params.selectedScreen) {
-                    is Screen.Home -> label.HOME_SCREEN
-                    is Screen.Settings -> label.SETTINGS_SCREEN
-                    is Screen.Licenses -> "Open Source Licenses"
-                }
-            )
-        })
+            ), title = {
+                Text(
+                    text = when (params.selectedScreen) {
+                        is Screen.Home -> label.HOME_SCREEN
+                        is Screen.Settings -> label.SETTINGS_SCREEN
+                        is Screen.Licenses -> "Open Source Licenses"
+                    }
+                )
+            })
     }, bottomBar = { BottomNavBar(params.navController) }) { innerPadding ->
         MainScreenNavHost(
             MainScreenNavHostParams(
@@ -175,7 +175,8 @@ fun MainScreenNavHost(params: MainScreenNavHostParams) {
                 modifier = Modifier.padding(params.innerPadding)
             ) {
                 val context = LocalContext.current
-                val sharedPreferences = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+                val sharedPreferences =
+                    context.getSharedPreferences("settings", Context.MODE_PRIVATE)
                 val settingsCompParams = SettingsComponentsParams(
                     canWriteState = params.canWriteState,
                     isSwitchedOn = params.isSwitchedOn,
@@ -191,7 +192,12 @@ fun MainScreenNavHost(params: MainScreenNavHostParams) {
                     sharedParams = createSharedParams(params.navController),
                     componentVisibilityParams = ComponentVisibilityDialogParams(
                         adaptBrightnessSwitch = rememberSaveable {
-                            mutableStateOf(sharedPreferences.getBoolean("adaptBrightnessSwitch", true))
+                            mutableStateOf(
+                                sharedPreferences.getBoolean(
+                                    "adaptBrightnessSwitch",
+                                    true
+                                )
+                            )
                         },
                         brightnessSlider = rememberSaveable {
                             mutableStateOf(sharedPreferences.getBoolean("brightnessSlider", true))
@@ -200,7 +206,12 @@ fun MainScreenNavHost(params: MainScreenNavHostParams) {
                             mutableStateOf(sharedPreferences.getBoolean("ringerModeSelector", true))
                         },
                         chargingOptimizationSwitch = rememberSaveable {
-                            mutableStateOf(sharedPreferences.getBoolean("chargingOptimizationSwitch", true))
+                            mutableStateOf(
+                                sharedPreferences.getBoolean(
+                                    "chargingOptimizationSwitch",
+                                    true
+                                )
+                            )
                         }
                     ),
                     currentRingerMode = currentRingerMode,
@@ -254,7 +265,9 @@ fun MainScreen(params: MainScreenParams) {
     val isAdaptiveState by params.isAdaptive.observeAsState(initial = false)
     val isVibrationModeState by params.isVibrationMode.observeAsState(initial = false)
     val isChargingOptimizationState by params.isChargingOptimization.observeAsState(initial = false)
-    val isChargingOptimizationSupportedState by params.isChargingOptimizationSupported.observeAsState(initial = false)
+    val isChargingOptimizationSupportedState by params.isChargingOptimizationSupported.observeAsState(
+        initial = false
+    )
 
     val (isSwitchedOn, setSwitchedOn) = rememberSaveable { mutableStateOf(isAdaptiveState) }
     val (isVibrationModeOn, setVibrationMode) = rememberSaveable {
@@ -319,7 +332,8 @@ fun MainScreen(params: MainScreenParams) {
 @Composable
 fun MainScreenPreview() {
     MainScreen(
-        MainScreenParams(canWrite = MutableLiveData(true),
+        MainScreenParams(
+            canWrite = MutableLiveData(true),
             isAdaptive = MutableLiveData(true),
             toggleAdaptiveBrightness = {},
             isVibrationMode = MutableLiveData(true),

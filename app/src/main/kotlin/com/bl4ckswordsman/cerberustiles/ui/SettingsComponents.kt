@@ -140,9 +140,9 @@ private fun RingerModeSelectionButtonGroup(
                 Modifier.weight(1f)
             } else {
                 when (mode) {
-                    RingerMode.NORMAL  -> Modifier.weight(1f)
+                    RingerMode.NORMAL -> Modifier.weight(1f)
                     RingerMode.VIBRATE -> Modifier.weight(1.2f)
-                    RingerMode.SILENT  -> Modifier.weight(1f)
+                    RingerMode.SILENT -> Modifier.weight(1f)
                 }
             }
 
@@ -153,9 +153,9 @@ private fun RingerModeSelectionButtonGroup(
                 },
                 modifier = weightModifier.semantics { role = Role.RadioButton },
                 shapes = when (index) {
-                    0               -> ButtonGroupDefaults.connectedLeadingButtonShapes()
+                    0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
                     modes.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
-                    else            -> ButtonGroupDefaults.connectedMiddleButtonShapes()
+                    else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
                 }
             ) {
                 Icon(

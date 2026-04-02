@@ -17,12 +17,12 @@ import org.junit.Assert.*
 class ExampleInstrumentedTest {
     @Test
 
-/**
- * Instrumented test to verify the application context.
- *
- * This test checks if the context of the app under test is correct
- * by comparing the package name with the expected value.
- */
+            /**
+             * Instrumented test to verify the application context.
+             *
+             * This test checks if the context of the app under test is correct
+             * by comparing the package name with the expected value.
+             */
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext

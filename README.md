@@ -20,9 +20,11 @@
 
 ## Introduction
 
-Pixel phones don't offer quick access to some core settings, unlike some other Android phone manufacturers.
+Pixel phones don't offer quick access to some core settings, unlike some other Android phone
+manufacturers.
 
-That's where Cerberus Tiles[^1] comes in, to add more quick settings tiles and shortcuts to your Google Pixel.
+That's where Cerberus Tiles[^1] comes in, to add more quick settings tiles and shortcuts to your
+Google Pixel.
 Ideal to be used with the back tap gesture.
 Tested in a Pixel 8 Pro.
 
@@ -30,13 +32,12 @@ Tested in a Pixel 8 Pro.
   <summary> Screenshots (Click to expand)</summary>
 
 <p float="left">
-  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_1.png" width="150" />
-  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_1_dark.png" width="150" />
-  <img src="assets/recording_1.gif" width="156" />
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_1.png" width="150"  alt="Screenshot"/>
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_1_dark.png" width="150"  alt="Screenshot Dark"/>
+  <img src="assets/recording_1.gif" width="156"  alt="Animated GIF"/>
 
 </p>
 </details>
-
 
 ## Features
 
@@ -50,8 +51,8 @@ Tested in a Pixel 8 Pro.
 > [!NOTE]
 > More features coming soon.
 
-
 ## Download
+
 Download a GitHub actions build here:
 <p>
   <a href="https://github.com/bl4ckswordsman/CerberusTiles/releases/latest"><img src="https://img.shields.io/github/v/release/bl4ckswordsman/CerberusTiles" alt="GitHub release (latest by date)"></a>

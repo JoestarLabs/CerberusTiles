@@ -7,13 +7,13 @@ import android.media.AudioManager
 import android.provider.Settings
 import android.widget.Toast
 import androidx.compose.runtime.mutableStateOf
+import androidx.core.net.toUri
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.bl4ckswordsman.cerberustiles.SettingsUtils.canWriteSettings
 import com.bl4ckswordsman.cerberustiles.models.RingerMode
 import com.bl4ckswordsman.cerberustiles.util.Ringer
 import kotlin.math.pow
-import androidx.core.net.toUri
 
 /** Utilities for different settings. */
 object SettingsUtils {
