@@ -53,7 +53,7 @@ Tested in a Pixel 8 Pro.
 
 ## Download
 
-Download a GitHub actions build here:
+Download a GitHub actions build (scanned by 🛡VirusTotal) here:
 <p>
   <a href="https://github.com/bl4ckswordsman/CerberusTiles/releases/latest"><img src="https://img.shields.io/github/v/release/bl4ckswordsman/CerberusTiles" alt="GitHub release (latest by date)"></a>
 </p>
