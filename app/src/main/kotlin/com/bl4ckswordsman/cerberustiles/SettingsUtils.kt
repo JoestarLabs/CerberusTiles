@@ -95,9 +95,7 @@ object SettingsUtils {
             if (Settings.System.canWrite(context)) {
                 val brightnessValue = (255.0.pow(brightness.toDouble())).toInt()
                 Settings.System.putInt(
-                    context.contentResolver,
-                    Settings.System.SCREEN_BRIGHTNESS,
-                    brightnessValue
+                    context.contentResolver, Settings.System.SCREEN_BRIGHTNESS, brightnessValue
                 )
             }
         }
