@@ -12,8 +12,8 @@ android {
         applicationId = "com.bl4ckswordsman.cerberustiles"
         minSdk = 24
         targetSdk = 34
-        versionCode = 22
-        versionName = "0.4.8"
+        versionCode = 23
+        versionName = "0.5.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
