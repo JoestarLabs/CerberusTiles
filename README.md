@@ -41,12 +41,12 @@ Tested in a Pixel 8 Pro.
 
 ## Features
 
-|                       | In-app toggle | App shortcut | Quick Settings tile |
-|:---------------------:|:-------------:|:------------:|:-------------------:|
-|  Adaptive Brightness  |       ✅       |      ✅       |          ✅          |
-| Vibration Ringer Mode |       ✅       |      ✅       |          -          |
-|    Overlay dialog     |       -       |      ✅       |          -          |
-|           -           |               |              |                     |
+|                                              | In-app toggle | App shortcut | Quick Settings tile |
+|:--------------------------------------------:|:-------------:|:------------:|:-------------------:|
+|             Adaptive Brightness              |       ✅       |      ✅       |          ✅          |
+|            Vibration Ringer Mode             |       ✅       |      ✅       |          -          |
+|                Overlay dialog                |       -       |      ✅       |          -          |
+| Limit Charge to 80%<br>*(requires adb perm)* |       ✅       |      -       |          -          |
 
 > [!NOTE]
 > More features coming soon.
