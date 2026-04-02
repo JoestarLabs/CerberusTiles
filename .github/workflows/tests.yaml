@@ -9,6 +9,7 @@ on:
   pull_request:
     branches: [ "main", "master" ]
   workflow_dispatch: # allows manual trigger from Actions tab
+  workflow_call:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
