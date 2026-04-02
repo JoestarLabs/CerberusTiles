@@ -28,7 +28,7 @@ jobs:
           java-version: "17"
           distribution: "zulu"
       - name: Build with Gradle
-        run: ./gradlew licenseReleaseReport assembleRelease
+        run: ./gradlew assembleRelease
       - name: Sign APK
         id: sign_apk
         uses: ilharp/sign-android-release@v2
