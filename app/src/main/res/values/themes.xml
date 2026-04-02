@@ -2,10 +2,12 @@
 <resources>
 
     <style name="Theme.CustomTiles" parent="android:Theme.Material.Light.NoActionBar" />
+
     <style name="Theme.OverlayActivity" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Make the window background transparent -->
         <item name="android:windowIsTranslucent">true</item>
     </style>
+
     <style name="Theme.OverlayActivity.Dialog" parent="Theme.CustomTiles">
         <item name="android:windowBackground">@android:color/transparent</item>
     </style>

@@ -11,6 +11,10 @@ import com.bl4ckswordsman.cerberustiles.SettingsUtils
  */
 class AdaptiveBrightnessTileService : TileService() {
 
+    /**
+     * Called when the tile becomes visible. Reads the current adaptive brightness state and
+     * updates the tile's active/inactive state accordingly.
+     */
     override fun onStartListening() {
         super.onStartListening()
 
@@ -20,13 +24,18 @@ class AdaptiveBrightnessTileService : TileService() {
         qsTile.updateTile()
     }
 
+    /**
+     * Called when the user taps the tile. Toggles adaptive brightness and updates the tile
+     * state and icon to reflect the new value.
+     */
     override fun onClick() {
         super.onClick()
 
         val isAdaptive = SettingsUtils.Brightness.isAdaptiveBrightnessEnabled(this)
-        val params = SettingsUtils.SettingsToggleParams(this) { newValue ->
-            // Do nothing
-        }
+        val params = SettingsUtils.SettingsToggleParams(
+            context = this,
+            onSettingChanged = { _ -> }
+        )
         SettingsUtils.Brightness.toggleAdaptiveBrightness(params)
 
         qsTile.state = if (isAdaptive) Tile.STATE_INACTIVE else Tile.STATE_ACTIVE

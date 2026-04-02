@@ -30,6 +30,12 @@ data class OverlayDialogParams(
     val isVibrationModeOn: Boolean,
     val setVibrationMode: (Boolean) -> Unit,
     val toggleVibrationMode: () -> Boolean,
+    val isChargingOptimizationOn: Boolean,
+    val isChargingOptimizationSupported: Boolean,
+    val setChargingOptimization: (Boolean) -> Unit,
+    val toggleChargingOptimization: (Boolean) -> Unit,
+    val showAdbDialog: Boolean,
+    val onAdbDialogDismiss: () -> Unit,
     val sharedParams: SharedParams,
     val currentRingerMode: RingerMode,
     val onRingerModeChange: (RingerMode) -> Unit
@@ -46,10 +52,19 @@ fun OverlayDialog(params: OverlayDialogParams) {
         params.sharedParams.sharedPreferences.getBoolean("brightnessSlider", true)
     val ringerModeSelector =
         params.sharedParams.sharedPreferences.getBoolean("ringerModeSelector", true)
+    val chargingOptimizationSwitch =
+        params.sharedParams.sharedPreferences.getBoolean("chargingOptimizationSwitch", true)
     val canWriteState by params.canWrite.observeAsState(initial = false)
     val currentRingerMode = rememberSaveable {
         mutableStateOf(Ringer.getCurrentRingerMode(params.sharedParams.context))
     }
+    if (params.showAdbDialog) {
+        AdbPermissionDialog(
+            context = params.sharedParams.context,
+            onDismiss = params.onAdbDialogDismiss
+        )
+    }
+
     if (params.showDialog.value) {
         Dialog(onDismissRequest = {
             params.showDialog.value = false
@@ -78,6 +93,9 @@ fun OverlayDialog(params: OverlayDialogParams) {
                                     mutableStateOf(
                                         ringerModeSelector
                                     )
+                                },
+                                chargingOptimizationSwitch = rememberSaveable {
+                                    mutableStateOf(chargingOptimizationSwitch)
                                 }
                             )
                             val settingsComponentsParams = SettingsComponentsParams(
@@ -89,6 +107,9 @@ fun OverlayDialog(params: OverlayDialogParams) {
                                 isVibrationModeOn = params.isVibrationModeOn,
                                 setVibrationMode = params.setVibrationMode,
                                 toggleVibrationMode = params.toggleVibrationMode,
+                                isChargingOptimizationOn = params.isChargingOptimizationOn,
+                                setChargingOptimization = params.setChargingOptimization,
+                                toggleChargingOptimization = params.toggleChargingOptimization,
                                 componentVisibilityParams = componentVisibilityDialogParams,
                                 sharedParams = createSharedParams(),
                                 currentRingerMode = currentRingerMode.value,

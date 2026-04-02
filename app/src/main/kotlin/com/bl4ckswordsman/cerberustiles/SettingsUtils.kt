@@ -4,13 +4,16 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.media.AudioManager
-import android.net.Uri
 import android.provider.Settings
 import android.widget.Toast
 import androidx.compose.runtime.mutableStateOf
+import androidx.core.net.toUri
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.bl4ckswordsman.cerberustiles.util.AutomaticZenManager
+import com.bl4ckswordsman.cerberustiles.SettingsUtils.Charging.CHARGE_OPTIMIZATION_MODE
+import com.bl4ckswordsman.cerberustiles.SettingsUtils.canWriteSettings
+import com.bl4ckswordsman.cerberustiles.models.RingerMode
+import com.bl4ckswordsman.cerberustiles.util.Ringer
 import kotlin.math.pow
 
 /** Utilities for different settings. */
@@ -20,7 +23,8 @@ object SettingsUtils {
      */
     data class SettingsToggleParams(
         val context: Context,
-        val onSettingChanged: (Boolean) -> Unit
+        val onSettingChanged: (Boolean) -> Unit,
+        val onPermissionDenied: (() -> Unit)? = null
     )
 
     /**
@@ -71,7 +75,6 @@ object SettingsUtils {
                     Settings.System.SCREEN_BRIGHTNESS_MODE,
                     if (isAdaptive) 0 else 1
                 )
-                // Show a toast with the new state of adaptive brightness
                 showToast(params.context, "Adaptive brightness", !isAdaptive)
                 params.onSettingChanged(!isAdaptive)
             }
@@ -91,12 +94,9 @@ object SettingsUtils {
          */
         fun setScreenBrightness(context: Context, brightness: Float) {
             if (Settings.System.canWrite(context)) {
-                // Convert the brightness value to a 0-255 range
                 val brightnessValue = (255.0.pow(brightness.toDouble())).toInt()
                 Settings.System.putInt(
-                    context.contentResolver,
-                    Settings.System.SCREEN_BRIGHTNESS,
-                    brightnessValue
+                    context.contentResolver, Settings.System.SCREEN_BRIGHTNESS, brightnessValue
                 )
             }
         }
@@ -125,35 +125,48 @@ object SettingsUtils {
          * Handles the vibration mode toggling logic.
          */
         private class VibrationModeToggler(private val params: SettingsToggleParams) {
+            /**
+             * Checks for the required WRITE_SETTINGS permission and, if present, delegates to
+             * [performVibrationToggle]. Redirects to permission settings and returns false
+             * if the permission is missing.
+             *
+             * @return true if the vibration mode was successfully toggled, false otherwise.
+             */
             fun toggle(): Boolean {
                 if (!canWriteSettings(params.context)) {
                     openPermissionSettings(params.context)
                     return false
                 }
-
                 return performVibrationToggle()
             }
 
+            /**
+             * Reads the current vibration mode state and switches it, shows a confirmation toast,
+             * and invokes [SettingsToggleParams.onSettingChanged] with the new value.
+             * Returns true on success, false if a [SecurityException] is caught.
+             */
             private fun performVibrationToggle(): Boolean {
                 val audioManager =
                     params.context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-
                 return try {
                     val isVibrationModeOn =
                         audioManager.ringerMode == AudioManager.RINGER_MODE_VIBRATE
                     val newMode =
                         if (isVibrationModeOn) AudioManager.RINGER_MODE_NORMAL else AudioManager.RINGER_MODE_VIBRATE
-
                     audioManager.ringerMode = newMode
                     showToast(params.context, "Vibration mode", !isVibrationModeOn)
                     params.onSettingChanged(!isVibrationModeOn)
                     true
-                } catch (e: SecurityException) {
+                } catch (_: SecurityException) {
                     handleVibrationSecurityException()
                     false
                 }
             }
 
+            /**
+             * Shows a toast informing the user that vibration settings cannot be changed
+             * while Do Not Disturb mode is active.
+             */
             private fun handleVibrationSecurityException() {
                 Toast.makeText(
                     params.context,
@@ -165,81 +178,63 @@ object SettingsUtils {
     }
 
     /**
-     * Utilities for silent mode settings using AutomaticZenManager.
+     * Utilities for charging settings.
      */
-    object Silent {
-        /**
-         * Checks if the silent mode is enabled.
-         */
-        fun isSilentModeEnabled(context: Context): Boolean {
-            // Check both audio manager and DND state for complete silent mode
-            val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-            val isAudioSilent = audioManager.ringerMode == AudioManager.RINGER_MODE_SILENT
-            val isDndActive = AutomaticZenManager.isSilentModeActive(context)
+    object Charging {
+        private const val CHARGE_OPTIMIZATION_MODE = "charge_optimization_mode"
 
-            return isAudioSilent || isDndActive
+        /**
+         * Checks if charging optimization (80% limit) is supported on this device.
+         *
+         * Returns false if the [CHARGE_OPTIMIZATION_MODE] secure setting does not exist
+         * (default value of -1 is returned) or if reading it throws any exception.
+         */
+        fun isChargingOptimizationSupported(context: Context): Boolean {
+            return try {
+                Settings.Secure.getInt(
+                    context.contentResolver, CHARGE_OPTIMIZATION_MODE, -1
+                ) != -1
+            } catch (_: Exception) {
+                false
+            }
         }
 
         /**
-         * Toggles the silent mode using AutomaticZenManager for Android 15+ compatibility.
+         * Checks if charging optimization (80% limit) is enabled.
+         *
+         * Returns false if the setting is 0, absent, or if reading it throws any exception.
          */
-        fun toggleSilentMode(params: SettingsToggleParams): Boolean {
-            return SilentModeToggler(params).toggle()
+        fun isChargingOptimizationEnabled(context: Context): Boolean {
+            return try {
+                Settings.Secure.getInt(
+                    context.contentResolver, CHARGE_OPTIMIZATION_MODE, 0
+                ) == 1
+            } catch (_: Exception) {
+                false
+            }
         }
 
         /**
-         * Handles the silent mode toggling logic.
+         * Sets the charging optimization (80% limit).
          */
-        private class SilentModeToggler(private val params: SettingsToggleParams) {
-            fun toggle(): Boolean {
-                if (!canWriteSettings(params.context)) {
-                    openPermissionSettings(params.context)
-                    return false
-                }
-
-                return try {
-                    val isSilentModeOn = isSilentModeEnabled(params.context)
-                    if (isSilentModeOn) {
-                        deactivateSilentMode()
-                    } else {
-                        activateSilentMode()
-                    }
-                } catch (e: SecurityException) {
-                    handleSilentModeSecurityException()
-                    false
-                }
-            }
-
-            private fun activateSilentMode(): Boolean {
-                val success = AutomaticZenManager.activateSilentMode(params.context)
+        fun setChargingOptimization(enabled: Boolean, params: SettingsToggleParams) {
+            val newState = if (enabled) 1 else 0
+            try {
+                val success = Settings.Secure.putInt(
+                    params.context.contentResolver, CHARGE_OPTIMIZATION_MODE, newState
+                )
                 if (success) {
-                    val audioManager =
-                        params.context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-                    audioManager.ringerMode = AudioManager.RINGER_MODE_SILENT
-                    showToast(params.context, "Silent mode", true)
-                    params.onSettingChanged(true)
+                    showToast(params.context, "Charging optimization", enabled)
+                    params.onSettingChanged(enabled)
+                } else {
+                    Toast.makeText(
+                        params.context,
+                        "Failed to change charging optimization setting. It may be restricted.",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
-                return success
-            }
-
-            private fun deactivateSilentMode(): Boolean {
-                val success = AutomaticZenManager.deactivateSilentMode(params.context)
-                if (success) {
-                    val audioManager =
-                        params.context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-                    audioManager.ringerMode = AudioManager.RINGER_MODE_NORMAL
-                    showToast(params.context, "Silent mode", false)
-                    params.onSettingChanged(false)
-                }
-                return success
-            }
-
-            private fun handleSilentModeSecurityException() {
-                Toast.makeText(
-                    params.context,
-                    "Cannot change silent mode settings. Please check permissions.",
-                    Toast.LENGTH_SHORT
-                ).show()
+            } catch (_: SecurityException) {
+                params.onPermissionDenied?.invoke()
             }
         }
     }
@@ -249,7 +244,7 @@ object SettingsUtils {
      */
     fun openPermissionSettings(context: Context) {
         val intent = Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS).apply {
-            data = Uri.parse("package:${context.packageName}")
+            data = "package:${context.packageName}".toUri()
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
         }
         context.startActivity(intent)
@@ -264,35 +259,90 @@ object SettingsUtils {
         }
         context.startActivity(intent)
     }
+}
+
+/**
+ * The main ViewModel that holds the canonical state for all settings screens.
+ *
+ * Both [com.bl4ckswordsman.cerberustiles.activities.MainActivity] and
+ * [com.bl4ckswordsman.cerberustiles.activities.OverlayActivity] use this ViewModel
+ * via `by viewModels<MainViewModel>()` for structural consistency. Each activity
+ * has its own instance; state is refreshed from device settings in onResume().
+ *
+ * ## State type rationale
+ * Two fields use [MutableLiveData] and the rest use Compose [mutableStateOf].
+ * This split is intentional:
+ * - [canWrite] and [currentRingerMode] are [MutableLiveData] because
+ *   [com.bl4ckswordsman.cerberustiles.ui.MainScreenParams] and
+ *   [com.bl4ckswordsman.cerberustiles.ui.OverlayDialogParams] declare those
+ *   parameters as `LiveData<T>`, so they must stay as LiveData to satisfy
+ *   the shared UI contract.
+ * - The remaining five fields are [mutableStateOf] because they are read as
+ *   plain `.value` (Boolean) in OverlayDialogParams, which does not accept
+ *   LiveData for those slots.
+ */
+class MainViewModel : ViewModel() {
+    /** Whether the app has WRITE_SETTINGS permission. */
+    val canWrite = MutableLiveData<Boolean>()
+
+    /** Whether adaptive brightness is currently enabled. */
+    val isAdaptiveBrightnessOn = mutableStateOf(false)
+
+    /** Whether vibration mode is currently active. */
+    val isVibrationModeOn = mutableStateOf(false)
+
+    /** Whether charging optimization (80% limit) is currently enabled. */
+    val isChargingOptimizationOn = mutableStateOf(false)
+
+    /** Whether the device supports charging optimization. */
+    val isChargingOptimizationSupported = mutableStateOf(false)
+
+    /** Whether the ADB-instructions dialog should be shown. */
+    val showAdbDialog = mutableStateOf(false)
+
+    /** The current ringer mode of the device. */
+    val currentRingerMode = MutableLiveData<RingerMode>(RingerMode.NORMAL)
 
     /**
-     * The main view model that holds the state of the settings.
+     * Updates the state of the canWrite setting.
      */
-    class MainViewModel : ViewModel() {
-        val canWrite = MutableLiveData<Boolean>()
-        val isSwitchedOn = mutableStateOf(false)
-        val isVibrationModeOn = mutableStateOf(false)
+    fun updateCanWrite(context: Context) {
+        canWrite.value = canWriteSettings(context)
+    }
 
-        /**
-         * Updates the state of the canWrite setting.
-         */
-        fun updateCanWrite(context: Context) {
-            canWrite.value = canWriteSettings(context)
-        }
+    /**
+     * Updates the state of the adaptive brightness setting.
+     */
+    fun updateIsAdaptiveBrightnessOn(context: Context) {
+        isAdaptiveBrightnessOn.value = SettingsUtils.Brightness.isAdaptiveBrightnessEnabled(context)
+    }
 
-        /**
-         * Updates the state of the adaptive brightness setting.
-         */
-        fun updateIsSwitchedOn(context: Context) {
-            isSwitchedOn.value = Brightness.isAdaptiveBrightnessEnabled(context)
-        }
+    /**
+     * Updates the state of the vibration mode setting.
+     */
+    fun updateIsVibrationModeOn(context: Context) {
+        isVibrationModeOn.value = SettingsUtils.Vibration.isVibrationModeEnabled(context)
+    }
 
-        /**
-         * Updates the state of the vibration mode setting.
-         */
-        fun updateIsVibrationModeOn(context: Context) {
-            isVibrationModeOn.value = Vibration.isVibrationModeEnabled(context)
+    /**
+     * Updates the state of the charging optimization setting.
+     */
+    fun updateIsChargingOptimizationOn(context: Context) {
+        isChargingOptimizationSupported.value =
+            SettingsUtils.Charging.isChargingOptimizationSupported(context)
+        if (isChargingOptimizationSupported.value) {
+            isChargingOptimizationOn.value =
+                SettingsUtils.Charging.isChargingOptimizationEnabled(context)
+        } else {
+            isChargingOptimizationOn.value = false
         }
+    }
+
+    /**
+     * Reads the current ringer mode from the device and updates [currentRingerMode].
+     */
+    fun updateCurrentRingerMode(context: Context) {
+        currentRingerMode.value = Ringer.getCurrentRingerMode(context)
     }
 }
 

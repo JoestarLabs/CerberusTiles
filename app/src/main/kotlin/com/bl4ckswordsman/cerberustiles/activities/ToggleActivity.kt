@@ -40,9 +40,10 @@ class ToggleAdaptiveBrightnessActivity : BaseToggleActivity() {
 
     /** Toggles the adaptive brightness setting. */
     override fun performAction() {
-        val params = SettingsUtils.SettingsToggleParams(this) { _ ->
-            // Do nothing
-        }
+        val params = SettingsUtils.SettingsToggleParams(
+            context = this,
+            onSettingChanged = { _ -> }
+        )
         SettingsUtils.Brightness.toggleAdaptiveBrightness(params)
     }
 }
@@ -61,9 +62,10 @@ class ToggleVibrationModeActivity : BaseToggleActivity() {
 
     /** Toggles the vibration mode setting. */
     override fun performAction() {
-        val params = SettingsUtils.SettingsToggleParams(this) { newValue ->
-            // Do nothing
-        }
+        val params = SettingsUtils.SettingsToggleParams(
+            context = this,
+            onSettingChanged = { _ -> }
+        )
         SettingsUtils.Vibration.toggleVibrationMode(params)
     }
 }
