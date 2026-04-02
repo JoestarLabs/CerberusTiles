@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.core.net.toUri
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.bl4ckswordsman.cerberustiles.SettingsUtils.Charging.CHARGE_OPTIMIZATION_MODE
 import com.bl4ckswordsman.cerberustiles.SettingsUtils.canWriteSettings
 import com.bl4ckswordsman.cerberustiles.models.RingerMode
 import com.bl4ckswordsman.cerberustiles.util.Ringer
@@ -332,6 +333,8 @@ class MainViewModel : ViewModel() {
         if (isChargingOptimizationSupported.value) {
             isChargingOptimizationOn.value =
                 SettingsUtils.Charging.isChargingOptimizationEnabled(context)
+        } else {
+            isChargingOptimizationOn.value = false
         }
     }
 
