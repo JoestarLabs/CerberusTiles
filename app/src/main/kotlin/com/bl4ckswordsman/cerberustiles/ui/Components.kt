@@ -40,6 +40,11 @@ import kotlin.math.ln
 
 /**
  * A switch with a label. The label is clickable and toggles the switch.
+ *
+ * @param isSwitchedOn Whether the switch is currently in the on (checked) state.
+ * @param onCheckedChange Callback invoked with the new checked state when the user
+ *   taps the row or the switch directly.
+ * @param label The text displayed next to the switch describing the setting.
  */
 @Composable
 fun SwitchWithLabel(isSwitchedOn: Boolean, onCheckedChange: (Boolean) -> Unit, label: String) {
@@ -88,6 +93,14 @@ fun SwitchWithLabel(isSwitchedOn: Boolean, onCheckedChange: (Boolean) -> Unit, l
 
 /**
  * A dialog showing the required ADB command to grant WRITE_SECURE_SETTINGS permission.
+ *
+ * The dialog displays the full ADB command and provides a "Copy" button that writes
+ * the command to the system clipboard for easy transfer to a PC terminal.
+ *
+ * @param context The application context used to build the ADB command string and
+ *   access the [ClipboardManager].
+ * @param onDismiss Callback invoked when the dialog is dismissed via the "OK" button
+ *   or a tap outside the dialog.
  */
 @Composable
 fun AdbPermissionDialog(context: Context, onDismiss: () -> Unit) {
@@ -124,7 +137,14 @@ fun AdbPermissionDialog(context: Context, onDismiss: () -> Unit) {
 }
 
 /**
- * A slider for brightness settings.
+ * A slider for adjusting screen brightness.
+ *
+ * The slider is initialised from the current system screen brightness and applies
+ * changes in real time via [SettingsUtils.Brightness.setScreenBrightness]. The
+ * brightness value is mapped on a logarithmic scale so that the perceived brightness
+ * change feels linear to the user.
+ *
+ * @param context The application context used to read and write the system brightness setting.
  */
 @Composable
 fun BrightnessSlider(context: Context) {

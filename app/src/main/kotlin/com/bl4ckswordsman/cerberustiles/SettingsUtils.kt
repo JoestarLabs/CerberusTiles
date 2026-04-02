@@ -126,6 +126,13 @@ object SettingsUtils {
          * Handles the vibration mode toggling logic.
          */
         private class VibrationModeToggler(private val params: SettingsToggleParams) {
+            /**
+             * Checks for the required WRITE_SETTINGS permission and, if present, delegates to
+             * [performVibrationToggle]. Redirects to permission settings and returns false
+             * if the permission is missing.
+             *
+             * @return true if the vibration mode was successfully toggled, false otherwise.
+             */
             fun toggle(): Boolean {
                 if (!canWriteSettings(params.context)) {
                     openPermissionSettings(params.context)
