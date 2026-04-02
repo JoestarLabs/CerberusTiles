@@ -186,24 +186,18 @@ object SettingsUtils {
          * Checks if charging optimization (80% limit) is supported.
          */
         fun isChargingOptimizationSupported(context: Context): Boolean {
-            return try {
-                Settings.Secure.getInt(context.contentResolver, CHARGE_OPTIMIZATION_MODE, -1) != -1
-            } catch (_: Exception) {
-                false
-            }
+            return Settings.Secure.getInt(
+                context.contentResolver,
+                CHARGE_OPTIMIZATION_MODE,
+                -1
+            ) != -1
         }
 
         /**
          * Checks if charging optimization (80% limit) is enabled.
          */
         fun isChargingOptimizationEnabled(context: Context): Boolean {
-            return try {
-                Settings.Secure.getInt(
-                    context.contentResolver, CHARGE_OPTIMIZATION_MODE, 0
-                ) == 1
-            } catch (_: Exception) {
-                false
-            }
+            return Settings.Secure.getInt(context.contentResolver, CHARGE_OPTIMIZATION_MODE, 0) == 1
         }
 
         /**
