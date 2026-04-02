@@ -52,6 +52,8 @@ fun OverlayDialog(params: OverlayDialogParams) {
         params.sharedParams.sharedPreferences.getBoolean("brightnessSlider", true)
     val ringerModeSelector =
         params.sharedParams.sharedPreferences.getBoolean("ringerModeSelector", true)
+    val chargingOptimizationSwitch =
+        params.sharedParams.sharedPreferences.getBoolean("chargingOptimizationSwitch", true)
     val canWriteState by params.canWrite.observeAsState(initial = false)
     val currentRingerMode = rememberSaveable {
         mutableStateOf(Ringer.getCurrentRingerMode(params.sharedParams.context))
@@ -93,7 +95,7 @@ fun OverlayDialog(params: OverlayDialogParams) {
                                     )
                                 },
                                 chargingOptimizationSwitch = rememberSaveable {
-                                    mutableStateOf(params.isChargingOptimizationSupported) // Adjust logic if it should be configurable via SharedPreferences
+                                    mutableStateOf(chargingOptimizationSwitch)
                                 }
                             )
                             val settingsComponentsParams = SettingsComponentsParams(

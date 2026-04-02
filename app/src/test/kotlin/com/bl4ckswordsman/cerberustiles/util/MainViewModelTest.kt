@@ -136,7 +136,10 @@ class MainViewModelTest {
         every { SettingsUtils.Charging.isChargingOptimizationEnabled(context) } returns true
         viewModel.updateIsChargingOptimizationOn(context)
 
-        assertTrue("Pre-condition: should be supported", viewModel.isChargingOptimizationSupported.value)
+        assertTrue(
+            "Pre-condition: should be supported",
+            viewModel.isChargingOptimizationSupported.value
+        )
         assertTrue("Pre-condition: should be on", viewModel.isChargingOptimizationOn.value)
 
         // Second call: not supported anymore (e.g. after device reset)
