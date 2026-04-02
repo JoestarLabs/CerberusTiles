@@ -187,9 +187,7 @@ object SettingsUtils {
          */
         fun isChargingOptimizationSupported(context: Context): Boolean {
             return Settings.Secure.getInt(
-                context.contentResolver,
-                CHARGE_OPTIMIZATION_MODE,
-                -1
+                context.contentResolver, CHARGE_OPTIMIZATION_MODE, -1
             ) != -1
         }
 

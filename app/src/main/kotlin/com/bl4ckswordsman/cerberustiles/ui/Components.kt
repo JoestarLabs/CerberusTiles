@@ -57,11 +57,10 @@ fun SwitchWithLabel(isSwitchedOn: Boolean, onCheckedChange: (Boolean) -> Unit, l
             containerColor = MaterialTheme.colorScheme.primaryContainer,
         ),
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { onCheckedChange(!isSwitchedOn) }
-                .padding(start = 22.dp, end = 22.dp, top = 14.dp, bottom = 14.dp), // Inside padding
+        Row(modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onCheckedChange(!isSwitchedOn) }
+            .padding(start = 22.dp, end = 22.dp, top = 14.dp, bottom = 14.dp), // Inside padding
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically) {
             Box(
@@ -85,8 +84,7 @@ fun SwitchWithLabel(isSwitchedOn: Boolean, onCheckedChange: (Boolean) -> Unit, l
                     }
                 } else {
                     null
-                }
-            )
+                })
         }
     }
 }
@@ -107,33 +105,24 @@ fun AdbPermissionDialog(context: Context, onDismiss: () -> Unit) {
     val adbCommand =
         "adb shell pm grant ${context.packageName} android.permission.WRITE_SECURE_SETTINGS"
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Permission Required") },
-        text = {
-            Text(
-                text = "To use this feature, please connect your device to a PC and grant the WRITE_SECURE_SETTINGS permission using the following ADB command:\n\n" +
-                        "$adbCommand\n\n" +
-                        "Note: Shizuku support is planned for the future."
-            )
-        },
-        confirmButton = {
-            Button(onClick = onDismiss) {
-                Text("OK")
-            }
-        },
-        dismissButton = {
-            Button(onClick = {
-                val clipboard =
-                    context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                val clip = ClipData.newPlainText("ADB Command", adbCommand)
-                clipboard.setPrimaryClip(clip)
-                Toast.makeText(context, "Copied to clipboard", Toast.LENGTH_SHORT).show()
-            }) {
-                Text("Copy")
-            }
+    AlertDialog(onDismissRequest = onDismiss, title = { Text("Permission Required") }, text = {
+        Text(
+            text = "To use this feature, please connect your device to a PC and grant the WRITE_SECURE_SETTINGS permission using the following ADB command:\n\n" + "$adbCommand\n\n" + "Note: Shizuku support is planned for the future."
+        )
+    }, confirmButton = {
+        Button(onClick = onDismiss) {
+            Text("OK")
         }
-    )
+    }, dismissButton = {
+        Button(onClick = {
+            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = ClipData.newPlainText("ADB Command", adbCommand)
+            clipboard.setPrimaryClip(clip)
+            Toast.makeText(context, "Copied to clipboard", Toast.LENGTH_SHORT).show()
+        }) {
+            Text("Copy")
+        }
+    })
 }
 
 /**
