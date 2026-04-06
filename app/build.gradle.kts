@@ -88,7 +88,7 @@ dependencies {
     implementation("com.mikepenz:aboutlibraries-compose-m3:14.0.0-b03")
     implementation("com.mikepenz:aboutlibraries-core:14.0.0-b03")
     testImplementation("junit:junit:4.13.2")
-    testImplementation("io.mockk:mockk:1.13.9")
+    testImplementation("io.mockk:mockk:1.14.9")
     androidTestImplementation("androidx.test.ext:junit:1.3.0")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
