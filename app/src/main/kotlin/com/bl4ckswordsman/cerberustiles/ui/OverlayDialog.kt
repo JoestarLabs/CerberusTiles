@@ -58,12 +58,6 @@ fun OverlayDialog(params: OverlayDialogParams) {
     val currentRingerMode = rememberSaveable {
         mutableStateOf(Ringer.getCurrentRingerMode(params.sharedParams.context))
     }
-    if (params.showAdbDialog) {
-        AdbPermissionDialog(
-            context = params.sharedParams.context,
-            onDismiss = params.onAdbDialogDismiss
-        )
-    }
 
     if (params.showDialog.value) {
         Dialog(onDismissRequest = {
