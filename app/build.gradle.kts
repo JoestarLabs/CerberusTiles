@@ -85,8 +85,8 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.9.7")
     implementation("androidx.compose.material:material-icons-core")
     implementation("androidx.compose.material3:material3:1.5.0-alpha17") // TODO: Don't rely on alpha version
-    implementation("com.mikepenz:aboutlibraries-compose-m3:14.0.0-b03")
-    implementation("com.mikepenz:aboutlibraries-core:14.0.0-b03")
+    implementation("com.mikepenz:aboutlibraries-compose-m3:15.0.0-b03")
+    implementation("com.mikepenz:aboutlibraries-core:15.0.0-b03")
     testImplementation("junit:junit:4.13.2")
     testImplementation("io.mockk:mockk:1.14.9")
     androidTestImplementation("androidx.test.ext:junit:1.3.0")
