@@ -81,7 +81,7 @@ dependencies {
     implementation("androidx.compose.runtime:runtime-android:1.10.6")
     implementation("androidx.compose.runtime:runtime-livedata:1.10.6")
     implementation("androidx.compose.runtime:runtime-rxjava2:1.10.6")
-    implementation("androidx.appcompat:appcompat:1.7.1")
+    implementation("androidx.appcompat:appcompat:1.8.0")
     implementation("androidx.lifecycle:lifecycle-process:2.10.0")
     implementation("androidx.navigation:navigation-compose:2.9.7")
     implementation("androidx.compose.material:material-icons-core")
