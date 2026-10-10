@@ -167,6 +167,8 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
             onPermissionDenied = {
                 viewModel.showAdbDialog.value = true
                 showAdbDialogLiveData.value = true
+                viewModel.isChargingOptimizationOn.value = !enabled
+                isChargingOptimizationLiveData.value = !enabled
             }
         )
         SettingsUtils.Charging.setChargingOptimization(enabled, chargingParams)

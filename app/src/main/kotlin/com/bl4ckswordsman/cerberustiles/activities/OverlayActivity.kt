@@ -111,7 +111,10 @@ class OverlayActivity : ComponentActivity() {
                         onSettingChanged = { newValue ->
                             viewModel.isChargingOptimizationOn.value = newValue
                         },
-                        onPermissionDenied = { viewModel.showAdbDialog.value = true }
+                        onPermissionDenied = {
+                            viewModel.showAdbDialog.value = true
+                            viewModel.isChargingOptimizationOn.value = !enabled
+                        }
                     )
                     SettingsUtils.Charging.setChargingOptimization(enabled, chargingParams)
                 },

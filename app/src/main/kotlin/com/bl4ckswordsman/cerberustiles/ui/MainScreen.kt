@@ -18,7 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -281,9 +281,13 @@ fun MainScreen(params: MainScreenParams) {
         )
     }
 
-    SideEffect {
+    LaunchedEffect(isAdaptiveState) {
         setSwitchedOn(isAdaptiveState)
+    }
+    LaunchedEffect(isVibrationModeState) {
         setVibrationMode(isVibrationModeState)
+    }
+    LaunchedEffect(isChargingOptimizationState) {
         setChargingOptimization(isChargingOptimizationState)
     }
 
