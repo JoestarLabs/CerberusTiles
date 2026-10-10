@@ -19,6 +19,7 @@ import com.bl4ckswordsman.cerberustiles.SettingsUtils.Vibration.toggleVibrationM
 import com.bl4ckswordsman.cerberustiles.SettingsUtils.openPermissionSettings
 import com.bl4ckswordsman.cerberustiles.models.RingerMode
 import com.bl4ckswordsman.cerberustiles.ui.OverlayDialog
+import com.bl4ckswordsman.cerberustiles.ui.AdbPermissionDialog
 import com.bl4ckswordsman.cerberustiles.ui.OverlayDialogParams
 import com.bl4ckswordsman.cerberustiles.ui.createSharedParams
 
@@ -65,6 +66,13 @@ class OverlayActivity : ComponentActivity() {
             val showOverlayDialog = rememberSaveable { mutableStateOf(true) }
             val currentRingerMode by viewModel.currentRingerMode.observeAsState(RingerMode.NORMAL)
 
+            if (viewModel.showAdbDialog.value) {
+                AdbPermissionDialog(
+                    context = this,
+                    onDismiss = { viewModel.showAdbDialog.value = false }
+                )
+            }
+
             val params = OverlayDialogParams(
                 showDialog = showOverlayDialog,
                 onDismiss = { finish() },
@@ -103,12 +111,12 @@ class OverlayActivity : ComponentActivity() {
                         onSettingChanged = { newValue ->
                             viewModel.isChargingOptimizationOn.value = newValue
                         },
-                        onPermissionDenied = { viewModel.showAdbDialog.value = true }
+                        onPermissionDenied = {
+                            viewModel.showAdbDialog.value = true
+                        }
                     )
                     SettingsUtils.Charging.setChargingOptimization(enabled, chargingParams)
                 },
-                showAdbDialog = viewModel.showAdbDialog.value,
-                onAdbDialogDismiss = { viewModel.showAdbDialog.value = false },
                 sharedParams = createSharedParams(),
                 currentRingerMode = currentRingerMode,
                 onRingerModeChange = { newMode ->

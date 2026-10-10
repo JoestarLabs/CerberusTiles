@@ -82,7 +82,6 @@ fun SettingsComponents(params: SettingsComponentsParams) {
         SwitchWithLabel(
             isSwitchedOn = params.isChargingOptimizationOn,
             onCheckedChange = {
-                // UI updates its state optimistically; we'll let the ViewModel callback handle actual success/failure
                 params.toggleChargingOptimization(it)
             },
             label = if (params.isChargingOptimizationOn) "Charging Optimization is ON" else "Charging Optimization is OFF"

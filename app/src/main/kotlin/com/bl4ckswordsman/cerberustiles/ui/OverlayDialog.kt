@@ -34,8 +34,6 @@ data class OverlayDialogParams(
     val isChargingOptimizationSupported: Boolean,
     val setChargingOptimization: (Boolean) -> Unit,
     val toggleChargingOptimization: (Boolean) -> Unit,
-    val showAdbDialog: Boolean,
-    val onAdbDialogDismiss: () -> Unit,
     val sharedParams: SharedParams,
     val currentRingerMode: RingerMode,
     val onRingerModeChange: (RingerMode) -> Unit
@@ -57,12 +55,6 @@ fun OverlayDialog(params: OverlayDialogParams) {
     val canWriteState by params.canWrite.observeAsState(initial = false)
     val currentRingerMode = rememberSaveable {
         mutableStateOf(Ringer.getCurrentRingerMode(params.sharedParams.context))
-    }
-    if (params.showAdbDialog) {
-        AdbPermissionDialog(
-            context = params.sharedParams.context,
-            onDismiss = params.onAdbDialogDismiss
-        )
     }
 
     if (params.showDialog.value) {

@@ -7,10 +7,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
@@ -21,9 +17,6 @@ import com.bl4ckswordsman.cerberustiles.ShortcutHelper
 import com.bl4ckswordsman.cerberustiles.models.RingerMode
 import com.bl4ckswordsman.cerberustiles.ui.MainScreen
 import com.bl4ckswordsman.cerberustiles.ui.MainScreenParams
-import com.bl4ckswordsman.cerberustiles.ui.OverlayDialog
-import com.bl4ckswordsman.cerberustiles.ui.OverlayDialogParams
-import com.bl4ckswordsman.cerberustiles.ui.createSharedParams
 import com.bl4ckswordsman.cerberustiles.ui.theme.CustomTilesTheme
 import kotlinx.coroutines.launch
 
@@ -90,7 +83,7 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
 
     /**
      * Initialises the activity, registers it as a lifecycle observer, and sets up the Compose
-     * content tree with [MainScreen] and [OverlayDialog].
+     * content tree with [MainScreen].
      */
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -98,9 +91,6 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
         super.onCreate(savedInstanceState)
         lifecycle.addObserver(this)
         setContent {
-            val showOverlayDialog = rememberSaveable { mutableStateOf(false) }
-            val currentRingerMode by viewModel.currentRingerMode.observeAsState(RingerMode.NORMAL)
-
             CustomTilesTheme {
                 MainScreen(
                     MainScreenParams(
@@ -127,32 +117,6 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
                     )
                 )
             }
-            OverlayDialog(
-                OverlayDialogParams(
-                    showDialog = showOverlayDialog,
-                    onDismiss = { showOverlayDialog.value = false },
-                    canWrite = viewModel.canWrite,
-                    isSwitchedOn = viewModel.isAdaptiveBrightnessOn.value,
-                    setSwitchedOn = { viewModel.isAdaptiveBrightnessOn.value = it },
-                    toggleAdaptiveBrightness = ::toggleAdaptiveBrightness,
-                    openPermissionSettings = { openPermissionSettings(this) },
-                    isVibrationModeOn = viewModel.isVibrationModeOn.value,
-                    setVibrationMode = { viewModel.isVibrationModeOn.value = it },
-                    toggleVibrationMode = ::toggleVibrationMode,
-                    isChargingOptimizationOn = viewModel.isChargingOptimizationOn.value,
-                    isChargingOptimizationSupported = viewModel.isChargingOptimizationSupported.value,
-                    setChargingOptimization = { viewModel.isChargingOptimizationOn.value = it },
-                    toggleChargingOptimization = ::toggleChargingOptimization,
-                    showAdbDialog = viewModel.showAdbDialog.value,
-                    onAdbDialogDismiss = { viewModel.showAdbDialog.value = false },
-                    sharedParams = createSharedParams(),
-                    currentRingerMode = currentRingerMode,
-                    onRingerModeChange = { newMode ->
-                        viewModel.currentRingerMode.value = newMode
-                        viewModel.isVibrationModeOn.value = newMode == RingerMode.VIBRATE
-                    }
-                )
-            )
         }
     }
 

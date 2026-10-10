@@ -18,7 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -275,16 +275,11 @@ fun MainScreen(params: MainScreenParams) {
             isVibrationModeState
         )
     }
-    val (isChargingOptimizationOn, setChargingOptimization) = rememberSaveable {
-        mutableStateOf(
-            isChargingOptimizationState
-        )
-    }
-
-    SideEffect {
+    LaunchedEffect(isAdaptiveState) {
         setSwitchedOn(isAdaptiveState)
+    }
+    LaunchedEffect(isVibrationModeState) {
         setVibrationMode(isVibrationModeState)
-        setChargingOptimization(isChargingOptimizationState)
     }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -314,9 +309,9 @@ fun MainScreen(params: MainScreenParams) {
             isVibrationModeOn,
             setVibrationMode,
             params.toggleVibrationMode,
-            isChargingOptimizationOn,
+            isChargingOptimizationState,
             isChargingOptimizationSupportedState,
-            setChargingOptimization,
+            {},
             params.toggleChargingOptimization,
             params.currentRingerMode,
             params.onRingerModeChange
