@@ -1,12 +1,12 @@
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.plugin.compose") version "2.3.20"
+    id("org.jetbrains.kotlin.plugin.compose") version "2.4.20"
     id("com.mikepenz.aboutlibraries.plugin.android")
 }
 
 android {
     namespace = "com.bl4ckswordsman.cerberustiles"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.bl4ckswordsman.cerberustiles"
@@ -24,6 +24,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -35,8 +36,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
     buildFeatures {
         compose = true
@@ -69,26 +70,26 @@ composeCompiler {
 }
 
 dependencies {
-    implementation("androidx.core:core-ktx:1.18.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.10.0")
+    implementation("androidx.core:core-ktx:1.19.1")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.11.0")
     implementation("androidx.activity:activity-compose:1.13.0")
-    implementation(platform("androidx.compose:compose-bom:2026.03.00"))
+    implementation(platform("androidx.compose:compose-bom:2026.09.00"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
-    implementation("androidx.compose.runtime:runtime-android:1.10.6")
-    implementation("androidx.compose.runtime:runtime-livedata:1.10.6")
-    implementation("androidx.compose.runtime:runtime-rxjava2:1.10.6")
-    implementation("androidx.appcompat:appcompat:1.7.1")
-    implementation("androidx.lifecycle:lifecycle-process:2.10.0")
-    implementation("androidx.navigation:navigation-compose:2.9.7")
+    implementation("androidx.compose.runtime:runtime-android:1.12.1")
+    implementation("androidx.compose.runtime:runtime-livedata:1.12.1")
+    implementation("androidx.compose.runtime:runtime-rxjava2:1.12.1")
+    implementation("androidx.appcompat:appcompat:1.8.0")
+    implementation("androidx.lifecycle:lifecycle-process:2.11.0")
+    implementation("androidx.navigation:navigation-compose:2.10.2")
     implementation("androidx.compose.material:material-icons-core")
-    implementation("androidx.compose.material3:material3:1.5.0-alpha16") // TODO: Don't rely on alpha version
-    implementation("com.mikepenz:aboutlibraries-compose-m3:14.0.0-b03")
-    implementation("com.mikepenz:aboutlibraries-core:14.0.0-b03")
+    implementation("androidx.compose.material3:material3:1.5.0-alpha29") // TODO: Don't rely on alpha version
+    implementation("com.mikepenz:aboutlibraries-compose-m3:15.2.0")
+    implementation("com.mikepenz:aboutlibraries-core:15.2.0")
     testImplementation("junit:junit:4.13.2")
-    testImplementation("io.mockk:mockk:1.13.9")
+    testImplementation("io.mockk:mockk:1.14.11")
     androidTestImplementation("androidx.test.ext:junit:1.3.0")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")

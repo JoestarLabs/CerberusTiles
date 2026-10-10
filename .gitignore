@@ -1,5 +1,7 @@
 *.iml
 .gradle
+gradle/gradle-daemon-jvm.properties
+.idea
 /local.properties
 /.idea/caches
 /.idea/libraries
