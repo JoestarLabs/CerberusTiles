@@ -69,7 +69,7 @@ jobs:
       - name: Create or update GitHub Release and upload APK
         uses: "mathieucarbou/marvinpinto-action-automatic-releases@latest"
         with:
-          repo_token: "${{ secrets.CERBERUSTILES_PAT_TOKEN || secrets.GITHUB_TOKEN }}"
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
           automatic_release_tag: ${{ github.event.inputs.tag }}
           prerelease: false
           title: "${{ github.event.inputs.tag }}"
