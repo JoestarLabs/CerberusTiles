@@ -42,14 +42,6 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      - name: Update Android version
-        run: |
-          VERSION="${{ github.event.inputs.tag }}"
-          CLEAN_VERSION="${VERSION#v}"
-          VERSION_CODE=$(date +%s)
-          sed -i "s/versionName = \".*\"/versionName = \"$CLEAN_VERSION\"/" app/build.gradle.kts
-          sed -i "s/versionCode = [0-9]*/versionCode = $VERSION_CODE/" app/build.gradle.kts
-
       - name: Build Release APK
         run: ./gradlew assembleRelease
 

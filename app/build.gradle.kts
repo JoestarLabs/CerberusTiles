@@ -4,6 +4,15 @@ plugins {
     id("com.mikepenz.aboutlibraries.plugin.android")
 }
 
+fun calculateVersionCode(version: String): Int {
+    val clean = version.substringBefore('-').trim()
+    val parts = clean.split('.').map { it.toIntOrNull() ?: 0 }
+    val major = parts.getOrElse(0) { 0 }
+    val minor = parts.getOrElse(1) { 0 }
+    val patch = parts.getOrElse(2) { 0 }
+    return major * 10000 + minor * 100 + patch
+}
+
 android {
     namespace = "com.bl4ckswordsman.cerberustiles"
     compileSdk = 37
@@ -13,7 +22,7 @@ android {
         minSdk = 24
         targetSdk = 34
         versionName = "0.5.0" // x-release-please-version
-        versionName = "0.5.1" // x-release-please-version
+        versionCode = calculateVersionCode(versionName!!)
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

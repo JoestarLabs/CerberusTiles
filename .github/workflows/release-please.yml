@@ -50,15 +50,6 @@ jobs:
       - name: Run unit tests
         run: ./gradlew testDebugUnitTest
 
-      - name: Update Android version
-        run: |
-          VERSION="${{ needs.release-please.outputs.version }}"
-          VERSION_CODE=$(date +%s)
-
-          # Update versionName and versionCode in build.gradle.kts
-          sed -i "s/versionName = \".*\"/versionName = \"$VERSION\"/" app/build.gradle.kts
-          sed -i "s/versionCode = [0-9]*/versionCode = $VERSION_CODE/" app/build.gradle.kts
-
       - name: Build Release APK
         run: ./gradlew assembleRelease
 
