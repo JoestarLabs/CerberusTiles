@@ -1,0 +1,101 @@
+name: "Manual Release Build"
+
+permissions:
+  contents: write
+  packages: write
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag (e.g., v0.5.0)"
+        required: true
+        type: string
+
+env:
+  APP_NAME: cerberus_tiles
+
+jobs:
+  run-tests:
+    uses: ./.github/workflows/tests.yaml
+
+  release:
+    needs: run-tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set release version env
+        run: echo "RELEASE_VERSION=${{ github.event.inputs.tag }}" >> $GITHUB_ENV
+
+      - name: Set up JDK
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 25
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Update Android version
+        run: |
+          VERSION="${{ github.event.inputs.tag }}"
+          CLEAN_VERSION="${VERSION#v}"
+          VERSION_CODE=$(date +%s)
+          sed -i "s/versionName = \".*\"/versionName = \"$CLEAN_VERSION\"/" app/build.gradle.kts
+          sed -i "s/versionCode = [0-9]*/versionCode = $VERSION_CODE/" app/build.gradle.kts
+
+      - name: Build Release APK
+        run: ./gradlew assembleRelease
+
+      - name: Sign APK
+        id: sign_apk
+        uses: ilharp/sign-android-release@v2
+        with:
+          releaseDir: app/build/outputs/apk/release
+          signingKey: ${{ secrets.SIGNING_KEYSTORE }}
+          keyStorePassword: ${{ secrets.SIGNING_KEYSTORE_PASSWORD }}
+          keyAlias: ${{ secrets.SIGNING_KEY_ALIAS }}
+          keyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
+
+      - name: Rename signed APK
+        run: mv ${{ steps.sign_apk.outputs.signedFile }} ${{ env.APP_NAME }}-release-${{ env.RELEASE_VERSION }}.apk
+
+      - name: Create or update GitHub Release and upload APK
+        uses: "mathieucarbou/marvinpinto-action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.CERBERUSTILES_PAT_TOKEN || secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: ${{ github.event.inputs.tag }}
+          prerelease: false
+          title: "${{ github.event.inputs.tag }}"
+          files: ${{ env.APP_NAME }}-release-${{ env.RELEASE_VERSION }}.apk
+
+      - name: VirusTotal Scan
+        id: vt
+        if: env.VT_API_KEY != ''
+        uses: crazy-max/ghaction-virustotal@v5
+        env:
+          VT_API_KEY: ${{ secrets.VT_API_KEY }}
+        with:
+          vt_api_key: ${{ secrets.VT_API_KEY }}
+          files: |
+            ${{ env.APP_NAME }}-release-${{ env.RELEASE_VERSION }}.apk
+
+      - name: Update Release Body with Scan Results
+        if: env.VT_API_KEY != '' && steps.vt.outputs.analysis != ''
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VT_API_KEY: ${{ secrets.VT_API_KEY }}
+        run: |
+          TAG="${{ github.event.inputs.tag }}"
+          CURRENT_BODY=$(gh release view "$TAG" --json body --jq .body)
+          VT_LINK="${{ steps.vt.outputs.analysis }}"
+          VT_URL=$(echo "$VT_LINK" | cut -d'=' -f2-)
+          APK_NAME="${{ env.APP_NAME }}-release-${{ env.RELEASE_VERSION }}.apk"
+          NEW_BODY=$(printf "%s\n\n## Security Scan\n* [VirusTotal Analysis](%s) for \`%s\`\n" "$CURRENT_BODY" "$VT_URL" "$APK_NAME")
+          gh release edit "$TAG" --notes "$NEW_BODY"
