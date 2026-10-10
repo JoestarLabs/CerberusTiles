@@ -275,20 +275,11 @@ fun MainScreen(params: MainScreenParams) {
             isVibrationModeState
         )
     }
-    val (isChargingOptimizationOn, setChargingOptimization) = rememberSaveable {
-        mutableStateOf(
-            isChargingOptimizationState
-        )
-    }
-
     LaunchedEffect(isAdaptiveState) {
         setSwitchedOn(isAdaptiveState)
     }
     LaunchedEffect(isVibrationModeState) {
         setVibrationMode(isVibrationModeState)
-    }
-    LaunchedEffect(isChargingOptimizationState) {
-        setChargingOptimization(isChargingOptimizationState)
     }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -318,9 +309,9 @@ fun MainScreen(params: MainScreenParams) {
             isVibrationModeOn,
             setVibrationMode,
             params.toggleVibrationMode,
-            isChargingOptimizationOn,
+            isChargingOptimizationState,
             isChargingOptimizationSupportedState,
-            setChargingOptimization,
+            {},
             params.toggleChargingOptimization,
             params.currentRingerMode,
             params.onRingerModeChange
