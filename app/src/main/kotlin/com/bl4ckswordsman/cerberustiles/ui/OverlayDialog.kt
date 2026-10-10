@@ -34,8 +34,6 @@ data class OverlayDialogParams(
     val isChargingOptimizationSupported: Boolean,
     val setChargingOptimization: (Boolean) -> Unit,
     val toggleChargingOptimization: (Boolean) -> Unit,
-    val showAdbDialog: Boolean,
-    val onAdbDialogDismiss: () -> Unit,
     val sharedParams: SharedParams,
     val currentRingerMode: RingerMode,
     val onRingerModeChange: (RingerMode) -> Unit

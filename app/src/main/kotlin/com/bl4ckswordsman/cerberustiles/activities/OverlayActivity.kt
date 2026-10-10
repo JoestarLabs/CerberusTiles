@@ -115,8 +115,6 @@ class OverlayActivity : ComponentActivity() {
                     )
                     SettingsUtils.Charging.setChargingOptimization(enabled, chargingParams)
                 },
-                showAdbDialog = viewModel.showAdbDialog.value,
-                onAdbDialogDismiss = { viewModel.showAdbDialog.value = false },
                 sharedParams = createSharedParams(),
                 currentRingerMode = currentRingerMode,
                 onRingerModeChange = { newMode ->
