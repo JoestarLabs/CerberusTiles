@@ -1,18 +1,18 @@
 package com.bl4ckswordsman.cerberustiles.ui
 
 import android.content.Context
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.bl4ckswordsman.cerberustiles.models.RingerMode
 import com.bl4ckswordsman.cerberustiles.ui.theme.CustomTilesTheme
-import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -24,30 +24,43 @@ class SettingsComponentsTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
+    @Composable
+    private fun rememberTestSharedParams(): SharedParams {
+        val context = LocalContext.current
+        val scope = rememberCoroutineScope()
+        val sharedPreferences = context.getSharedPreferences("test_prefs", Context.MODE_PRIVATE)
+        return SharedParams(
+            context = context,
+            coroutineScope = scope,
+            showDialog = remember { mutableStateOf(false) },
+            dialogType = remember { mutableStateOf(DialogType.NONE) },
+            sharedPreferences = sharedPreferences
+        )
+    }
+
+    @Composable
+    private fun rememberTestVisibilityParams(
+        adaptBrightness: Boolean = false,
+        chargingOptimization: Boolean = false,
+        ringerMode: Boolean = false,
+        brightnessSlider: Boolean = false
+    ): ComponentVisibilityDialogParams {
+        return ComponentVisibilityDialogParams(
+            adaptBrightnessSwitch = remember { mutableStateOf(adaptBrightness) },
+            brightnessSlider = remember { mutableStateOf(brightnessSlider) },
+            ringerModeSelector = remember { mutableStateOf(ringerMode) },
+            chargingOptimizationSwitch = remember { mutableStateOf(chargingOptimization) }
+        )
+    }
+
     @Test
     fun adaptiveBrightnessSetting_whenCanWriteTrue_togglesAdaptiveBrightness() {
         var toggleCalled = false
         var setSwitchedOnCalled = false
 
         composeTestRule.setContent {
-            val context = LocalContext.current
-            val scope = rememberCoroutineScope()
-            val sharedPreferences = context.getSharedPreferences("test_prefs", Context.MODE_PRIVATE)
-
-            val sharedParams = SharedParams(
-                context = context,
-                coroutineScope = scope,
-                showDialog = mutableStateOf(false),
-                dialogType = mutableStateOf(DialogType.NONE),
-                sharedPreferences = sharedPreferences
-            )
-
-            val visibilityParams = ComponentVisibilityDialogParams(
-                adaptBrightnessSwitch = mutableStateOf(true),
-                brightnessSlider = mutableStateOf(false),
-                ringerModeSelector = mutableStateOf(false),
-                chargingOptimizationSwitch = mutableStateOf(false)
-            )
+            val sharedParams = rememberTestSharedParams()
+            val visibilityParams = rememberTestVisibilityParams(adaptBrightness = true)
 
             val params = SettingsComponentsParams(
                 componentVisibilityParams = visibilityParams,
@@ -87,24 +100,8 @@ class SettingsComponentsTest {
         var openPermissionCalled = false
 
         composeTestRule.setContent {
-            val context = LocalContext.current
-            val scope = rememberCoroutineScope()
-            val sharedPreferences = context.getSharedPreferences("test_prefs", Context.MODE_PRIVATE)
-
-            val sharedParams = SharedParams(
-                context = context,
-                coroutineScope = scope,
-                showDialog = mutableStateOf(false),
-                dialogType = mutableStateOf(DialogType.NONE),
-                sharedPreferences = sharedPreferences
-            )
-
-            val visibilityParams = ComponentVisibilityDialogParams(
-                adaptBrightnessSwitch = mutableStateOf(true),
-                brightnessSlider = mutableStateOf(false),
-                ringerModeSelector = mutableStateOf(false),
-                chargingOptimizationSwitch = mutableStateOf(false)
-            )
+            val sharedParams = rememberTestSharedParams()
+            val visibilityParams = rememberTestVisibilityParams(adaptBrightness = true)
 
             val params = SettingsComponentsParams(
                 componentVisibilityParams = visibilityParams,
@@ -140,24 +137,8 @@ class SettingsComponentsTest {
         var toggledValue = false
 
         composeTestRule.setContent {
-            val context = LocalContext.current
-            val scope = rememberCoroutineScope()
-            val sharedPreferences = context.getSharedPreferences("test_prefs", Context.MODE_PRIVATE)
-
-            val sharedParams = SharedParams(
-                context = context,
-                coroutineScope = scope,
-                showDialog = mutableStateOf(false),
-                dialogType = mutableStateOf(DialogType.NONE),
-                sharedPreferences = sharedPreferences
-            )
-
-            val visibilityParams = ComponentVisibilityDialogParams(
-                adaptBrightnessSwitch = mutableStateOf(false),
-                brightnessSlider = mutableStateOf(false),
-                ringerModeSelector = mutableStateOf(false),
-                chargingOptimizationSwitch = mutableStateOf(true)
-            )
+            val sharedParams = rememberTestSharedParams()
+            val visibilityParams = rememberTestVisibilityParams(chargingOptimization = true)
 
             val params = SettingsComponentsParams(
                 componentVisibilityParams = visibilityParams,
@@ -191,24 +172,8 @@ class SettingsComponentsTest {
     @Test
     fun ringerModeSelector_displaysModesAndChecksInitialSelection() {
         composeTestRule.setContent {
-            val context = LocalContext.current
-            val scope = rememberCoroutineScope()
-            val sharedPreferences = context.getSharedPreferences("test_prefs", Context.MODE_PRIVATE)
-
-            val sharedParams = SharedParams(
-                context = context,
-                coroutineScope = scope,
-                showDialog = mutableStateOf(false),
-                dialogType = mutableStateOf(DialogType.NONE),
-                sharedPreferences = sharedPreferences
-            )
-
-            val visibilityParams = ComponentVisibilityDialogParams(
-                adaptBrightnessSwitch = mutableStateOf(false),
-                brightnessSlider = mutableStateOf(false),
-                ringerModeSelector = mutableStateOf(true),
-                chargingOptimizationSwitch = mutableStateOf(false)
-            )
+            val sharedParams = rememberTestSharedParams()
+            val visibilityParams = rememberTestVisibilityParams(ringerMode = true)
 
             val params = SettingsComponentsParams(
                 componentVisibilityParams = visibilityParams,

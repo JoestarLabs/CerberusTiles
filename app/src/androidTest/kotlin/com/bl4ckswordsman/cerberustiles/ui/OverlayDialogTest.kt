@@ -38,7 +38,7 @@ class OverlayDialogTest {
                 context = context,
                 coroutineScope = scope,
                 showDialog = showDialogState,
-                dialogType = mutableStateOf(DialogType.NONE),
+                dialogType = androidx.compose.runtime.remember { mutableStateOf(DialogType.NONE) },
                 sharedPreferences = sharedPreferences
             )
 
@@ -91,7 +91,7 @@ class OverlayDialogTest {
                 context = context,
                 coroutineScope = scope,
                 showDialog = showDialogState,
-                dialogType = mutableStateOf(DialogType.NONE),
+                dialogType = androidx.compose.runtime.remember { mutableStateOf(DialogType.NONE) },
                 sharedPreferences = sharedPreferences
             )
 
