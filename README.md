@@ -7,12 +7,11 @@
 <p align="center">
   <a href="https://app.codacy.com/gh/JoestarLabs/CerberusTiles/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade"><img src="https://app.codacy.com/project/badge/Grade/26190040807340c58373dab20f3d413e" alt="Codacy Badge"></a>
   <a href="https://github.com/JoestarLabs/CerberusTiles/actions/workflows/tests.yaml"><img src="https://github.com/JoestarLabs/CerberusTiles/actions/workflows/tests.yaml/badge.svg" alt="Build & Test"></a>
-  <a href="https://github.com/JoestarLabs/CerberusTiles/actions/workflows/release-build.yaml"><img src="https://github.com/JoestarLabs/CerberusTiles/actions/workflows/release-build.yaml/badge.svg" alt="Release Build"></a>
   <a href="https://github.com/JoestarLabs/CerberusTiles/actions/workflows/codeql.yml"><img src="https://github.com/JoestarLabs/CerberusTiles/actions/workflows/codeql.yml/badge.svg" alt="CodeQL"></a>
   <a href="https://github.com/JoestarLabs/CerberusTiles/releases"><img src="https://img.shields.io/github/downloads/JoestarLabs/CerberusTiles/total.svg" alt="Downloads"></a>
   <!-- Started counting 2025-07-28 -->
   <a href="https://hits.sh/github.com/JoestarLabs/CerberusTiles/"><img alt="Hits" src="https://hits.sh/github.com/JoestarLabs/CerberusTiles.svg?color=007ec6"/></a>
-  <a href="https://shields.rbtlog.dev/com.JoestarLabs.cerberustiles"><img src="https://shields.rbtlog.dev/simple/com.JoestarLabs.cerberustiles" alt="RB Status"></a>
+  <a href="https://shields.rbtlog.dev/com.JoestarLabs.cerberustiles"><img src="https://shields.rbtlog.dev/simple/com.bl4ckswordsman.cerberustiles" alt="RB Status"></a>
   <!-- <a href="https://github.com/bl4ckswordsman/CerberusTiles/"><img src="https://badges.pufler.dev/visits/bl4ckswordsman/CerberusTiles/" alt="Visits Badge"></a> -->
   <!-- <a href="https://hits.seeyoufarm.com/api/count/graph/dailyhits.svg?url=https://github.com/bl4ckswordsman/CerberusTiles"> -->
   <!-- <img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fbl4ckswordsman%2FCerberusTiles&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=Daily+hits&edge_flat=false" alt="views"> -->
