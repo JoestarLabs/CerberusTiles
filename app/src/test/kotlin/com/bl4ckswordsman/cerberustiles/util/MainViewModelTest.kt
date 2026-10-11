@@ -3,8 +3,10 @@ package com.bl4ckswordsman.cerberustiles.util
 import android.content.ContentResolver
 import android.content.Context
 import android.provider.Settings
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.bl4ckswordsman.cerberustiles.MainViewModel
 import com.bl4ckswordsman.cerberustiles.SettingsUtils
+import com.bl4ckswordsman.cerberustiles.models.RingerMode
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -13,12 +15,18 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import io.mockk.verify
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
 class MainViewModelTest {
+
+    @get:Rule
+    val instantTaskExecutorRule = InstantTaskExecutorRule()
 
     @MockK(relaxed = true)
     private lateinit var context: Context
@@ -33,7 +41,11 @@ class MainViewModelTest {
         MockKAnnotations.init(this)
         every { context.contentResolver } returns contentResolver
         mockkStatic(Settings.Secure::class)
+        mockkObject(SettingsUtils)
         mockkObject(SettingsUtils.Charging)
+        mockkObject(SettingsUtils.Brightness)
+        mockkObject(SettingsUtils.Vibration)
+        mockkObject(Ringer)
         viewModel = MainViewModel()
     }
 
@@ -152,5 +164,98 @@ class MainViewModelTest {
             "Expected isChargingOptimizationOn to be reset to false when not supported",
             viewModel.isChargingOptimizationOn.value
         )
+    }
+
+    @Test
+    fun `initial canWrite state is null`() {
+        assertNull("Expected canWrite initial value to be null", viewModel.canWrite.value)
+    }
+
+    @Test
+    fun `initial currentRingerMode state is NORMAL`() {
+        assertEquals(
+            "Expected currentRingerMode initial value to be NORMAL",
+            RingerMode.NORMAL,
+            viewModel.currentRingerMode.value
+        )
+    }
+
+    @Test
+    fun `initial isAdaptiveBrightnessOn state is false`() {
+        assertFalse(
+            "Expected isAdaptiveBrightnessOn initial value to be false",
+            viewModel.isAdaptiveBrightnessOn.value
+        )
+    }
+
+    @Test
+    fun `initial isVibrationModeOn state is false`() {
+        assertFalse(
+            "Expected isVibrationModeOn initial value to be false",
+            viewModel.isVibrationModeOn.value
+        )
+    }
+
+    @Test
+    fun `updateCanWrite updates canWrite LiveData to true when permission granted`() {
+        every { SettingsUtils.canWriteSettings(context) } returns true
+
+        viewModel.updateCanWrite(context)
+
+        assertEquals(true, viewModel.canWrite.value)
+    }
+
+    @Test
+    fun `updateCanWrite updates canWrite LiveData to false when permission denied`() {
+        every { SettingsUtils.canWriteSettings(context) } returns false
+
+        viewModel.updateCanWrite(context)
+
+        assertEquals(false, viewModel.canWrite.value)
+    }
+
+    @Test
+    fun `updateIsAdaptiveBrightnessOn updates isAdaptiveBrightnessOn value`() {
+        every { SettingsUtils.Brightness.isAdaptiveBrightnessEnabled(context) } returns true
+
+        viewModel.updateIsAdaptiveBrightnessOn(context)
+
+        assertTrue(viewModel.isAdaptiveBrightnessOn.value)
+
+        every { SettingsUtils.Brightness.isAdaptiveBrightnessEnabled(context) } returns false
+
+        viewModel.updateIsAdaptiveBrightnessOn(context)
+
+        assertFalse(viewModel.isAdaptiveBrightnessOn.value)
+    }
+
+    @Test
+    fun `updateIsVibrationModeOn updates isVibrationModeOn value`() {
+        every { SettingsUtils.Vibration.isVibrationModeEnabled(context) } returns true
+
+        viewModel.updateIsVibrationModeOn(context)
+
+        assertTrue(viewModel.isVibrationModeOn.value)
+
+        every { SettingsUtils.Vibration.isVibrationModeEnabled(context) } returns false
+
+        viewModel.updateIsVibrationModeOn(context)
+
+        assertFalse(viewModel.isVibrationModeOn.value)
+    }
+
+    @Test
+    fun `updateCurrentRingerMode updates currentRingerMode LiveData`() {
+        every { Ringer.getCurrentRingerMode(context) } returns RingerMode.VIBRATE
+
+        viewModel.updateCurrentRingerMode(context)
+
+        assertEquals(RingerMode.VIBRATE, viewModel.currentRingerMode.value)
+
+        every { Ringer.getCurrentRingerMode(context) } returns RingerMode.SILENT
+
+        viewModel.updateCurrentRingerMode(context)
+
+        assertEquals(RingerMode.SILENT, viewModel.currentRingerMode.value)
     }
 }
