@@ -6,6 +6,7 @@
 
 <p align="center">
   <a href="https://app.codacy.com/gh/JoestarLabs/CerberusTiles/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade"><img src="https://app.codacy.com/project/badge/Grade/26190040807340c58373dab20f3d413e" alt="Codacy Badge"></a>
+  <a href="https://github.com/JoestarLabs/CerberusTiles/actions/workflows/tests.yaml"><img src="https://github.com/JoestarLabs/CerberusTiles/actions/workflows/tests.yaml/badge.svg" alt="Build & Test"></a>
   <a href="https://github.com/JoestarLabs/CerberusTiles/actions/workflows/release-build.yaml"><img src="https://github.com/JoestarLabs/CerberusTiles/actions/workflows/release-build.yaml/badge.svg" alt="Release Build"></a>
   <a href="https://github.com/JoestarLabs/CerberusTiles/actions/workflows/codeql.yml"><img src="https://github.com/JoestarLabs/CerberusTiles/actions/workflows/codeql.yml/badge.svg" alt="CodeQL"></a>
   <a href="https://github.com/JoestarLabs/CerberusTiles/releases"><img src="https://img.shields.io/github/downloads/JoestarLabs/CerberusTiles/total.svg" alt="Downloads"></a>

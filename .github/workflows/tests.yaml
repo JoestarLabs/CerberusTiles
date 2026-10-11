@@ -38,8 +38,12 @@ jobs:
       - name: Grant gradlew permission
         run: chmod +x ./gradlew
 
-      - name: Run unit tests
-        run: ./gradlew testDebugUnitTest
+      - name: Run unit tests & generate coverage
+        run: ./gradlew testDebugUnitTest koverXmlReport koverHtmlReport
+
+      - name: Generate Coverage Summary
+        if: always()
+        run: python3 scripts/coverage_summary.py
 
       - name: Upload test reports
         if: always() # upload even on test failure so you can inspect results
@@ -48,3 +52,11 @@ jobs:
           name: unit-test-reports
           path: app/build/reports/tests/testDebugUnitTest/
           retention-days: 7
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: kover-coverage-report
+          path: app/build/reports/kover/html/
+          retention-days: 14
