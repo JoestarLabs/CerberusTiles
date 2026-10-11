@@ -1,0 +1,89 @@
+package com.bl4ckswordsman.cerberustiles.ui
+
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.bl4ckswordsman.cerberustiles.ui.theme.CustomTilesTheme
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+
+@RunWith(AndroidJUnit4::class)
+class ComponentsTest {
+
+    @get:Rule
+    val composeTestRule = createComposeRule()
+
+    @Test
+    fun switchWithLabel_displaysLabelAndTogglesOnClick() {
+        val checkedState = mutableStateOf(false)
+        var callbackInvocationCount = 0
+
+        composeTestRule.setContent {
+            CustomTilesTheme {
+                SwitchWithLabel(
+                    isSwitchedOn = checkedState.value,
+                    onCheckedChange = {
+                        checkedState.value = it
+                        callbackInvocationCount++
+                    },
+                    label = "Test Setting"
+                )
+            }
+        }
+
+        // Verify label is visible
+        composeTestRule.onNodeWithText("Test Setting").assertIsDisplayed()
+
+        // Click row/switch to toggle ON
+        composeTestRule.onNodeWithText("Test Setting").performClick()
+
+        assertEquals(1, callbackInvocationCount)
+        assertTrue(checkedState.value)
+    }
+
+    @Test
+    fun adbPermissionDialog_displaysTitleAndInvokesDismissOnOk() {
+        var dismissed = false
+
+        composeTestRule.setContent {
+            val context = LocalContext.current
+            CustomTilesTheme {
+                AdbPermissionDialog(
+                    context = context,
+                    onDismiss = { dismissed = true }
+                )
+            }
+        }
+
+        // Verify dialog title and buttons are displayed
+        composeTestRule.onNodeWithText("Permission Required").assertIsDisplayed()
+        composeTestRule.onNodeWithText("OK").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Copy").assertIsDisplayed()
+
+        // Click OK to dismiss
+        composeTestRule.onNodeWithText("OK").performClick()
+        assertTrue(dismissed)
+    }
+
+    @Test
+    fun brightnessSlider_rendersMinimizeAndMaximizeButtons() {
+        composeTestRule.setContent {
+            val context = LocalContext.current
+            CustomTilesTheme {
+                BrightnessSlider(context = context)
+            }
+        }
+
+        // Verify minimize and maximize buttons exist
+        composeTestRule.onNodeWithContentDescription("Minimize brightness").assertIsDisplayed()
+        composeTestRule.onNodeWithContentDescription("Maximize brightness").assertIsDisplayed()
+    }
+}
