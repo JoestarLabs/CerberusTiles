@@ -158,7 +158,13 @@ class SettingsUtilsTest {
 
         SettingsUtils.Brightness.toggleAdaptiveBrightness(params)
 
-        verify { Settings.System.putInt(contentResolver, Settings.System.SCREEN_BRIGHTNESS_MODE, 0) }
+        verify {
+            Settings.System.putInt(
+                contentResolver,
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                0
+            )
+        }
         verify { Toast.makeText(context, "Adaptive brightness disabled", Toast.LENGTH_SHORT) }
         assertEquals(false, callbackValue)
     }
@@ -181,7 +187,13 @@ class SettingsUtilsTest {
 
         SettingsUtils.Brightness.toggleAdaptiveBrightness(params)
 
-        verify { Settings.System.putInt(contentResolver, Settings.System.SCREEN_BRIGHTNESS_MODE, 1) }
+        verify {
+            Settings.System.putInt(
+                contentResolver,
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                1
+            )
+        }
         verify { Toast.makeText(context, "Adaptive brightness enabled", Toast.LENGTH_SHORT) }
         assertEquals(true, callbackValue)
     }
@@ -313,7 +325,9 @@ class SettingsUtilsTest {
     fun `toggleVibrationMode handles SecurityException in DND mode and returns false`() {
         every { Settings.System.canWrite(context) } returns true
         every { audioManager.ringerMode } returns AudioManager.RINGER_MODE_NORMAL
-        every { audioManager.setRingerMode(AudioManager.RINGER_MODE_VIBRATE) } throws SecurityException("DND active")
+        every { audioManager.setRingerMode(AudioManager.RINGER_MODE_VIBRATE) } throws SecurityException(
+            "DND active"
+        )
 
         var callbackCalled = false
         val params = SettingsUtils.SettingsToggleParams(

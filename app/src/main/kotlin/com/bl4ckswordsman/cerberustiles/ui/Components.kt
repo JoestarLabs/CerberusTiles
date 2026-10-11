@@ -57,10 +57,11 @@ fun SwitchWithLabel(isSwitchedOn: Boolean, onCheckedChange: (Boolean) -> Unit, l
             containerColor = MaterialTheme.colorScheme.primaryContainer,
         ),
     ) {
-        Row(modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onCheckedChange(!isSwitchedOn) }
-            .padding(start = 22.dp, end = 22.dp, top = 14.dp, bottom = 14.dp), // Inside padding
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onCheckedChange(!isSwitchedOn) }
+                .padding(start = 22.dp, end = 22.dp, top = 14.dp, bottom = 14.dp), // Inside padding
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically) {
             Box(
