@@ -44,7 +44,7 @@ class ShortcutHelper(private val context: Context) {
                     shortLabel = "Toggle Adaptive Brightness",
                     longLabel = "Toggle Adaptive Brightness",
                     icon = R.drawable.baseline_brightness_auto_24,
-                    action = "com.bl4ckswordsman.cerberustiles.TOGGLE_ADAPTIVE_BRIGHTNESS",
+                    action = Constants.TOGGLE_ADAPTIVE_BRIGHTNESS_ACTION,
                     activityClass = ToggleAdaptiveBrightnessActivity::class.java
                 )
             )
@@ -55,7 +55,7 @@ class ShortcutHelper(private val context: Context) {
                     shortLabel = "Toggle Vibration Ringer Mode",
                     longLabel = "Toggle Vibration Ringer Mode",
                     icon = R.drawable.baseline_vibration_24,
-                    action = "com.bl4ckswordsman.cerberustiles.TOGGLE_VIBRATION_RINGER_MODE",
+                    action = Constants.TOGGLE_VIBRATION_MODE_ACTION,
                     activityClass = ToggleVibrationModeActivity::class.java
                 )
             )

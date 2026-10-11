@@ -251,8 +251,10 @@ fun CreateSettingsListItem(
 ) {
     ListItem(
         modifier = Modifier.clickable { onClick() },
-        headlineContent = { Text(headlineText) },
-        supportingContent = { Text(supportingText) })
+        supportingContent = { Text(supportingText) }
+    ) {
+        Text(headlineText)
+    }
 }
 
 /**

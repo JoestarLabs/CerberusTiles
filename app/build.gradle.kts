@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.plugin.compose") version "2.4.20"
     id("com.mikepenz.aboutlibraries.plugin.android")
+    id("org.jetbrains.kotlinx.kover")
 }
 
 fun calculateVersionCode(version: String): Int {
@@ -42,6 +43,7 @@ android {
         }
         debug {
             applicationIdSuffix = ".debug"
+            enableUnitTestCoverage = true
         }
     }
     compileOptions {
@@ -60,6 +62,7 @@ android {
     testOptions {
         unitTests {
             isReturnDefaultValues = true
+            isIncludeAndroidResources = true
             all {
                 it.jvmArgs(
                     "-XX:+EnableDynamicAgentLoading",
@@ -86,7 +89,6 @@ dependencies {
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.runtime:runtime-android:1.12.1")
     implementation("androidx.compose.runtime:runtime-livedata:1.12.1")
     implementation("androidx.compose.runtime:runtime-rxjava2:1.12.1")
@@ -99,9 +101,24 @@ dependencies {
     implementation("com.mikepenz:aboutlibraries-core:15.2.0")
     testImplementation("junit:junit:4.13.2")
     testImplementation("io.mockk:mockk:1.14.11")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
+    testImplementation("androidx.arch.core:core-testing:2.2.0")
     androidTestImplementation("androidx.test.ext:junit:1.3.0")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+}
+
+kover {
+    reports {
+        total {
+            html {
+                onCheck = true
+            }
+            xml {
+                onCheck = true
+            }
+        }
+    }
 }
