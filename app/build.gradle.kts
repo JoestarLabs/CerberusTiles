@@ -1,6 +1,6 @@
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.plugin.compose") version "2.4.20"
+    id("org.jetbrains.kotlin.plugin.compose") version "2.4.21"
     id("com.mikepenz.aboutlibraries.plugin.android")
     id("org.jetbrains.kotlinx.kover")
 }
@@ -96,12 +96,12 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-process:2.11.0")
     implementation("androidx.navigation:navigation-compose:2.10.2")
     implementation("androidx.compose.material:material-icons-core")
-    implementation("androidx.compose.material3:material3:1.5.0-alpha29") // TODO: Don't rely on alpha version
+    implementation("androidx.compose.material3:material3:1.5.0-beta01") // TODO: Don't rely on alpha version
     implementation("com.mikepenz:aboutlibraries-compose-m3:15.2.0")
     implementation("com.mikepenz:aboutlibraries-core:15.2.0")
     testImplementation("junit:junit:4.13.2")
     testImplementation("io.mockk:mockk:1.14.11")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0")
     testImplementation("androidx.arch.core:core-testing:2.2.0")
     androidTestImplementation("androidx.test.ext:junit:1.3.0")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
