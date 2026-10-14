@@ -18,8 +18,8 @@ import com.bl4ckswordsman.cerberustiles.SettingsUtils.Brightness
 import com.bl4ckswordsman.cerberustiles.SettingsUtils.Vibration.toggleVibrationMode
 import com.bl4ckswordsman.cerberustiles.SettingsUtils.openPermissionSettings
 import com.bl4ckswordsman.cerberustiles.models.RingerMode
-import com.bl4ckswordsman.cerberustiles.ui.OverlayDialog
 import com.bl4ckswordsman.cerberustiles.ui.AdbPermissionDialog
+import com.bl4ckswordsman.cerberustiles.ui.OverlayDialog
 import com.bl4ckswordsman.cerberustiles.ui.OverlayDialogParams
 import com.bl4ckswordsman.cerberustiles.ui.createSharedParams
 

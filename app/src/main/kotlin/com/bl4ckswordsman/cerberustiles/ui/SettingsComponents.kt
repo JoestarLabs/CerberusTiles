@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ButtonGroupDefaults
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleButton
@@ -114,7 +113,6 @@ fun SettingsComponents(params: SettingsComponentsParams) {
  * @param onModeSelected Callback invoked with the newly selected [RingerMode] when the user
  *   taps a button that is not already selected.
  */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun RingerModeSelectionButtonGroup(
     currentMode: RingerMode,

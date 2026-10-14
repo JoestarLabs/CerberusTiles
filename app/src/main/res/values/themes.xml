@@ -8,7 +8,4 @@
         <item name="android:windowIsTranslucent">true</item>
     </style>
 
-    <style name="Theme.OverlayActivity.Dialog" parent="Theme.CustomTiles">
-        <item name="android:windowBackground">@android:color/transparent</item>
-    </style>
 </resources>

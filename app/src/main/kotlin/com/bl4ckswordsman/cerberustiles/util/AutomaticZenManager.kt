@@ -73,11 +73,7 @@ object AutomaticZenManager {
          * Returns true on success, false if permission is missing or an error occurs.
          */
         fun deactivate(): Boolean {
-            if (!canManageDndRules(context)) {
-                return false
-            }
-
-            return try {
+            return canManageDndRules(context) && try {
                 notificationManager.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_ALL)
                 true
             } catch (_: Exception) {
@@ -91,11 +87,7 @@ object AutomaticZenManager {
          * Returns false if permission is missing or an error occurs.
          */
         fun isActive(): Boolean {
-            if (!canManageDndRules(context)) {
-                return false
-            }
-
-            return try {
+            return canManageDndRules(context) && try {
                 notificationManager.currentInterruptionFilter == NotificationManager.INTERRUPTION_FILTER_NONE
             } catch (_: Exception) {
                 false

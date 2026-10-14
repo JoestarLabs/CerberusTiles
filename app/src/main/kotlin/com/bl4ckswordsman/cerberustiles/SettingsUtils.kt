@@ -330,12 +330,7 @@ class MainViewModel : ViewModel() {
     fun updateIsChargingOptimizationOn(context: Context) {
         isChargingOptimizationSupported.value =
             SettingsUtils.Charging.isChargingOptimizationSupported(context)
-        if (isChargingOptimizationSupported.value) {
-            isChargingOptimizationOn.value =
-                SettingsUtils.Charging.isChargingOptimizationEnabled(context)
-        } else {
-            isChargingOptimizationOn.value = false
-        }
+        isChargingOptimizationOn.value = isChargingOptimizationSupported.value && SettingsUtils.Charging.isChargingOptimizationEnabled(context)
     }
 
     /**
