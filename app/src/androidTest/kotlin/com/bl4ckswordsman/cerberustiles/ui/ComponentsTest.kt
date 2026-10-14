@@ -8,7 +8,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.bl4ckswordsman.cerberustiles.ui.theme.CustomTilesTheme
+import com.bl4ckswordsman.cerberustiles.ui.theme.CerberusTilesTheme
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -27,7 +27,7 @@ class ComponentsTest {
         var callbackInvocationCount = 0
 
         composeTestRule.setContent {
-            CustomTilesTheme {
+            CerberusTilesTheme {
                 SwitchWithLabel(
                     isSwitchedOn = checkedState.value,
                     onCheckedChange = {
@@ -55,7 +55,7 @@ class ComponentsTest {
 
         composeTestRule.setContent {
             val context = LocalContext.current
-            CustomTilesTheme {
+            CerberusTilesTheme {
                 AdbPermissionDialog(
                     context = context,
                     onDismiss = { dismissed = true }
@@ -63,8 +63,13 @@ class ComponentsTest {
             }
         }
 
-        // Verify dialog title and buttons are displayed
+        // Verify dialog title, instructional body, and buttons are displayed
         composeTestRule.onNodeWithText("Permission Required").assertIsDisplayed()
+        composeTestRule.onNodeWithText(
+            "To use this feature, please connect your device to a PC and grant the WRITE_SECURE_SETTINGS permission using the following ADB command:\n\n" +
+                    "adb shell pm grant com.bl4ckswordsman.cerberustiles android.permission.WRITE_SECURE_SETTINGS\n\n" +
+                    "Note: Shizuku support is planned for the future."
+        ).assertIsDisplayed()
         composeTestRule.onNodeWithText("OK").assertIsDisplayed()
         composeTestRule.onNodeWithText("Copy").assertIsDisplayed()
 
@@ -77,7 +82,7 @@ class ComponentsTest {
     fun brightnessSlider_rendersMinimizeAndMaximizeButtons() {
         composeTestRule.setContent {
             val context = LocalContext.current
-            CustomTilesTheme {
+            CerberusTilesTheme {
                 BrightnessSlider(context = context)
             }
         }

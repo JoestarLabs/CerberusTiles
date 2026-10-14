@@ -258,4 +258,9 @@ class MainViewModelTest {
 
         assertEquals(RingerMode.SILENT, viewModel.currentRingerMode.value)
     }
+
+    @Test
+    fun `initial currentRingerMode value is RingerMode NORMAL`() {
+        assertEquals(RingerMode.NORMAL, viewModel.currentRingerMode.value)
+    }
 }

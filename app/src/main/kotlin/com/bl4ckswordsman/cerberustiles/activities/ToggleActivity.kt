@@ -4,6 +4,7 @@ import android.app.Activity
 import android.os.Bundle
 import android.provider.Settings
 import com.bl4ckswordsman.cerberustiles.SettingsUtils
+import com.bl4ckswordsman.cerberustiles.ShortcutHelper
 
 /**
  * An [Activity] that toggles a setting when the user taps the shortcut.
@@ -40,6 +41,7 @@ class ToggleAdaptiveBrightnessActivity : BaseToggleActivity() {
 
     /** Toggles the adaptive brightness setting. */
     override fun performAction() {
+        ShortcutHelper.reportUsage(this, ShortcutHelper.ID_ADAPTIVE_BRIGHTNESS)
         val params = SettingsUtils.SettingsToggleParams(
             context = this,
             onSettingChanged = { _ -> }
@@ -62,6 +64,7 @@ class ToggleVibrationModeActivity : BaseToggleActivity() {
 
     /** Toggles the vibration mode setting. */
     override fun performAction() {
+        ShortcutHelper.reportUsage(this, ShortcutHelper.ID_VIBRATION_RINGER_MODE)
         val params = SettingsUtils.SettingsToggleParams(
             context = this,
             onSettingChanged = { _ -> }

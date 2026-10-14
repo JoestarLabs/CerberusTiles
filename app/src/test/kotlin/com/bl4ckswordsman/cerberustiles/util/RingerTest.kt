@@ -222,7 +222,9 @@ class RingerTest {
     @Test
     fun `setRingerMode handles SecurityException when switching to non-silent mode`() {
         every { audioManager.ringerMode } returns AudioManager.RINGER_MODE_SILENT
-        every { audioManager.setRingerMode(AudioManager.RINGER_MODE_NORMAL) } throws SecurityException(
+        every {
+            audioManager.ringerMode = AudioManager.RINGER_MODE_NORMAL
+        } throws SecurityException(
             "Not allowed"
         )
 

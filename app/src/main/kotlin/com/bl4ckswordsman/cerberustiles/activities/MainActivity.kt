@@ -17,7 +17,7 @@ import com.bl4ckswordsman.cerberustiles.ShortcutHelper
 import com.bl4ckswordsman.cerberustiles.models.RingerMode
 import com.bl4ckswordsman.cerberustiles.ui.MainScreen
 import com.bl4ckswordsman.cerberustiles.ui.MainScreenParams
-import com.bl4ckswordsman.cerberustiles.ui.theme.CustomTilesTheme
+import com.bl4ckswordsman.cerberustiles.ui.theme.CerberusTilesTheme
 import kotlinx.coroutines.launch
 
 /**
@@ -91,7 +91,7 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
         super.onCreate(savedInstanceState)
         lifecycle.addObserver(this)
         setContent {
-            CustomTilesTheme {
+            CerberusTilesTheme {
                 MainScreen(
                     MainScreenParams(
                         canWrite = viewModel.canWrite,

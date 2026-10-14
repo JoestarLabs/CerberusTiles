@@ -3,7 +3,6 @@ package com.bl4ckswordsman.cerberustiles
 import android.app.NotificationManager
 import android.content.ContentResolver
 import android.content.Context
-import android.content.Intent
 import android.media.AudioManager
 import android.provider.Settings
 import android.widget.Toast
@@ -12,7 +11,6 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
 import io.mockk.mockkStatic
-import io.mockk.slot
 import io.mockk.unmockkAll
 import io.mockk.verify
 import org.junit.After
@@ -325,7 +323,9 @@ class SettingsUtilsTest {
     fun `toggleVibrationMode handles SecurityException in DND mode and returns false`() {
         every { Settings.System.canWrite(context) } returns true
         every { audioManager.ringerMode } returns AudioManager.RINGER_MODE_NORMAL
-        every { audioManager.setRingerMode(AudioManager.RINGER_MODE_VIBRATE) } throws SecurityException(
+        every {
+            audioManager.ringerMode = AudioManager.RINGER_MODE_VIBRATE
+        } throws SecurityException(
             "DND active"
         )
 

@@ -1,10 +1,10 @@
-<div align="center">
+<div style="text-align: center;">
   <img src="app/src/main/res/mipmap-xxxhdpi/ic_launcher_cerberus_round.webp" alt="Cerberus Tiles app icon" width="150"/>
   <br>
   <span style="font-size: 30px;">Cerberus Tiles</span>
 </div>
 
-<p align="center">
+<p style="text-align: center;">
   <a href="https://app.codacy.com/gh/JoestarLabs/CerberusTiles/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade"><img src="https://app.codacy.com/project/badge/Grade/26190040807340c58373dab20f3d413e" alt="Codacy Badge"></a>
   <a href="https://github.com/JoestarLabs/CerberusTiles/actions/workflows/tests.yaml"><img src="https://github.com/JoestarLabs/CerberusTiles/actions/workflows/tests.yaml/badge.svg" alt="Build & Test"></a>
   <a href="https://github.com/JoestarLabs/CerberusTiles/actions/workflows/codeql.yml"><img src="https://github.com/JoestarLabs/CerberusTiles/actions/workflows/codeql.yml/badge.svg" alt="CodeQL"></a>
@@ -31,7 +31,7 @@ Tested in a Pixel 8 Pro.
 <details>
   <summary> Screenshots (Click to expand)</summary>
 
-<p float="left">
+<p>
   <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_1.png" width="150"  alt="Screenshot"/>
   <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_1_dark.png" width="150"  alt="Screenshot Dark"/>
   <img src="assets/recording_1.gif" width="156"  alt="Animated GIF"/>
@@ -53,14 +53,14 @@ Tested in a Pixel 8 Pro.
 
 ## Download
 
-Download a GitHub actions build (scanned by 🛡VirusTotal) here:
+Download a GitHub Actions build (scanned by 🛡VirusTotal) here:
 <p>
   <a href="https://github.com/JoestarLabs/CerberusTiles/releases/latest"><img src="https://img.shields.io/github/v/release/JoestarLabs/CerberusTiles" alt="GitHub release (latest by date)"></a>
 </p>
 
 Or from IzzyOnDroid:
 <p>
-  <a href="https://apt.izzysoft.de/packages/com.bl4ckswordsman.cerberustiles"><img src="assets/IzzyOnDroidButtonGreyBorder_nofont.png" width="200"></a>
+  <a href="https://apt.izzysoft.de/packages/com.bl4ckswordsman.cerberustiles"><img src="assets/IzzyOnDroidButtonGreyBorder_nofont.png" width="200" alt="IzzyOnDroid button"></a>
 </p>
 
 ### Kudos to

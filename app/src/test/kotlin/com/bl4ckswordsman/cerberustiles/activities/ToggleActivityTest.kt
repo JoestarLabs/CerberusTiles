@@ -2,6 +2,7 @@ package com.bl4ckswordsman.cerberustiles.activities
 
 import android.provider.Settings
 import com.bl4ckswordsman.cerberustiles.SettingsUtils
+import com.bl4ckswordsman.cerberustiles.ShortcutHelper
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
@@ -22,9 +23,11 @@ class ToggleActivityTest {
         mockkObject(SettingsUtils)
         mockkObject(SettingsUtils.Brightness)
         mockkObject(SettingsUtils.Vibration)
+        mockkObject(ShortcutHelper)
 
         every { SettingsUtils.Brightness.toggleAdaptiveBrightness(any()) } returns Unit
         every { SettingsUtils.Vibration.toggleVibrationMode(any()) } returns true
+        every { ShortcutHelper.reportUsage(any(), any()) } returns Unit
     }
 
     @After
@@ -49,12 +52,15 @@ class ToggleActivityTest {
     }
 
     @Test
-    fun `ToggleAdaptiveBrightnessActivity performAction invokes toggleAdaptiveBrightness`() {
+    fun `ToggleAdaptiveBrightnessActivity performAction invokes toggleAdaptiveBrightness and reports shortcut usage`() {
         val activity = spyk(ToggleAdaptiveBrightnessActivity())
 
         activity.performAction()
 
-        verify { SettingsUtils.Brightness.toggleAdaptiveBrightness(any()) }
+        verify {
+            ShortcutHelper.reportUsage(activity, ShortcutHelper.ID_ADAPTIVE_BRIGHTNESS)
+            SettingsUtils.Brightness.toggleAdaptiveBrightness(any())
+        }
     }
 
     @Test
@@ -85,11 +91,14 @@ class ToggleActivityTest {
     }
 
     @Test
-    fun `ToggleVibrationModeActivity performAction invokes toggleVibrationMode`() {
+    fun `ToggleVibrationModeActivity performAction invokes toggleVibrationMode and reports shortcut usage`() {
         val activity = spyk(ToggleVibrationModeActivity())
 
         activity.performAction()
 
-        verify { SettingsUtils.Vibration.toggleVibrationMode(any()) }
+        verify {
+            ShortcutHelper.reportUsage(activity, ShortcutHelper.ID_VIBRATION_RINGER_MODE)
+            SettingsUtils.Vibration.toggleVibrationMode(any())
+        }
     }
 }

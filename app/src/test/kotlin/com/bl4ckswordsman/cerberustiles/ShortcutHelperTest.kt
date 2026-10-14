@@ -110,4 +110,10 @@ class ShortcutHelperTest {
 
         assertEquals(3, dynamicShortcutsSlot.captured.size)
     }
+
+    @Test
+    fun `reportUsage calls ShortcutManager reportShortcutUsed`() {
+        ShortcutHelper.reportUsage(context, ShortcutHelper.ID_ADAPTIVE_BRIGHTNESS, shortcutManager)
+        verify { shortcutManager.reportShortcutUsed(ShortcutHelper.ID_ADAPTIVE_BRIGHTNESS) }
+    }
 }
