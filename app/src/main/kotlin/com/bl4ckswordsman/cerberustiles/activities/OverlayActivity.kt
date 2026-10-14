@@ -17,6 +17,7 @@ import com.bl4ckswordsman.cerberustiles.SettingsUtils
 import com.bl4ckswordsman.cerberustiles.SettingsUtils.Brightness
 import com.bl4ckswordsman.cerberustiles.SettingsUtils.Vibration.toggleVibrationMode
 import com.bl4ckswordsman.cerberustiles.SettingsUtils.openPermissionSettings
+import com.bl4ckswordsman.cerberustiles.ShortcutHelper
 import com.bl4ckswordsman.cerberustiles.models.RingerMode
 import com.bl4ckswordsman.cerberustiles.ui.AdbPermissionDialog
 import com.bl4ckswordsman.cerberustiles.ui.OverlayDialog
@@ -60,6 +61,9 @@ class OverlayActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        if (intent?.action == "com.bl4ckswordsman.cerberustiles.OPEN_OVERLAY") {
+            ShortcutHelper.reportUsage(this, ShortcutHelper.ID_OVERLAY)
+        }
         WindowCompat.setDecorFitsSystemWindows(window, false)
         window.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
         setContent {

@@ -63,8 +63,13 @@ class ComponentsTest {
             }
         }
 
-        // Verify dialog title and buttons are displayed
+        // Verify dialog title, instructional body, and buttons are displayed
         composeTestRule.onNodeWithText("Permission Required").assertIsDisplayed()
+        composeTestRule.onNodeWithText(
+            "To use this feature, please connect your device to a PC and grant the WRITE_SECURE_SETTINGS permission using the following ADB command:\n\n" +
+                    "adb shell pm grant com.bl4ckswordsman.cerberustiles android.permission.WRITE_SECURE_SETTINGS\n\n" +
+                    "Note: Shizuku support is planned for the future."
+        ).assertIsDisplayed()
         composeTestRule.onNodeWithText("OK").assertIsDisplayed()
         composeTestRule.onNodeWithText("Copy").assertIsDisplayed()
 

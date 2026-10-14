@@ -323,7 +323,9 @@ class SettingsUtilsTest {
     fun `toggleVibrationMode handles SecurityException in DND mode and returns false`() {
         every { Settings.System.canWrite(context) } returns true
         every { audioManager.ringerMode } returns AudioManager.RINGER_MODE_NORMAL
-        every { audioManager.ringerMode = AudioManager.RINGER_MODE_VIBRATE } throws SecurityException(
+        every {
+            audioManager.ringerMode = AudioManager.RINGER_MODE_VIBRATE
+        } throws SecurityException(
             "DND active"
         )
 

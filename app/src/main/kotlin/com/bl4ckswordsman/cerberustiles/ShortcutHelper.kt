@@ -1,5 +1,6 @@
 package com.bl4ckswordsman.cerberustiles
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ShortcutInfo
@@ -40,7 +41,7 @@ class ShortcutHelper(private val context: Context) {
 
             val adaptiveBrightnessShortcut = createShortcut(
                 CustomShortcutInfo(
-                    id = "toggle_adaptive_brightness",
+                    id = ID_ADAPTIVE_BRIGHTNESS,
                     shortLabel = "Toggle Adaptive Brightness",
                     longLabel = "Toggle Adaptive Brightness",
                     icon = R.drawable.baseline_brightness_auto_24,
@@ -51,7 +52,7 @@ class ShortcutHelper(private val context: Context) {
 
             val vibrationRingerModeShortcut = createShortcut(
                 CustomShortcutInfo(
-                    id = "toggle_vibration_ringer_mode",
+                    id = ID_VIBRATION_RINGER_MODE,
                     shortLabel = "Toggle Vibration Ringer Mode",
                     longLabel = "Toggle Vibration Ringer Mode",
                     icon = R.drawable.baseline_vibration_24,
@@ -62,7 +63,7 @@ class ShortcutHelper(private val context: Context) {
 
             val overlayShortcut = createShortcut(
                 CustomShortcutInfo(
-                    id = "overlay_shortcut",
+                    id = ID_OVERLAY,
                     shortLabel = "Toolbox Overlay",
                     longLabel = "Toolbox Overlay",
                     icon = R.drawable.round_open_in_new_24,
@@ -73,6 +74,28 @@ class ShortcutHelper(private val context: Context) {
 
             shortcutManager?.dynamicShortcuts =
                 listOf(adaptiveBrightnessShortcut, vibrationRingerModeShortcut, overlayShortcut)
+        }
+    }
+
+    companion object {
+        const val ID_ADAPTIVE_BRIGHTNESS = "toggle_adaptive_brightness"
+        const val ID_VIBRATION_RINGER_MODE = "toggle_vibration_ringer_mode"
+        const val ID_OVERLAY = "overlay_shortcut"
+
+        /**
+         * Reports shortcut usage to [ShortcutManager] on API 25+ (Android 7.1+).
+         */
+        @SuppressLint("NewApi")
+        fun reportUsage(
+            context: Context,
+            shortcutId: String,
+            shortcutManager: ShortcutManager? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+                context.getSystemService(Context.SHORTCUT_SERVICE) as? ShortcutManager
+            } else {
+                null
+            }
+        ) {
+            shortcutManager?.reportShortcutUsed(shortcutId)
         }
     }
 

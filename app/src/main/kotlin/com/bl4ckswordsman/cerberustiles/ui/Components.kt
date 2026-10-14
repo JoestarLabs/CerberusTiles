@@ -108,7 +108,7 @@ fun AdbPermissionDialog(context: Context, onDismiss: () -> Unit) {
 
     AlertDialog(onDismissRequest = onDismiss, title = { Text("Permission Required") }, text = {
         Text(
-            text = "To use this feature, please connect your device to a PC and grant the WRITE_SECURE_SETTINGS permission using the following ADB command:\n\n" + "$adbCommand\n\n" + "Note: Shizuku support is planned for the future."
+            text = "To use this feature, please connect your device to a PC and grant the WRITE_SECURE_SETTINGS permission using the following ADB command:\n\n$adbCommand\n\nNote: Shizuku support is planned for the future."
         )
     }, confirmButton = {
         Button(onClick = onDismiss) {
