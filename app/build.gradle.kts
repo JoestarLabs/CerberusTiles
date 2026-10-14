@@ -22,7 +22,7 @@ android {
         applicationId = "com.bl4ckswordsman.cerberustiles"
         minSdk = 24
         targetSdk = 35
-        versionName = "0.5.1" // x-release-please-version
+        versionName = "0.5.2" // x-release-please-version
         versionCode = calculateVersionCode(versionName!!)
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
