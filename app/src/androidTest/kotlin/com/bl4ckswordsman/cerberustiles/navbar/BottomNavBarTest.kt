@@ -10,7 +10,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.bl4ckswordsman.cerberustiles.Constants
-import com.bl4ckswordsman.cerberustiles.ui.theme.CustomTilesTheme
+import com.bl4ckswordsman.cerberustiles.ui.theme.CerberusTilesTheme
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -25,7 +25,7 @@ class BottomNavBarTest {
     fun bottomNavBar_displaysHomeAndSettingsTabs() {
         composeTestRule.setContent {
             val navController = rememberNavController()
-            CustomTilesTheme {
+            CerberusTilesTheme {
                 BottomNavBar(navController = navController)
             }
         }
@@ -38,7 +38,7 @@ class BottomNavBarTest {
     fun bottomNavBar_clickingSettingsTab_navigatesToSettings() {
         composeTestRule.setContent {
             val navController = rememberNavController()
-            CustomTilesTheme {
+            CerberusTilesTheme {
                 NavHost(
                     navController = navController,
                     startDestination = Constants.HOME_SCREEN

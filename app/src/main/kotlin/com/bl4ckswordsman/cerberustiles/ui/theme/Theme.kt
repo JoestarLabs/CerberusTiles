@@ -40,7 +40,7 @@ onSurface = Color(0xFF1C1B1F),
  * @param content The content of the theme.
  */
 @Composable
-fun CustomTilesTheme(
+fun CerberusTilesTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
@@ -61,3 +61,17 @@ fun CustomTilesTheme(
         content = content
     )
 }
+
+/**
+ * Backward compatibility alias for [CerberusTilesTheme].
+ */
+@Deprecated(
+    message = "Use CerberusTilesTheme instead",
+    replaceWith = ReplaceWith("CerberusTilesTheme(darkTheme, dynamicColor, content)")
+)
+@Composable
+fun CustomTilesTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    dynamicColor: Boolean = true,
+    content: @Composable () -> Unit
+) = CerberusTilesTheme(darkTheme, dynamicColor, content)

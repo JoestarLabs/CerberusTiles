@@ -13,7 +13,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.LiveData
 import com.bl4ckswordsman.cerberustiles.models.RingerMode
-import com.bl4ckswordsman.cerberustiles.ui.theme.CustomTilesTheme
+import com.bl4ckswordsman.cerberustiles.ui.theme.CerberusTilesTheme
 import com.bl4ckswordsman.cerberustiles.util.Ringer
 
 /**
@@ -62,7 +62,7 @@ fun OverlayDialog(params: OverlayDialogParams) {
             params.showDialog.value = false
             params.onDismiss()
         }) {
-            CustomTilesTheme {
+            CerberusTilesTheme {
                 AlertDialog(
                     onDismissRequest = {
                         params.showDialog.value = false

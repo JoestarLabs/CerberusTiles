@@ -17,5 +17,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Custom Tiles"
+rootProject.name = "CerberusTiles"
 include(":app")

@@ -11,7 +11,7 @@ import androidx.compose.ui.test.performClick
 import androidx.lifecycle.MutableLiveData
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.bl4ckswordsman.cerberustiles.models.RingerMode
-import com.bl4ckswordsman.cerberustiles.ui.theme.CustomTilesTheme
+import com.bl4ckswordsman.cerberustiles.ui.theme.CerberusTilesTheme
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -62,7 +62,7 @@ class OverlayDialogTest {
                 onRingerModeChange = {}
             )
 
-            CustomTilesTheme {
+            CerberusTilesTheme {
                 OverlayDialog(params = params)
             }
         }
@@ -115,7 +115,7 @@ class OverlayDialogTest {
                 onRingerModeChange = {}
             )
 
-            CustomTilesTheme {
+            CerberusTilesTheme {
                 OverlayDialog(params = params)
             }
         }
