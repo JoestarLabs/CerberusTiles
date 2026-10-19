@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.5.2](https://github.com/JoestarLabs/CerberusTiles/compare/v0.5.1...v0.5.2) (2026-10-19)
+
+
+### Bug Fixes
+
+* **deps:** update gradle dependencies ([4f4aa61](https://github.com/JoestarLabs/CerberusTiles/commit/4f4aa611b37921c05026bd64207f64dda36d9215))
+* **deps:** update gradle dependencies ([b38cb17](https://github.com/JoestarLabs/CerberusTiles/commit/b38cb17ef41fe060d83d535b57149daa515f56ae))
+* **deps:** update gradle dependencies to v15.3.0 ([4fa923c](https://github.com/JoestarLabs/CerberusTiles/commit/4fa923c53b050d010d751d2cfe6bc2acbe5ec9dd))
+* **deps:** update gradle dependencies to v15.3.0 ([b72beac](https://github.com/JoestarLabs/CerberusTiles/commit/b72beac7ce31438785221406cdc003873455acea))
+
 ## [0.5.1](https://github.com/JoestarLabs/CerberusTiles/compare/v0.5.0...v0.5.1) (2026-10-10)
 
 
