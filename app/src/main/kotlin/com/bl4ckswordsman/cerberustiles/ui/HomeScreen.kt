@@ -5,8 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
@@ -46,24 +44,7 @@ fun HomeScreen(params: HomeScreenParams) {
     ) {
         val context = LocalContext.current
         val sharedPreferences = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
-
-        val componentVisibilityParams = ComponentVisibilityDialogParams(
-            adaptBrightnessSwitch = rememberSaveable {
-                mutableStateOf(sharedPreferences.getBoolean("adaptBrightnessSwitch", true))
-            },
-            brightnessSlider = rememberSaveable {
-                mutableStateOf(sharedPreferences.getBoolean("brightnessSlider", true))
-            },
-            ringerModeSelector = rememberSaveable {
-                mutableStateOf(sharedPreferences.getBoolean("ringerModeSelector", true))
-            },
-            chargingOptimizationSwitch = rememberSaveable {
-                mutableStateOf(sharedPreferences.getBoolean("chargingOptimizationSwitch", true))
-            },
-            smartPixelsSwitch = rememberSaveable {
-                mutableStateOf(sharedPreferences.getBoolean("smartPixelsSwitch", true))
-            }
-        )
+        val componentVisibility = rememberComponentVisibility(sharedPreferences)
 
         val settingsCompParams = SettingsComponentsParams(
             canWriteState = params.canWriteState,
@@ -78,7 +59,7 @@ fun HomeScreen(params: HomeScreenParams) {
             setChargingOptimization = params.setChargingOptimization,
             toggleChargingOptimization = params.toggleChargingOptimization,
             sharedParams = createSharedParams(params.navController),
-            componentVisibilityParams = componentVisibilityParams,
+            componentVisibilityParams = componentVisibility,
             currentRingerMode = params.currentRingerMode,
             onRingerModeChange = params.onRingerModeChange,
             isSmartPixelsOn = params.isSmartPixelsOn,

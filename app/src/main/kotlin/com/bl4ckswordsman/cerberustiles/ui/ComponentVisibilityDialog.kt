@@ -30,47 +30,62 @@ fun ComponentVisibilityDialog(
         text = {
             Column {
                 SettingsCheckbox(
-                    initialValue = sharedPreferences.getBoolean("adaptBrightnessSwitch", true),
+                    initialValue = sharedPreferences.getBoolean(
+                        ComponentVisibility.KEY_ADAPTIVE_BRIGHTNESS,
+                        true
+                    ),
                     text = "1. Adaptive Brightness Switch",
                     onCheckedChange = { newValue ->
                         sharedPreferences.edit {
-                            putBoolean("adaptBrightnessSwitch", newValue)
+                            putBoolean(ComponentVisibility.KEY_ADAPTIVE_BRIGHTNESS, newValue)
                         }
                     }
                 )
                 SettingsCheckbox(
-                    initialValue = sharedPreferences.getBoolean("brightnessSlider", true),
+                    initialValue = sharedPreferences.getBoolean(
+                        ComponentVisibility.KEY_BRIGHTNESS_SLIDER,
+                        true
+                    ),
                     text = "2. Brightness Slider",
                     onCheckedChange = { newValue ->
                         sharedPreferences.edit {
-                            putBoolean("brightnessSlider", newValue)
+                            putBoolean(ComponentVisibility.KEY_BRIGHTNESS_SLIDER, newValue)
                         }
                     }
                 )
                 SettingsCheckbox(
-                    initialValue = sharedPreferences.getBoolean("ringerModeSelector", true),
+                    initialValue = sharedPreferences.getBoolean(
+                        ComponentVisibility.KEY_RINGER_MODE,
+                        true
+                    ),
                     text = "3. Ringer Mode Selector",
                     onCheckedChange = { newValue ->
                         sharedPreferences.edit {
-                            putBoolean("ringerModeSelector", newValue)
+                            putBoolean(ComponentVisibility.KEY_RINGER_MODE, newValue)
                         }
                     }
                 )
                 SettingsCheckbox(
-                    initialValue = sharedPreferences.getBoolean("chargingOptimizationSwitch", true),
+                    initialValue = sharedPreferences.getBoolean(
+                        ComponentVisibility.KEY_CHARGING_OPTIMIZATION,
+                        true
+                    ),
                     text = "4. Charging Optimization",
                     onCheckedChange = { newValue ->
                         sharedPreferences.edit {
-                            putBoolean("chargingOptimizationSwitch", newValue)
+                            putBoolean(ComponentVisibility.KEY_CHARGING_OPTIMIZATION, newValue)
                         }
                     }
                 )
                 SettingsCheckbox(
-                    initialValue = sharedPreferences.getBoolean("smartPixelsSwitch", true),
+                    initialValue = sharedPreferences.getBoolean(
+                        ComponentVisibility.KEY_SMART_PIXELS,
+                        true
+                    ),
                     text = "5. Smart Pixels",
                     onCheckedChange = { newValue ->
                         sharedPreferences.edit {
-                            putBoolean("smartPixelsSwitch", newValue)
+                            putBoolean(ComponentVisibility.KEY_SMART_PIXELS, newValue)
                         }
                     }
                 )

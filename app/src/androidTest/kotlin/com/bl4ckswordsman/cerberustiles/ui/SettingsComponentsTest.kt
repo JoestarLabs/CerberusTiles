@@ -38,18 +38,17 @@ class SettingsComponentsTest {
         )
     }
 
-    @Composable
-    private fun rememberTestVisibilityParams(
+    private fun testVisibilityParams(
         adaptBrightness: Boolean = false,
         chargingOptimization: Boolean = false,
         ringerMode: Boolean = false,
         brightnessSlider: Boolean = false
-    ): ComponentVisibilityDialogParams {
-        return ComponentVisibilityDialogParams(
-            adaptBrightnessSwitch = remember { mutableStateOf(adaptBrightness) },
-            brightnessSlider = remember { mutableStateOf(brightnessSlider) },
-            ringerModeSelector = remember { mutableStateOf(ringerMode) },
-            chargingOptimizationSwitch = remember { mutableStateOf(chargingOptimization) }
+    ): ComponentVisibility {
+        return ComponentVisibility(
+            adaptBrightnessSwitch = adaptBrightness,
+            brightnessSlider = brightnessSlider,
+            ringerModeSelector = ringerMode,
+            chargingOptimizationSwitch = chargingOptimization
         )
     }
 
@@ -60,7 +59,7 @@ class SettingsComponentsTest {
 
         composeTestRule.setContent {
             val sharedParams = rememberTestSharedParams()
-            val visibilityParams = rememberTestVisibilityParams(adaptBrightness = true)
+            val visibilityParams = testVisibilityParams(adaptBrightness = true)
 
             val params = SettingsComponentsParams(
                 componentVisibilityParams = visibilityParams,
@@ -101,7 +100,7 @@ class SettingsComponentsTest {
 
         composeTestRule.setContent {
             val sharedParams = rememberTestSharedParams()
-            val visibilityParams = rememberTestVisibilityParams(adaptBrightness = true)
+            val visibilityParams = testVisibilityParams(adaptBrightness = true)
 
             val params = SettingsComponentsParams(
                 componentVisibilityParams = visibilityParams,
@@ -138,7 +137,7 @@ class SettingsComponentsTest {
 
         composeTestRule.setContent {
             val sharedParams = rememberTestSharedParams()
-            val visibilityParams = rememberTestVisibilityParams(chargingOptimization = true)
+            val visibilityParams = testVisibilityParams(chargingOptimization = true)
 
             val params = SettingsComponentsParams(
                 componentVisibilityParams = visibilityParams,
@@ -173,7 +172,7 @@ class SettingsComponentsTest {
     fun ringerModeSelector_displaysModesAndChecksInitialSelection() {
         composeTestRule.setContent {
             val sharedParams = rememberTestSharedParams()
-            val visibilityParams = rememberTestVisibilityParams(ringerMode = true)
+            val visibilityParams = testVisibilityParams(ringerMode = true)
 
             val params = SettingsComponentsParams(
                 componentVisibilityParams = visibilityParams,
