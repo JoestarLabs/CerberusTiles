@@ -8,7 +8,6 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.lifecycle.MutableLiveData
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.bl4ckswordsman.cerberustiles.models.RingerMode
 import com.bl4ckswordsman.cerberustiles.ui.theme.CerberusTilesTheme
@@ -45,7 +44,7 @@ class OverlayDialogTest {
             val params = OverlayDialogParams(
                 showDialog = showDialogState,
                 onDismiss = { dismissed = true },
-                canWrite = MutableLiveData(true),
+                canWrite = true,
                 isSwitchedOn = false,
                 setSwitchedOn = {},
                 toggleAdaptiveBrightness = {},
@@ -98,7 +97,7 @@ class OverlayDialogTest {
             val params = OverlayDialogParams(
                 showDialog = showDialogState,
                 onDismiss = {},
-                canWrite = MutableLiveData(true),
+                canWrite = true,
                 isSwitchedOn = false,
                 setSwitchedOn = {},
                 toggleAdaptiveBrightness = {},

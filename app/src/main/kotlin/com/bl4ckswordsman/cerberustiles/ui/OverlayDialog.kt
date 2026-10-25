@@ -6,15 +6,10 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.window.Dialog
-import androidx.lifecycle.LiveData
 import com.bl4ckswordsman.cerberustiles.models.RingerMode
 import com.bl4ckswordsman.cerberustiles.ui.theme.CerberusTilesTheme
-import com.bl4ckswordsman.cerberustiles.util.Ringer
 
 /**
  * Parameters for the overlay dialog.
@@ -22,7 +17,7 @@ import com.bl4ckswordsman.cerberustiles.util.Ringer
 data class OverlayDialogParams(
     val showDialog: MutableState<Boolean>,
     val onDismiss: () -> Unit,
-    val canWrite: LiveData<Boolean>,
+    val canWrite: Boolean,
     val isSwitchedOn: Boolean,
     val setSwitchedOn: (Boolean) -> Unit,
     val toggleAdaptiveBrightness: () -> Unit,
@@ -56,82 +51,65 @@ fun OverlayDialog(params: OverlayDialogParams) {
         params.sharedParams.sharedPreferences.getBoolean("chargingOptimizationSwitch", true)
     val smartPixelsSwitch =
         params.sharedParams.sharedPreferences.getBoolean("smartPixelsSwitch", true)
-    val canWriteState by params.canWrite.observeAsState(initial = false)
-    val currentRingerMode = rememberSaveable {
-        mutableStateOf(Ringer.getCurrentRingerMode(params.sharedParams.context))
-    }
 
     if (params.showDialog.value) {
-        Dialog(onDismissRequest = {
-            params.showDialog.value = false
-            params.onDismiss()
-        }) {
-            CerberusTilesTheme {
-                AlertDialog(
-                    onDismissRequest = {
+        CerberusTilesTheme {
+            AlertDialog(
+                onDismissRequest = {
+                    params.showDialog.value = false
+                    params.onDismiss()
+                },
+                text = {
+                    Column {
+                        val componentVisibilityDialogParams = ComponentVisibilityDialogParams(
+                            adaptBrightnessSwitch = rememberSaveable {
+                                mutableStateOf(adaptBrightnessSwitch)
+                            },
+                            brightnessSlider = rememberSaveable {
+                                mutableStateOf(brightnessSlider)
+                            },
+                            ringerModeSelector = rememberSaveable {
+                                mutableStateOf(ringerModeSelector)
+                            },
+                            chargingOptimizationSwitch = rememberSaveable {
+                                mutableStateOf(chargingOptimizationSwitch)
+                            },
+                            smartPixelsSwitch = rememberSaveable {
+                                mutableStateOf(smartPixelsSwitch)
+                            }
+                        )
+                        val settingsComponentsParams = SettingsComponentsParams(
+                            canWriteState = params.canWrite,
+                            isSwitchedOn = params.isSwitchedOn,
+                            setSwitchedOn = params.setSwitchedOn,
+                            toggleAdaptiveBrightness = params.toggleAdaptiveBrightness,
+                            openPermissionSettings = params.openPermissionSettings,
+                            isVibrationModeOn = params.isVibrationModeOn,
+                            setVibrationMode = params.setVibrationMode,
+                            toggleVibrationMode = params.toggleVibrationMode,
+                            isChargingOptimizationOn = params.isChargingOptimizationOn,
+                            setChargingOptimization = params.setChargingOptimization,
+                            toggleChargingOptimization = params.toggleChargingOptimization,
+                            componentVisibilityParams = componentVisibilityDialogParams,
+                            sharedParams = params.sharedParams,
+                            currentRingerMode = params.currentRingerMode,
+                            onRingerModeChange = params.onRingerModeChange,
+                            isOverlayContext = true,
+                            isSmartPixelsOn = params.isSmartPixelsOn,
+                            toggleSmartPixels = params.toggleSmartPixels
+                        )
+                        SettingsComponents(settingsComponentsParams)
+                    }
+                },
+                confirmButton = {
+                    Button(onClick = {
                         params.showDialog.value = false
                         params.onDismiss()
-                    },
-                    text = {
-                        Column {
-                            val componentVisibilityDialogParams = ComponentVisibilityDialogParams(
-                                adaptBrightnessSwitch = rememberSaveable {
-                                    mutableStateOf(
-                                        adaptBrightnessSwitch
-                                    )
-                                },
-                                brightnessSlider = rememberSaveable {
-                                    mutableStateOf(
-                                        brightnessSlider
-                                    )
-                                },
-                                ringerModeSelector = rememberSaveable {
-                                    mutableStateOf(
-                                        ringerModeSelector
-                                    )
-                                },
-                                chargingOptimizationSwitch = rememberSaveable {
-                                    mutableStateOf(chargingOptimizationSwitch)
-                                },
-                                smartPixelsSwitch = rememberSaveable {
-                                    mutableStateOf(smartPixelsSwitch)
-                                }
-                            )
-                            val settingsComponentsParams = SettingsComponentsParams(
-                                canWriteState = canWriteState,
-                                isSwitchedOn = params.isSwitchedOn,
-                                setSwitchedOn = params.setSwitchedOn,
-                                toggleAdaptiveBrightness = params.toggleAdaptiveBrightness,
-                                openPermissionSettings = params.openPermissionSettings,
-                                isVibrationModeOn = params.isVibrationModeOn,
-                                setVibrationMode = params.setVibrationMode,
-                                toggleVibrationMode = params.toggleVibrationMode,
-                                isChargingOptimizationOn = params.isChargingOptimizationOn,
-                                setChargingOptimization = params.setChargingOptimization,
-                                toggleChargingOptimization = params.toggleChargingOptimization,
-                                componentVisibilityParams = componentVisibilityDialogParams,
-                                sharedParams = createSharedParams(),
-                                currentRingerMode = currentRingerMode.value,
-                                onRingerModeChange = { newMode ->
-                                    currentRingerMode.value = newMode
-                                },
-                                isOverlayContext = true,
-                                isSmartPixelsOn = params.isSmartPixelsOn,
-                                toggleSmartPixels = params.toggleSmartPixels
-                            )
-                            SettingsComponents(settingsComponentsParams)
-                        }
-                    },
-                    confirmButton = {
-                        Button(onClick = {
-                            params.showDialog.value = false
-                            params.onDismiss()
-                        }) {
-                            Text("Close")
-                        }
+                    }) {
+                        Text("Close")
                     }
-                )
-            }
+                }
+            )
         }
     }
 }
