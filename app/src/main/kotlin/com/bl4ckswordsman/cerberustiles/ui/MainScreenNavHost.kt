@@ -8,9 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.LiveData
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -48,7 +46,7 @@ data class MainScreenNavHostParams(
     val isChargingOptimizationSupported: Boolean,
     val setChargingOptimization: (Boolean) -> Unit,
     val toggleChargingOptimization: (Boolean) -> Unit,
-    val currentRingerMode: LiveData<RingerMode>,
+    val currentRingerMode: RingerMode,
     val onRingerModeChange: (RingerMode) -> Unit,
     val isSmartPixelsOn: Boolean = false,
     val toggleSmartPixels: ((Boolean) -> Unit)? = null
@@ -57,7 +55,7 @@ data class MainScreenNavHostParams(
 /**
  * Converts [MainScreenNavHostParams] to [HomeScreenParams] for the Home destination.
  */
-fun MainScreenNavHostParams.toHomeScreenParams(currentRingerMode: RingerMode): HomeScreenParams =
+fun MainScreenNavHostParams.toHomeScreenParams(): HomeScreenParams =
     HomeScreenParams(
         innerPadding = innerPadding,
         canWriteState = canWriteState,
@@ -84,8 +82,6 @@ fun MainScreenNavHostParams.toHomeScreenParams(currentRingerMode: RingerMode): H
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun MainScreenNavHost(params: MainScreenNavHostParams) {
-    val currentRingerMode by params.currentRingerMode.observeAsState(RingerMode.NORMAL)
-
     NavHost(
         navController = params.navController,
         startDestination = Screen.Home.route,
@@ -99,7 +95,7 @@ fun MainScreenNavHost(params: MainScreenNavHostParams) {
             popEnterTransition = { tabEnterTransition() },
             popExitTransition = { tabExitTransition() }
         ) {
-            HomeScreen(params = params.toHomeScreenParams(currentRingerMode))
+            HomeScreen(params = params.toHomeScreenParams())
         }
 
         composable(

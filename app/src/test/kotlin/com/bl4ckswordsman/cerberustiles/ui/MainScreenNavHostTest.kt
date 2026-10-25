@@ -2,7 +2,6 @@ package com.bl4ckswordsman.cerberustiles.ui
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.MutableLiveData
 import com.bl4ckswordsman.cerberustiles.models.RingerMode
 import com.bl4ckswordsman.cerberustiles.navbar.Screen
 import io.mockk.mockk
@@ -29,13 +28,13 @@ class MainScreenNavHostTest {
             isChargingOptimizationSupported = true,
             setChargingOptimization = {},
             toggleChargingOptimization = {},
-            currentRingerMode = MutableLiveData(RingerMode.NORMAL),
+            currentRingerMode = RingerMode.NORMAL,
             onRingerModeChange = {},
             isSmartPixelsOn = true,
             toggleSmartPixels = {}
         )
 
-        val homeParams = navHostParams.toHomeScreenParams(RingerMode.VIBRATE)
+        val homeParams = navHostParams.toHomeScreenParams()
 
         assertEquals(PaddingValues(16.dp), homeParams.innerPadding)
         assertTrue(homeParams.canWriteState)
@@ -43,7 +42,7 @@ class MainScreenNavHostTest {
         assertTrue(homeParams.isVibrationModeOn)
         assertTrue(homeParams.isChargingOptimizationOn)
         assertTrue(homeParams.isSmartPixelsOn)
-        assertEquals(RingerMode.VIBRATE, homeParams.currentRingerMode)
+        assertEquals(RingerMode.NORMAL, homeParams.currentRingerMode)
     }
 
     @Test
@@ -63,7 +62,7 @@ class MainScreenNavHostTest {
             isChargingOptimizationSupported = true,
             setChargingOptimization = {},
             toggleChargingOptimization = {},
-            currentRingerMode = MutableLiveData(RingerMode.SILENT),
+            currentRingerMode = RingerMode.SILENT,
             onRingerModeChange = {},
             isSmartPixelsOn = true,
             toggleSmartPixels = {}
@@ -75,5 +74,6 @@ class MainScreenNavHostTest {
         assertTrue(navHostParams.canWriteState)
         assertTrue(navHostParams.isChargingOptimizationOn)
         assertTrue(navHostParams.isSmartPixelsOn)
+        assertEquals(RingerMode.SILENT, navHostParams.currentRingerMode)
     }
 }

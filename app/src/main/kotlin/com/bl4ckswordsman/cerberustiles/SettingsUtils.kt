@@ -8,10 +8,7 @@ import android.media.AudioManager
 import android.provider.Settings
 import android.view.accessibility.AccessibilityManager
 import android.widget.Toast
-import androidx.compose.runtime.mutableStateOf
 import androidx.core.net.toUri
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import com.bl4ckswordsman.cerberustiles.SettingsUtils.Charging.CHARGE_OPTIMIZATION_MODE
 import com.bl4ckswordsman.cerberustiles.SettingsUtils.canWriteSettings
 import com.bl4ckswordsman.cerberustiles.models.RingerMode
@@ -372,111 +369,7 @@ object SettingsUtils {
     }
 }
 
-/**
- * The main ViewModel that holds the canonical state for all settings screens.
- *
- * Both [com.bl4ckswordsman.cerberustiles.activities.MainActivity] and
- * [com.bl4ckswordsman.cerberustiles.activities.OverlayActivity] use this ViewModel
- * via `by viewModels<MainViewModel>()` for structural consistency. Each activity
- * has its own instance; state is refreshed from device settings in onResume().
- *
- * ## State type rationale
- * Two fields use [MutableLiveData] and the rest use Compose [mutableStateOf].
- * This split is intentional:
- * - [canWrite] and [currentRingerMode] are [MutableLiveData] because
- *   [com.bl4ckswordsman.cerberustiles.ui.MainScreenParams] and
- *   [com.bl4ckswordsman.cerberustiles.ui.OverlayDialogParams] declare those
- *   parameters as `LiveData<T>`, so they must stay as LiveData to satisfy
- *   the shared UI contract.
- * - The remaining fields are [mutableStateOf] because they are read as
- *   plain `.value` (Boolean) in OverlayDialogParams, which does not accept
- *   LiveData for those slots.
- */
-class MainViewModel : ViewModel() {
-    /** Whether the app has WRITE_SETTINGS permission. */
-    val canWrite = MutableLiveData<Boolean>()
 
-    /** Whether adaptive brightness is currently enabled. */
-    val isAdaptiveBrightnessOn = mutableStateOf(false)
-
-    /** Whether vibration mode is currently active. */
-    val isVibrationModeOn = mutableStateOf(false)
-
-    /** Whether charging optimization (80% limit) is currently enabled. */
-    val isChargingOptimizationOn = mutableStateOf(false)
-
-    /** Whether the device supports charging optimization. */
-    val isChargingOptimizationSupported = mutableStateOf(false)
-
-    /** Whether the ADB-instructions dialog should be shown. */
-    val showAdbDialog = mutableStateOf(false)
-
-    /** The current ringer mode of the device. */
-    val currentRingerMode = MutableLiveData(RingerMode.NORMAL)
-
-    /** Whether the Smart Pixels AccessibilityService is enabled. */
-    val isAccessibilityEnabled = MutableLiveData<Boolean>()
-
-    /** Whether Smart Pixels is currently enabled. */
-    val isSmartPixelsOn = mutableStateOf(false)
-
-    /** Current intensity for Smart Pixels (10% to 90%, default 50%). */
-    val smartPixelsIntensity = mutableStateOf(SettingsUtils.SmartPixels.DEFAULT_INTENSITY)
-
-    /** Whether Smart Pixels should pause during screen recording / casting. */
-    val isSmartPixelsDisableOnCast = mutableStateOf(true)
-
-    /**
-     * Updates the state of the canWrite setting.
-     */
-    fun updateCanWrite(context: Context) {
-        canWrite.value = canWriteSettings(context)
-    }
-
-    /**
-     * Updates the state of the adaptive brightness setting.
-     */
-    fun updateIsAdaptiveBrightnessOn(context: Context) {
-        isAdaptiveBrightnessOn.value = SettingsUtils.Brightness.isAdaptiveBrightnessEnabled(context)
-    }
-
-    /**
-     * Updates the state of the vibration mode setting.
-     */
-    fun updateIsVibrationModeOn(context: Context) {
-        isVibrationModeOn.value = SettingsUtils.Vibration.isVibrationModeEnabled(context)
-    }
-
-    /**
-     * Updates the state of the charging optimization setting.
-     */
-    fun updateIsChargingOptimizationOn(context: Context) {
-        isChargingOptimizationSupported.value =
-            SettingsUtils.Charging.isChargingOptimizationSupported(context)
-        isChargingOptimizationOn.value =
-            isChargingOptimizationSupported.value && SettingsUtils.Charging.isChargingOptimizationEnabled(
-                context
-            )
-    }
-
-    /**
-     * Reads the current ringer mode from the device and updates [currentRingerMode].
-     */
-    fun updateCurrentRingerMode(context: Context) {
-        currentRingerMode.value = Ringer.getCurrentRingerMode(context)
-    }
-
-    /**
-     * Updates the state of the Smart Pixels settings and accessibility status.
-     */
-    fun updateSmartPixelsState(context: Context) {
-        isAccessibilityEnabled.value =
-            SettingsUtils.SmartPixels.isAccessibilityServiceEnabled(context)
-        isSmartPixelsOn.value = SettingsUtils.SmartPixels.isSmartPixelsEnabled(context)
-        smartPixelsIntensity.value = SettingsUtils.SmartPixels.getSmartPixelsIntensity(context)
-        isSmartPixelsDisableOnCast.value = SettingsUtils.SmartPixels.isDisableOnCastEnabled(context)
-    }
-}
 
 
 // TODO: Add other settings utilities here

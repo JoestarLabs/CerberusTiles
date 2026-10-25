@@ -15,13 +15,8 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -51,7 +46,7 @@ data class MainScreenScaffoldParams(
     val isChargingOptimizationSupported: Boolean,
     val setChargingOptimization: (Boolean) -> Unit,
     val toggleChargingOptimization: (Boolean) -> Unit,
-    val currentRingerMode: LiveData<RingerMode>,
+    val currentRingerMode: RingerMode,
     val onRingerModeChange: (RingerMode) -> Unit,
     val isSmartPixelsOn: Boolean = false,
     val toggleSmartPixels: ((Boolean) -> Unit)? = null
@@ -61,20 +56,22 @@ data class MainScreenScaffoldParams(
  * Parameters for the main screen.
  */
 data class MainScreenParams(
-    val canWrite: LiveData<Boolean>,
-    val isAdaptive: LiveData<Boolean>,
+    val canWrite: Boolean,
+    val isAdaptive: Boolean,
+    val setAdaptive: (Boolean) -> Unit = {},
     val toggleAdaptiveBrightness: () -> Unit,
-    val isVibrationMode: LiveData<Boolean>,
+    val isVibrationMode: Boolean,
+    val setVibrationMode: (Boolean) -> Unit = {},
     val toggleVibrationMode: () -> Boolean,
-    val isChargingOptimization: LiveData<Boolean>,
-    val isChargingOptimizationSupported: LiveData<Boolean>,
+    val isChargingOptimization: Boolean,
+    val isChargingOptimizationSupported: Boolean,
     val toggleChargingOptimization: (Boolean) -> Unit,
-    val showAdbDialog: LiveData<Boolean>,
+    val showAdbDialog: Boolean,
     val onAdbDialogDismiss: () -> Unit,
     val openPermissionSettings: () -> Unit,
-    val currentRingerMode: LiveData<RingerMode>,
+    val currentRingerMode: RingerMode,
     val onRingerModeChange: (RingerMode) -> Unit,
-    val isSmartPixels: LiveData<Boolean>? = null,
+    val isSmartPixels: Boolean = false,
     val toggleSmartPixels: ((Boolean) -> Unit)? = null,
     val openSettings: Boolean = false
 )
@@ -160,27 +157,7 @@ fun MainScreenScaffold(params: MainScreenScaffoldParams) {
 @Composable
 fun MainScreen(params: MainScreenParams) {
     val navController = rememberNavController()
-    val canWriteState by params.canWrite.observeAsState(initial = false)
-    val isAdaptiveState by params.isAdaptive.observeAsState(initial = false)
-    val isVibrationModeState by params.isVibrationMode.observeAsState(initial = false)
-    val isChargingOptimizationState by params.isChargingOptimization.observeAsState(initial = false)
-    val isChargingOptimizationSupportedState by params.isChargingOptimizationSupported.observeAsState(
-        initial = false
-    )
-    val isSmartPixelsState by (params.isSmartPixels?.observeAsState(initial = false)
-        ?: rememberSaveable { mutableStateOf(false) })
 
-    val (isSwitchedOn, setSwitchedOn) = rememberSaveable { mutableStateOf(isAdaptiveState) }
-    val (isVibrationModeOn, setVibrationMode) = rememberSaveable {
-        mutableStateOf(isVibrationModeState)
-    }
-
-    LaunchedEffect(isAdaptiveState) {
-        setSwitchedOn(isAdaptiveState)
-    }
-    LaunchedEffect(isVibrationModeState) {
-        setVibrationMode(isVibrationModeState)
-    }
     LaunchedEffect(params.openSettings) {
         if (params.openSettings) {
             navController.navigate(Screen.Settings.route)
@@ -196,7 +173,7 @@ fun MainScreen(params: MainScreenParams) {
         else -> Screen.Home
     }
 
-    if (params.showAdbDialog.observeAsState(initial = false).value) {
+    if (params.showAdbDialog) {
         AdbPermissionDialog(
             context = LocalContext.current,
             onDismiss = params.onAdbDialogDismiss
@@ -207,21 +184,21 @@ fun MainScreen(params: MainScreenParams) {
         MainScreenScaffoldParams(
             navController = navController,
             selectedScreen = selectedScreen,
-            canWriteState = canWriteState,
-            isSwitchedOn = isSwitchedOn,
-            setSwitchedOn = setSwitchedOn,
+            canWriteState = params.canWrite,
+            isSwitchedOn = params.isAdaptive,
+            setSwitchedOn = params.setAdaptive,
             toggleAdaptiveBrightness = params.toggleAdaptiveBrightness,
             openPermissionSettings = params.openPermissionSettings,
-            isVibrationModeOn = isVibrationModeOn,
-            setVibrationMode = setVibrationMode,
+            isVibrationModeOn = params.isVibrationMode,
+            setVibrationMode = params.setVibrationMode,
             toggleVibrationMode = params.toggleVibrationMode,
-            isChargingOptimizationOn = isChargingOptimizationState,
-            isChargingOptimizationSupported = isChargingOptimizationSupportedState,
+            isChargingOptimizationOn = params.isChargingOptimization,
+            isChargingOptimizationSupported = params.isChargingOptimizationSupported,
             setChargingOptimization = {},
             toggleChargingOptimization = params.toggleChargingOptimization,
             currentRingerMode = params.currentRingerMode,
             onRingerModeChange = params.onRingerModeChange,
-            isSmartPixelsOn = isSmartPixelsState,
+            isSmartPixelsOn = params.isSmartPixels,
             toggleSmartPixels = params.toggleSmartPixels
         )
     )
@@ -236,18 +213,18 @@ fun MainScreen(params: MainScreenParams) {
 fun MainScreenPreview() {
     MainScreen(
         MainScreenParams(
-            canWrite = MutableLiveData(true),
-            isAdaptive = MutableLiveData(true),
+            canWrite = true,
+            isAdaptive = true,
             toggleAdaptiveBrightness = {},
-            isVibrationMode = MutableLiveData(true),
+            isVibrationMode = true,
             toggleVibrationMode = { true },
-            isChargingOptimization = MutableLiveData(true),
-            isChargingOptimizationSupported = MutableLiveData(true),
+            isChargingOptimization = true,
+            isChargingOptimizationSupported = true,
             toggleChargingOptimization = {},
-            showAdbDialog = MutableLiveData(false),
+            showAdbDialog = false,
             onAdbDialogDismiss = {},
             openPermissionSettings = {},
-            currentRingerMode = MutableLiveData(RingerMode.NORMAL),
+            currentRingerMode = RingerMode.NORMAL,
             onRingerModeChange = {}
         )
     )
