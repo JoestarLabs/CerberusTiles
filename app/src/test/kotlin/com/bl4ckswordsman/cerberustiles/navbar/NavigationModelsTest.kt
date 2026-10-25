@@ -4,6 +4,7 @@ import com.bl4ckswordsman.cerberustiles.Constants
 import com.bl4ckswordsman.cerberustiles.models.RingerMode
 import com.bl4ckswordsman.cerberustiles.ui.DialogType
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -24,6 +25,21 @@ class NavigationModelsTest {
     @Test
     fun `Screen Licenses route is Licenses`() {
         assertEquals("Licenses", Screen.Licenses.route)
+    }
+
+    @Test
+    fun `Screen Permissions route is Permissions`() {
+        assertEquals("Permissions", Screen.Permissions.route)
+    }
+
+    @Test
+    fun `NavTransitions isSubScreen returns true for sub screens and false for tabs`() {
+        assertTrue(NavTransitions.isSubScreen(Screen.Licenses.route))
+        assertTrue(NavTransitions.isSubScreen(Screen.Permissions.route))
+        assertFalse(NavTransitions.isSubScreen(Screen.Home.route))
+        assertFalse(NavTransitions.isSubScreen(Screen.Settings.route))
+        assertFalse(NavTransitions.isSubScreen(null))
+        assertFalse(NavTransitions.isSubScreen("UnknownRoute"))
     }
 
     @Test

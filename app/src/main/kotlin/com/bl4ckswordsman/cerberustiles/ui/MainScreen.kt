@@ -1,17 +1,9 @@
 package com.bl4ckswordsman.cerberustiles.ui
 
-import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Icon
@@ -26,23 +18,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.bl4ckswordsman.cerberustiles.R
 import com.bl4ckswordsman.cerberustiles.models.RingerMode
 import com.bl4ckswordsman.cerberustiles.navbar.BottomNavBar
+import com.bl4ckswordsman.cerberustiles.navbar.NavTransitions.topBarIconEnterTransition
+import com.bl4ckswordsman.cerberustiles.navbar.NavTransitions.topBarIconExitTransition
+import com.bl4ckswordsman.cerberustiles.navbar.NavTransitions.topBarTitleTransition
 import com.bl4ckswordsman.cerberustiles.navbar.Screen
-import com.mikepenz.aboutlibraries.ui.compose.android.produceLibraries
-import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 import com.bl4ckswordsman.cerberustiles.Constants as label
 
 /**
@@ -63,8 +51,8 @@ data class MainScreenScaffoldParams(
     val isChargingOptimizationSupported: Boolean,
     val setChargingOptimization: (Boolean) -> Unit,
     val toggleChargingOptimization: (Boolean) -> Unit,
-    val currentRingerMode: LiveData<RingerMode>,    // Add this
-    val onRingerModeChange: (RingerMode) -> Unit,   // Add this
+    val currentRingerMode: LiveData<RingerMode>,
+    val onRingerModeChange: (RingerMode) -> Unit,
     val isSmartPixelsOn: Boolean = false,
     val toggleSmartPixels: ((Boolean) -> Unit)? = null
 )
@@ -92,209 +80,81 @@ data class MainScreenParams(
 )
 
 /**
- * Parameters for the main screen nav host.
+ * Converts [MainScreenScaffoldParams] to [MainScreenNavHostParams].
  */
-data class MainScreenNavHostParams(
-    val navController: NavHostController,
-    val innerPadding: PaddingValues,
-    val canWriteState: Boolean,
-    val isSwitchedOn: Boolean,
-    val setSwitchedOn: (Boolean) -> Unit,
-    val toggleAdaptiveBrightness: () -> Unit,
-    val openPermissionSettings: () -> Unit,
-    val isVibrationModeOn: Boolean,
-    val setVibrationMode: (Boolean) -> Unit,
-    val toggleVibrationMode: () -> Boolean,
-    val isChargingOptimizationOn: Boolean,
-    val isChargingOptimizationSupported: Boolean,
-    val setChargingOptimization: (Boolean) -> Unit,
-    val toggleChargingOptimization: (Boolean) -> Unit,
-    val currentRingerMode: LiveData<RingerMode>,
-    val onRingerModeChange: (RingerMode) -> Unit,
-    val isSmartPixelsOn: Boolean = false,
-    val toggleSmartPixels: ((Boolean) -> Unit)? = null
+fun MainScreenScaffoldParams.toNavHostParams(
+    innerPadding: androidx.compose.foundation.layout.PaddingValues
+): MainScreenNavHostParams = MainScreenNavHostParams(
+    navController = navController,
+    innerPadding = innerPadding,
+    canWriteState = canWriteState,
+    isSwitchedOn = isSwitchedOn,
+    setSwitchedOn = setSwitchedOn,
+    toggleAdaptiveBrightness = toggleAdaptiveBrightness,
+    openPermissionSettings = openPermissionSettings,
+    isVibrationModeOn = isVibrationModeOn,
+    setVibrationMode = setVibrationMode,
+    toggleVibrationMode = toggleVibrationMode,
+    isChargingOptimizationOn = isChargingOptimizationOn,
+    isChargingOptimizationSupported = isChargingOptimizationSupported,
+    setChargingOptimization = setChargingOptimization,
+    toggleChargingOptimization = toggleChargingOptimization,
+    currentRingerMode = currentRingerMode,
+    onRingerModeChange = onRingerModeChange,
+    isSmartPixelsOn = isSmartPixelsOn,
+    toggleSmartPixels = toggleSmartPixels
 )
 
 /**
- * The main screen scaffold that contains the top bar, bottom bar, and the main screen navigation host.
- *
- * @param params The parameters for the main screen scaffold.
+ * The main screen scaffold that contains the top bar, bottom bar, and navigation host.
  */
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun MainScreenScaffold(params: MainScreenScaffoldParams) {
-    Scaffold(topBar = {
-        TopAppBar(
-            colors = TopAppBarDefaults.topAppBarColors(),
-            title = {
-                Text(
-                    text = when (params.selectedScreen) {
-                        is Screen.Home -> label.HOME_SCREEN
-                        is Screen.Settings -> label.SETTINGS_SCREEN
-                        is Screen.Licenses -> "Open Source Licenses"
-                        is Screen.Permissions -> "Permissions & Privacy"
-                    }
-                )
-            },
-            navigationIcon = {
-                if (params.selectedScreen is Screen.Licenses || params.selectedScreen is Screen.Permissions) {
-                    IconButton(onClick = { params.navController.popBackStack() }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(),
+                title = {
+                    AnimatedContent(
+                        targetState = params.selectedScreen,
+                        transitionSpec = { topBarTitleTransition() },
+                        label = "TopAppBarTitleAnim"
+                    ) { screen ->
+                        Text(
+                            text = when (screen) {
+                                is Screen.Home -> label.HOME_SCREEN
+                                is Screen.Settings -> label.SETTINGS_SCREEN
+                                is Screen.Licenses -> "Open Source Licenses"
+                                is Screen.Permissions -> "Permissions & Privacy"
+                            }
                         )
                     }
-                }
-            }
-        )
-    }, bottomBar = { BottomNavBar(params.navController) }) { innerPadding ->
-        MainScreenNavHost(
-            MainScreenNavHostParams(
-                params.navController,
-                innerPadding,
-                params.canWriteState,
-                params.isSwitchedOn,
-                params.setSwitchedOn,
-                params.toggleAdaptiveBrightness,
-                params.openPermissionSettings,
-                params.isVibrationModeOn,
-                params.setVibrationMode,
-                params.toggleVibrationMode,
-                params.isChargingOptimizationOn,
-                params.isChargingOptimizationSupported,
-                params.setChargingOptimization,
-                params.toggleChargingOptimization,
-                params.currentRingerMode,
-                params.onRingerModeChange,
-                params.isSmartPixelsOn,
-                params.toggleSmartPixels
-            )
-        )
-    }
-}
-
-/**
- * The main screen navigation host that handles the navigation between screens.
- *
- * @param params The parameters for the main screen nav host.
- */
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
-@Composable
-fun MainScreenNavHost(params: MainScreenNavHostParams) {
-
-    val enterTrans: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition =
-        { fadeIn() }
-    val exitTrans: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition =
-        { fadeOut() }
-
-    val currentRingerMode by params.currentRingerMode.observeAsState(RingerMode.NORMAL)
-
-    NavHost(params.navController, startDestination = Screen.Home.route) {
-        composable(
-            Screen.Home.route, enterTransition = enterTrans, exitTransition = exitTrans
-        ) {
-            Column(
-                modifier = Modifier.padding(params.innerPadding)
-            ) {
-                val context = LocalContext.current
-                val sharedPreferences =
-                    context.getSharedPreferences("settings", Context.MODE_PRIVATE)
-                val settingsCompParams = SettingsComponentsParams(
-                    canWriteState = params.canWriteState,
-                    isSwitchedOn = params.isSwitchedOn,
-                    setSwitchedOn = params.setSwitchedOn,
-                    toggleAdaptiveBrightness = params.toggleAdaptiveBrightness,
-                    openPermissionSettings = params.openPermissionSettings,
-                    isVibrationModeOn = params.isVibrationModeOn,
-                    setVibrationMode = params.setVibrationMode,
-                    toggleVibrationMode = params.toggleVibrationMode,
-                    isChargingOptimizationOn = params.isChargingOptimizationOn,
-                    setChargingOptimization = params.setChargingOptimization,
-                    toggleChargingOptimization = params.toggleChargingOptimization,
-                    sharedParams = createSharedParams(params.navController),
-                    componentVisibilityParams = ComponentVisibilityDialogParams(
-                        adaptBrightnessSwitch = rememberSaveable {
-                            mutableStateOf(
-                                sharedPreferences.getBoolean(
-                                    "adaptBrightnessSwitch",
-                                    true
-                                )
-                            )
-                        },
-                        brightnessSlider = rememberSaveable {
-                            mutableStateOf(sharedPreferences.getBoolean("brightnessSlider", true))
-                        },
-                        ringerModeSelector = rememberSaveable {
-                            mutableStateOf(sharedPreferences.getBoolean("ringerModeSelector", true))
-                        },
-                        chargingOptimizationSwitch = rememberSaveable {
-                            mutableStateOf(
-                                sharedPreferences.getBoolean(
-                                    "chargingOptimizationSwitch",
-                                    true
-                                )
-                            )
-                        },
-                        smartPixelsSwitch = rememberSaveable {
-                            mutableStateOf(
-                                sharedPreferences.getBoolean(
-                                    "smartPixelsSwitch",
-                                    true
-                                )
+                },
+                navigationIcon = {
+                    AnimatedVisibility(
+                        visible = params.selectedScreen is Screen.Licenses || params.selectedScreen is Screen.Permissions,
+                        enter = topBarIconEnterTransition(),
+                        exit = topBarIconExitTransition()
+                    ) {
+                        IconButton(onClick = { params.navController.popBackStack() }) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back"
                             )
                         }
-                    ),
-                    currentRingerMode = currentRingerMode,
-                    onRingerModeChange = params.onRingerModeChange,
-                    isSmartPixelsOn = params.isSmartPixelsOn,
-                    toggleSmartPixels = params.toggleSmartPixels
-                )
-                SettingsComponents(settingsCompParams)
-            }
-        }
-        composable(
-            Screen.Settings.route,
-            enterTransition = enterTrans,
-            exitTransition = exitTrans
-        )
-        {
-            val sharedParams = createSharedParams(params.navController)
-            val settingsScreenParams = SettingsScreenParams(
-                paddingValues = params.innerPadding,
-                sharedParams = sharedParams
+                    }
+                }
             )
-
-            SettingsScreen(settingsScreenParams)
-        }
-        composable(
-            Screen.Licenses.route,
-            enterTransition = enterTrans,
-            exitTransition = exitTrans
-        ) {
-            val libraries by produceLibraries(R.raw.aboutlibraries)
-            Column(
-                modifier = Modifier.padding(params.innerPadding)
-            ) {
-                LibrariesContainer(
-                    libraries = libraries,
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
-        }
-        composable(
-            Screen.Permissions.route,
-            enterTransition = enterTrans,
-            exitTransition = exitTrans
-        ) {
-            PermissionsScreen(paddingValues = params.innerPadding)
-        }
+        },
+        bottomBar = { BottomNavBar(params.navController) }
+    ) { innerPadding ->
+        MainScreenNavHost(params.toNavHostParams(innerPadding))
     }
 }
 
 /**
- * The main screen of the app.
- *
- * @param params The parameters for the main screen.
+ * The main entry point composable for Cerberus Tiles UI.
  */
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
@@ -312,10 +172,9 @@ fun MainScreen(params: MainScreenParams) {
 
     val (isSwitchedOn, setSwitchedOn) = rememberSaveable { mutableStateOf(isAdaptiveState) }
     val (isVibrationModeOn, setVibrationMode) = rememberSaveable {
-        mutableStateOf(
-            isVibrationModeState
-        )
+        mutableStateOf(isVibrationModeState)
     }
+
     LaunchedEffect(isAdaptiveState) {
         setSwitchedOn(isAdaptiveState)
     }
@@ -346,24 +205,24 @@ fun MainScreen(params: MainScreenParams) {
 
     MainScreenScaffold(
         MainScreenScaffoldParams(
-            navController,
-            selectedScreen,
-            canWriteState,
-            isSwitchedOn,
-            setSwitchedOn,
-            params.toggleAdaptiveBrightness,
-            params.openPermissionSettings,
-            isVibrationModeOn,
-            setVibrationMode,
-            params.toggleVibrationMode,
-            isChargingOptimizationState,
-            isChargingOptimizationSupportedState,
-            {},
-            params.toggleChargingOptimization,
-            params.currentRingerMode,
-            params.onRingerModeChange,
-            isSmartPixelsState,
-            params.toggleSmartPixels
+            navController = navController,
+            selectedScreen = selectedScreen,
+            canWriteState = canWriteState,
+            isSwitchedOn = isSwitchedOn,
+            setSwitchedOn = setSwitchedOn,
+            toggleAdaptiveBrightness = params.toggleAdaptiveBrightness,
+            openPermissionSettings = params.openPermissionSettings,
+            isVibrationModeOn = isVibrationModeOn,
+            setVibrationMode = setVibrationMode,
+            toggleVibrationMode = params.toggleVibrationMode,
+            isChargingOptimizationOn = isChargingOptimizationState,
+            isChargingOptimizationSupported = isChargingOptimizationSupportedState,
+            setChargingOptimization = {},
+            toggleChargingOptimization = params.toggleChargingOptimization,
+            currentRingerMode = params.currentRingerMode,
+            onRingerModeChange = params.onRingerModeChange,
+            isSmartPixelsOn = isSmartPixelsState,
+            toggleSmartPixels = params.toggleSmartPixels
         )
     )
 }
@@ -389,6 +248,7 @@ fun MainScreenPreview() {
             onAdbDialogDismiss = {},
             openPermissionSettings = {},
             currentRingerMode = MutableLiveData(RingerMode.NORMAL),
-            onRingerModeChange = {})
+            onRingerModeChange = {}
+        )
     )
 }
