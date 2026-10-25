@@ -10,8 +10,6 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.CoroutineScope
 
 /**
@@ -22,7 +20,8 @@ import kotlinx.coroutines.CoroutineScope
  * @property showDialog The state of the dialog visibility.
  * @property dialogType The type of dialog to be shown.
  * @property sharedPreferences The shared preferences for storing app settings.
- * @property navController Optional navigation controller for screen navigation.
+ * @property onNavigateToPermissions Optional callback to navigate to permissions screen.
+ * @property onNavigateToLicenses Optional callback to navigate to licenses screen.
  */
 data class SharedParams(
     val context: Context,
@@ -30,7 +29,8 @@ data class SharedParams(
     val showDialog: MutableState<Boolean>,
     val dialogType: MutableState<DialogType>,
     val sharedPreferences: SharedPreferences,
-    val navController: NavController? = null
+    val onNavigateToPermissions: (() -> Unit)? = null,
+    val onNavigateToLicenses: (() -> Unit)? = null
 )
 
 /**
@@ -70,7 +70,7 @@ fun SettingsScreen(params: SettingsScreenParams) {
 @Composable
 fun SettingsScreenPreview() {
 
-    val sharedParams = createSharedParams(rememberNavController())
+    val sharedParams = createSharedParams()
     val settingsScreenParams = SettingsScreenParams(
         paddingValues = PaddingValues(16.dp),
         sharedParams = sharedParams

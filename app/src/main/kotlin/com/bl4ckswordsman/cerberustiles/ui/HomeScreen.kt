@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.navigation.NavController
 import com.bl4ckswordsman.cerberustiles.models.RingerMode
 
 /**
@@ -29,8 +28,7 @@ data class HomeScreenParams(
     val currentRingerMode: RingerMode,
     val onRingerModeChange: (RingerMode) -> Unit,
     val isSmartPixelsOn: Boolean = false,
-    val toggleSmartPixels: ((Boolean) -> Unit)? = null,
-    val navController: NavController? = null
+    val toggleSmartPixels: ((Boolean) -> Unit)? = null
 )
 
 /**
@@ -58,7 +56,7 @@ fun HomeScreen(params: HomeScreenParams) {
             isChargingOptimizationOn = params.isChargingOptimizationOn,
             setChargingOptimization = params.setChargingOptimization,
             toggleChargingOptimization = params.toggleChargingOptimization,
-            sharedParams = createSharedParams(params.navController),
+            sharedParams = createSharedParams(),
             componentVisibilityParams = componentVisibility,
             currentRingerMode = params.currentRingerMode,
             onRingerModeChange = params.onRingerModeChange,

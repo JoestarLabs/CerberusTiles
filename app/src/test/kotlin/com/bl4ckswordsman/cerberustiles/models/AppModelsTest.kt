@@ -1,0 +1,91 @@
+package com.bl4ckswordsman.cerberustiles.models
+
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.ui.unit.dp
+import com.bl4ckswordsman.cerberustiles.Constants
+import com.bl4ckswordsman.cerberustiles.ui.DialogType
+import com.bl4ckswordsman.cerberustiles.ui.HomeScreenParams
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+class AppModelsTest {
+
+    @Test
+    fun `DialogType entries contain all supported dialog variants`() {
+        val types = DialogType.entries.map { it.name }.toSet()
+        assertTrue(types.contains("NONE"))
+        assertTrue(types.contains("COMPONENT_VISIBILITY"))
+        assertTrue(types.contains("APP_VERSION"))
+        assertTrue(types.contains("SMART_PIXELS"))
+    }
+
+    @Test
+    fun `RingerMode contains expected enum constants`() {
+        val modes = RingerMode.entries.map { it.name }.toSet()
+        assertEquals(setOf("NORMAL", "SILENT", "VIBRATE"), modes)
+    }
+
+    @Test
+    fun `Constants contains expected intent action strings`() {
+        assertEquals(
+            "com.bl4ckswordsman.cerberustiles.TOGGLE_ADAPTIVE_BRIGHTNESS",
+            Constants.TOGGLE_ADAPTIVE_BRIGHTNESS_ACTION
+        )
+        assertEquals(
+            "com.bl4ckswordsman.cerberustiles.action.TOGGLE_VIBRATION_MODE",
+            Constants.TOGGLE_VIBRATION_MODE_ACTION
+        )
+        assertEquals("Unknown", Constants.UNKNOWN)
+        assertEquals("Home", Constants.HOME_SCREEN)
+        assertEquals("Settings", Constants.SETTINGS_SCREEN)
+    }
+
+    @Test
+    fun `HomeScreenParams constructs correctly with given properties`() {
+        var adaptiveToggled = false
+        var vibrationToggled = false
+        var chargingToggled = false
+        var smartPixelsToggled = false
+
+        val params = HomeScreenParams(
+            innerPadding = PaddingValues(12.dp),
+            canWriteState = true,
+            isSwitchedOn = true,
+            setSwitchedOn = {},
+            toggleAdaptiveBrightness = { adaptiveToggled = true },
+            openPermissionSettings = {},
+            isVibrationModeOn = false,
+            setVibrationMode = {},
+            toggleVibrationMode = { vibrationToggled = true; true },
+            isChargingOptimizationOn = true,
+            setChargingOptimization = {},
+            toggleChargingOptimization = { chargingToggled = it },
+            currentRingerMode = RingerMode.VIBRATE,
+            onRingerModeChange = {},
+            isSmartPixelsOn = true,
+            toggleSmartPixels = { smartPixelsToggled = it }
+        )
+
+        assertEquals(PaddingValues(12.dp), params.innerPadding)
+        assertTrue(params.canWriteState)
+        assertTrue(params.isSwitchedOn)
+        assertFalse(params.isVibrationModeOn)
+        assertTrue(params.isChargingOptimizationOn)
+        assertTrue(params.isSmartPixelsOn)
+        assertEquals(RingerMode.VIBRATE, params.currentRingerMode)
+
+        params.toggleAdaptiveBrightness()
+        assertTrue(adaptiveToggled)
+
+        assertTrue(params.toggleVibrationMode())
+        assertTrue(vibrationToggled)
+
+        params.toggleChargingOptimization(true)
+        assertTrue(chargingToggled)
+
+        params.toggleSmartPixels?.invoke(false)
+        assertFalse(smartPixelsToggled)
+    }
+}

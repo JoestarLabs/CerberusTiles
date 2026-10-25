@@ -11,8 +11,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.navigation.NavController
-import com.bl4ckswordsman.cerberustiles.navbar.Screen
 
 /**
  * The settings list item parameters.
@@ -44,7 +42,10 @@ enum class DialogType {
  * The shared parameters between the settings screen components.
  */
 @Composable
-fun createSharedParams(navController: NavController? = null): SharedParams {
+fun createSharedParams(
+    onNavigateToPermissions: (() -> Unit)? = null,
+    onNavigateToLicenses: (() -> Unit)? = null
+): SharedParams {
     val context = LocalContext.current
     val sharedPreferences = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
     val showDialog = rememberSaveable { mutableStateOf(false) }
@@ -57,7 +58,8 @@ fun createSharedParams(navController: NavController? = null): SharedParams {
         showDialog = showDialog,
         dialogType = dialogType,
         sharedPreferences = sharedPreferences,
-        navController = navController
+        onNavigateToPermissions = onNavigateToPermissions,
+        onNavigateToLicenses = onNavigateToLicenses
     )
 }
 
@@ -95,16 +97,16 @@ fun CreateSettingsListItem(params: SettingsListItemParams) {
         headlineText = "Permissions & Privacy",
         supportingText = "View required permissions, security details, and privacy FAQ",
         onClick = {
-            params.sharedParams.navController?.navigate(Screen.Permissions.route)
-                ?: Log.w("SettingsScreen", "NavController is null, cannot navigate to permissions")
+            params.sharedParams.onNavigateToPermissions?.invoke()
+                ?: Log.w("SettingsScreen", "onNavigateToPermissions callback is null")
         }
     )
     CreateSettingsListItem(
         headlineText = "Open Source Licenses",
         supportingText = "View licenses of the libraries that made this app possible",
         onClick = {
-            params.sharedParams.navController?.navigate(Screen.Licenses.route)
-                ?: Log.w("SettingsScreen", "NavController is null, cannot navigate to licenses")
+            params.sharedParams.onNavigateToLicenses?.invoke()
+                ?: Log.w("SettingsScreen", "onNavigateToLicenses callback is null")
         }
     )
 }

@@ -1,5 +1,6 @@
 package com.bl4ckswordsman.cerberustiles.activities
 
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -7,22 +8,33 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.lifecycleScope
+import com.bl4ckswordsman.cerberustiles.Constants as label
 import com.bl4ckswordsman.cerberustiles.MainViewModel
 import com.bl4ckswordsman.cerberustiles.SettingsUtils
 import com.bl4ckswordsman.cerberustiles.SettingsUtils.openPermissionSettings
 import com.bl4ckswordsman.cerberustiles.ShortcutHelper
 import com.bl4ckswordsman.cerberustiles.models.RingerMode
-import com.bl4ckswordsman.cerberustiles.ui.MainScreen
-import com.bl4ckswordsman.cerberustiles.ui.MainScreenParams
+import com.bl4ckswordsman.cerberustiles.ui.AdbPermissionDialog
+import com.bl4ckswordsman.cerberustiles.ui.HomeScreen
+import com.bl4ckswordsman.cerberustiles.ui.HomeScreenParams
 import com.bl4ckswordsman.cerberustiles.ui.theme.CerberusTilesTheme
 import kotlinx.coroutines.launch
 
 /**
- * Main activity of the app.
+ * Main activity of the app, hosting the Home screen and quick settings controls.
  *
  * All mutable settings state is owned by [MainViewModel], which is obtained via
  * `by viewModels()`. This keeps state consistent with [OverlayActivity], which
@@ -61,46 +73,81 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
 
     /**
      * Initialises the activity, registers it as a lifecycle observer, and sets up the Compose
-     * content tree with [MainScreen].
+     * content tree with [HomeScreen].
      */
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         lifecycle.addObserver(this)
+
+        if (intent?.action == "android.service.quicksettings.action.QS_TILE_PREFERENCES") {
+            startActivity(Intent(this, SettingsActivity::class.java))
+        }
+
         setContent {
             val canWrite by viewModel.canWrite.observeAsState(initial = false)
             val currentRingerMode by viewModel.currentRingerMode.observeAsState(RingerMode.NORMAL)
 
             CerberusTilesTheme {
-                MainScreen(
-                    MainScreenParams(
-                        canWrite = canWrite,
-                        isAdaptive = viewModel.isAdaptiveBrightnessOn.value,
-                        setAdaptive = { viewModel.isAdaptiveBrightnessOn.value = it },
-                        toggleAdaptiveBrightness = ::toggleAdaptiveBrightness,
-                        isVibrationMode = viewModel.isVibrationModeOn.value,
-                        setVibrationMode = { viewModel.isVibrationModeOn.value = it },
-                        toggleVibrationMode = ::toggleVibrationMode,
-                        isChargingOptimization = viewModel.isChargingOptimizationOn.value,
-                        isChargingOptimizationSupported = viewModel.isChargingOptimizationSupported.value,
-                        toggleChargingOptimization = ::toggleChargingOptimization,
-                        showAdbDialog = viewModel.showAdbDialog.value,
-                        onAdbDialogDismiss = {
-                            viewModel.showAdbDialog.value = false
-                        },
-                        openPermissionSettings = { openPermissionSettings(this) },
-                        currentRingerMode = currentRingerMode,
-                        onRingerModeChange = { newMode ->
-                            viewModel.currentRingerMode.value = newMode
-                            viewModel.isVibrationModeOn.value = newMode == RingerMode.VIBRATE
-                        },
-                        isSmartPixels = viewModel.isSmartPixelsOn.value,
-                        toggleSmartPixels = ::toggleSmartPixels,
-                        openSettings = intent?.action == "android.service.quicksettings.action.QS_TILE_PREFERENCES"
+                if (viewModel.showAdbDialog.value) {
+                    AdbPermissionDialog(
+                        context = this@MainActivity,
+                        onDismiss = { viewModel.showAdbDialog.value = false }
                     )
-                )
+                }
+
+                Scaffold(
+                    topBar = {
+                        TopAppBar(
+                            colors = TopAppBarDefaults.topAppBarColors(),
+                            title = { Text(label.HOME_SCREEN) },
+                            actions = {
+                                IconButton(onClick = {
+                                    startActivity(Intent(this@MainActivity, SettingsActivity::class.java))
+                                }) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Settings,
+                                        contentDescription = label.SETTINGS_SCREEN
+                                    )
+                                }
+                            }
+                        )
+                    }
+                ) { innerPadding ->
+                    HomeScreen(
+                        HomeScreenParams(
+                            innerPadding = innerPadding,
+                            canWriteState = canWrite,
+                            isSwitchedOn = viewModel.isAdaptiveBrightnessOn.value,
+                            setSwitchedOn = { viewModel.isAdaptiveBrightnessOn.value = it },
+                            toggleAdaptiveBrightness = ::toggleAdaptiveBrightness,
+                            openPermissionSettings = { openPermissionSettings(this@MainActivity) },
+                            isVibrationModeOn = viewModel.isVibrationModeOn.value,
+                            setVibrationMode = { viewModel.isVibrationModeOn.value = it },
+                            toggleVibrationMode = ::toggleVibrationMode,
+                            isChargingOptimizationOn = viewModel.isChargingOptimizationOn.value,
+                            setChargingOptimization = {},
+                            toggleChargingOptimization = ::toggleChargingOptimization,
+                            currentRingerMode = currentRingerMode,
+                            onRingerModeChange = { newMode ->
+                                viewModel.currentRingerMode.value = newMode
+                                viewModel.isVibrationModeOn.value = newMode == RingerMode.VIBRATE
+                            },
+                            isSmartPixelsOn = viewModel.isSmartPixelsOn.value,
+                            toggleSmartPixels = ::toggleSmartPixels
+                        )
+                    )
+                }
             }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        if (intent.action == "android.service.quicksettings.action.QS_TILE_PREFERENCES") {
+            startActivity(Intent(this, SettingsActivity::class.java))
         }
     }
 
