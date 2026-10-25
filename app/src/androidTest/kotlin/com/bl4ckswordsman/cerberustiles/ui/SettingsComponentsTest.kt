@@ -132,6 +132,43 @@ class SettingsComponentsTest {
     }
 
     @Test
+    fun brightnessSetting_whenCanWriteFalse_opensPermissionSettings() {
+        var openPermissionCalled = false
+
+        composeTestRule.setContent {
+            val sharedParams = rememberTestSharedParams()
+            val visibilityParams = testVisibilityParams(brightnessSlider = true)
+
+            val params = SettingsComponentsParams(
+                componentVisibilityParams = visibilityParams,
+                canWriteState = false,
+                isSwitchedOn = false,
+                setSwitchedOn = {},
+                toggleAdaptiveBrightness = {},
+                openPermissionSettings = { openPermissionCalled = true },
+                isVibrationModeOn = false,
+                setVibrationMode = {},
+                toggleVibrationMode = { true },
+                isChargingOptimizationOn = false,
+                setChargingOptimization = {},
+                toggleChargingOptimization = {},
+                sharedParams = sharedParams,
+                currentRingerMode = RingerMode.NORMAL,
+                onRingerModeChange = {}
+            )
+
+            CerberusTilesTheme {
+                SettingsComponents(params = params)
+            }
+        }
+
+        // Click preset button when app lacks write-settings permission
+        composeTestRule.onNodeWithText("Max").performClick()
+
+        assertTrue(openPermissionCalled)
+    }
+
+    @Test
     fun chargingOptimizationSetting_togglesCorrectly() {
         var toggledValue = false
 

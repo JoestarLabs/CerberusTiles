@@ -141,6 +141,8 @@ fun AdbPermissionDialog(context: Context, onDismiss: () -> Unit) {
  * @param isOverlayContext Whether this component is rendered inside an overlay
  *   (compact view with smaller icons and no labels).
  * @param initialPreset Optional initial preset to override system brightness lookup.
+ * @param canWriteState Whether the app currently has permission to write system settings.
+ * @param openPermissionSettings Callback to open the system write settings permission screen.
  * @param onPresetSelected Optional callback invoked when a preset is selected.
  */
 @Composable
@@ -148,6 +150,8 @@ fun BrightnessPresetButtonGroup(
     context: Context,
     isOverlayContext: Boolean = false,
     initialPreset: BrightnessPreset? = null,
+    canWriteState: Boolean = true,
+    openPermissionSettings: (() -> Unit)? = null,
     onPresetSelected: ((BrightnessPreset) -> Unit)? = null
 ) {
     var selectedPreset by rememberSaveable {
@@ -175,9 +179,16 @@ fun BrightnessPresetButtonGroup(
             ToggleButton(
                 checked = isSelected,
                 onCheckedChange = {
-                    selectedPreset = preset
-                    SettingsUtils.Brightness.setScreenBrightness(context, preset.level)
-                    onPresetSelected?.invoke(preset)
+                    if (!canWriteState) {
+                        openPermissionSettings?.invoke()
+                    } else {
+                        val writeSucceeded =
+                            SettingsUtils.Brightness.setScreenBrightness(context, preset.level)
+                        if (writeSucceeded) {
+                            selectedPreset = preset
+                            onPresetSelected?.invoke(preset)
+                        }
+                    }
                 },
                 modifier = Modifier
                     .weight(1f)

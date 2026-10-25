@@ -88,14 +88,17 @@ object SettingsUtils {
 
         /**
          * Sets the screen brightness.
+         *
+         * @return True if the brightness was successfully written, false otherwise (e.g., missing WRITE_SETTINGS permission).
          */
-        fun setScreenBrightness(context: Context, brightness: Float) {
+        fun setScreenBrightness(context: Context, brightness: Float): Boolean {
             if (Settings.System.canWrite(context)) {
                 val brightnessValue = (255.0.pow(brightness.toDouble())).toInt()
-                Settings.System.putInt(
+                return Settings.System.putInt(
                     context.contentResolver, Settings.System.SCREEN_BRIGHTNESS, brightnessValue
                 )
             }
+            return false
         }
     }
 

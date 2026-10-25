@@ -97,7 +97,9 @@ fun SettingsComponents(params: SettingsComponentsParams) {
     if (params.componentVisibilityParams.brightnessSlider) {
         BrightnessPresetButtonGroup(
             context = LocalContext.current,
-            isOverlayContext = params.isOverlayContext
+            isOverlayContext = params.isOverlayContext,
+            canWriteState = params.canWriteState,
+            openPermissionSettings = params.openPermissionSettings
         )
     }
 
