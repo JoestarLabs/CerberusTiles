@@ -147,7 +147,8 @@ object NavTransitions {
      */
     fun AnimatedContentTransitionScope<Screen>.topBarTitleTransition(): ContentTransform {
         val isTargetSubScreen = targetState is Screen.Licenses || targetState is Screen.Permissions
-        val isInitialSubScreen = initialState is Screen.Licenses || initialState is Screen.Permissions
+        val isInitialSubScreen =
+            initialState is Screen.Licenses || initialState is Screen.Permissions
 
         return if (isTargetSubScreen && !isInitialSubScreen) {
             (slideIntoContainer(

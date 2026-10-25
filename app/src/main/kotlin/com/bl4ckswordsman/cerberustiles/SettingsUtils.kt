@@ -10,10 +10,7 @@ import android.view.accessibility.AccessibilityManager
 import android.widget.Toast
 import androidx.core.net.toUri
 import com.bl4ckswordsman.cerberustiles.SettingsUtils.Charging.CHARGE_OPTIMIZATION_MODE
-import com.bl4ckswordsman.cerberustiles.SettingsUtils.canWriteSettings
-import com.bl4ckswordsman.cerberustiles.models.RingerMode
 import com.bl4ckswordsman.cerberustiles.smartpixels.SmartPixelsAccessibilityService
-import com.bl4ckswordsman.cerberustiles.util.Ringer
 import kotlin.math.pow
 
 /** Utilities for different settings. */
@@ -368,8 +365,6 @@ object SettingsUtils {
         }
     }
 }
-
-
 
 
 // TODO: Add other settings utilities here

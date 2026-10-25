@@ -123,18 +123,21 @@ fun CreateDialog(params: DialogCreationParams) {
                     context = params.sharedParams.context
                 )
             }
+
             DialogType.COMPONENT_VISIBILITY -> {
                 ComponentVisibilityDialog(
                     onDismiss = { params.sharedParams.showDialog.value = false },
                     sharedPreferences = params.sharedParams.sharedPreferences
                 )
             }
+
             DialogType.SMART_PIXELS -> {
                 SmartPixelsDialog(
                     onDismiss = { params.sharedParams.showDialog.value = false },
                     context = params.sharedParams.context
                 )
             }
+
             DialogType.NONE -> {
                 // Do nothing
             }
