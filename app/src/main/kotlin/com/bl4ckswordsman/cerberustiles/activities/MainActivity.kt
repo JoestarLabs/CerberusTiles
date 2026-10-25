@@ -81,7 +81,7 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
         super.onCreate(savedInstanceState)
         lifecycle.addObserver(this)
 
-        if (intent?.action == "android.service.quicksettings.action.QS_TILE_PREFERENCES") {
+        if (savedInstanceState == null && intent?.action == "android.service.quicksettings.action.QS_TILE_PREFERENCES") {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
 
