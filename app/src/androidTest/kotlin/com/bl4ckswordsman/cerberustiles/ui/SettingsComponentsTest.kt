@@ -7,6 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -166,6 +167,41 @@ class SettingsComponentsTest {
         composeTestRule.onNodeWithText("Max").performClick()
 
         assertTrue(openPermissionCalled)
+    }
+
+    @Test
+    fun brightnessSetting_whenAdaptiveBrightnessOn_presetsAreDisabled() {
+        composeTestRule.setContent {
+            val sharedParams = rememberTestSharedParams()
+            val visibilityParams = testVisibilityParams(brightnessSlider = true)
+
+            val params = SettingsComponentsParams(
+                componentVisibilityParams = visibilityParams,
+                canWriteState = true,
+                isSwitchedOn = true,
+                setSwitchedOn = {},
+                toggleAdaptiveBrightness = {},
+                openPermissionSettings = {},
+                isVibrationModeOn = false,
+                setVibrationMode = {},
+                toggleVibrationMode = { true },
+                isChargingOptimizationOn = false,
+                setChargingOptimization = {},
+                toggleChargingOptimization = {},
+                sharedParams = sharedParams,
+                currentRingerMode = RingerMode.NORMAL,
+                onRingerModeChange = {}
+            )
+
+            CerberusTilesTheme {
+                SettingsComponents(params = params)
+            }
+        }
+
+        // Verify presets are disabled when adaptive brightness is ON
+        composeTestRule.onNodeWithText("Min").assertIsNotEnabled()
+        composeTestRule.onNodeWithText("Balanced").assertIsNotEnabled()
+        composeTestRule.onNodeWithText("Max").assertIsNotEnabled()
     }
 
     @Test

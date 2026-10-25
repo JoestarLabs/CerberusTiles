@@ -99,6 +99,7 @@ fun SettingsComponents(params: SettingsComponentsParams) {
             context = LocalContext.current,
             isOverlayContext = params.isOverlayContext,
             canWriteState = params.canWriteState,
+            isAdaptiveBrightnessOn = params.isSwitchedOn,
             openPermissionSettings = params.openPermissionSettings
         )
     }

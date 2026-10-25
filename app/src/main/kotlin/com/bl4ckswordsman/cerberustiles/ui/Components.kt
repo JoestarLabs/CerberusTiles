@@ -142,6 +142,8 @@ fun AdbPermissionDialog(context: Context, onDismiss: () -> Unit) {
  *   (compact view with smaller icons and no labels).
  * @param initialPreset Optional initial preset to override system brightness lookup.
  * @param canWriteState Whether the app currently has permission to write system settings.
+ * @param isAdaptiveBrightnessOn Whether adaptive brightness is currently enabled.
+ *   When enabled, preset selection is disabled and no preset is marked as selected.
  * @param openPermissionSettings Callback to open the system write settings permission screen.
  * @param onPresetSelected Optional callback invoked when a preset is selected.
  */
@@ -151,6 +153,7 @@ fun BrightnessPresetButtonGroup(
     isOverlayContext: Boolean = false,
     initialPreset: BrightnessPreset? = null,
     canWriteState: Boolean = true,
+    isAdaptiveBrightnessOn: Boolean = false,
     openPermissionSettings: (() -> Unit)? = null,
     onPresetSelected: ((BrightnessPreset) -> Unit)? = null
 ) {
@@ -174,11 +177,14 @@ fun BrightnessPresetButtonGroup(
         horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween)
     ) {
         presets.forEachIndexed { index, preset ->
-            val isSelected = selectedPreset == preset
+            val isSelected = !isAdaptiveBrightnessOn && selectedPreset == preset
 
             ToggleButton(
                 checked = isSelected,
                 onCheckedChange = {
+                    if (isAdaptiveBrightnessOn) {
+                        return@ToggleButton
+                    }
                     if (!canWriteState) {
                         openPermissionSettings?.invoke()
                     } else {
@@ -190,6 +196,7 @@ fun BrightnessPresetButtonGroup(
                         }
                     }
                 },
+                enabled = !isAdaptiveBrightnessOn,
                 modifier = Modifier
                     .weight(1f)
                     .semantics { role = Role.RadioButton },
