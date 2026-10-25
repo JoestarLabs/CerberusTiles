@@ -26,7 +26,12 @@ class ComponentVisibilityTest {
         every { prefs.getBoolean(ComponentVisibility.KEY_ADAPTIVE_BRIGHTNESS, true) } returns true
         every { prefs.getBoolean(ComponentVisibility.KEY_BRIGHTNESS_SLIDER, true) } returns false
         every { prefs.getBoolean(ComponentVisibility.KEY_RINGER_MODE, true) } returns true
-        every { prefs.getBoolean(ComponentVisibility.KEY_CHARGING_OPTIMIZATION, true) } returns false
+        every {
+            prefs.getBoolean(
+                ComponentVisibility.KEY_CHARGING_OPTIMIZATION,
+                true
+            )
+        } returns false
         every { prefs.getBoolean(ComponentVisibility.KEY_SMART_PIXELS, true) } returns true
 
         val visibility = ComponentVisibility.fromPreferences(prefs)

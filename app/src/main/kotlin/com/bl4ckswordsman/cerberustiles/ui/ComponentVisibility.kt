@@ -39,7 +39,10 @@ data class ComponentVisibility(
                 adaptBrightnessSwitch = preferences.getBoolean(KEY_ADAPTIVE_BRIGHTNESS, true),
                 brightnessSlider = preferences.getBoolean(KEY_BRIGHTNESS_SLIDER, true),
                 ringerModeSelector = preferences.getBoolean(KEY_RINGER_MODE, true),
-                chargingOptimizationSwitch = preferences.getBoolean(KEY_CHARGING_OPTIMIZATION, true),
+                chargingOptimizationSwitch = preferences.getBoolean(
+                    KEY_CHARGING_OPTIMIZATION,
+                    true
+                ),
                 smartPixelsSwitch = preferences.getBoolean(KEY_SMART_PIXELS, true)
             )
     }
