@@ -52,6 +52,7 @@ class OverlayActivity : ComponentActivity() {
         viewModel.updateIsVibrationModeOn(this)
         viewModel.updateIsChargingOptimizationOn(this)
         viewModel.updateCurrentRingerMode(this)
+        viewModel.updateSmartPixelsState(this)
     }
 
     /**
@@ -126,6 +127,11 @@ class OverlayActivity : ComponentActivity() {
                 onRingerModeChange = { newMode ->
                     viewModel.currentRingerMode.value = newMode
                     viewModel.isVibrationModeOn.value = newMode == RingerMode.VIBRATE
+                },
+                isSmartPixelsOn = viewModel.isSmartPixelsOn.value,
+                toggleSmartPixels = { enabled ->
+                    SettingsUtils.SmartPixels.setSmartPixelsEnabled(this, enabled)
+                    viewModel.isSmartPixelsOn.value = enabled
                 }
             )
             OverlayDialog(params)

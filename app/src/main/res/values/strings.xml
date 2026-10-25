@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">Cerberus Tiles</string>
+    <string name="smart_pixels_title">Smart Pixels</string>
+    <string name="smart_pixels_desc">Dim pixels in a grid to save battery on OLED displays</string>
+    <string name="smart_pixels_intensity">Smart Pixels Intensity</string>
+    <string name="smart_pixels_disable_on_cast">Pause during screen recording or casting</string>
+    <string name="smart_pixels_disable_on_cast_desc">Automatically pause pixel grid overlay while casting or recording screen</string>
+    <string name="permission_missing">Permission missing</string>
+    <string name="on">On</string>
+    <string name="off">Off</string>
+    <string name="smart_pixels_accessibility_description">Used strictly to display an OLED battery-saving pixel grid over the screen. CerberusTiles does not read screen content, track keystrokes, or intercept user input.</string>
+    <string name="grant_accessibility_permission">Grant Accessibility Permission</string>
 </resources>

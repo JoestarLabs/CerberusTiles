@@ -60,7 +60,9 @@ data class MainScreenScaffoldParams(
     val setChargingOptimization: (Boolean) -> Unit,
     val toggleChargingOptimization: (Boolean) -> Unit,
     val currentRingerMode: LiveData<RingerMode>,    // Add this
-    val onRingerModeChange: (RingerMode) -> Unit    // Add this
+    val onRingerModeChange: (RingerMode) -> Unit,   // Add this
+    val isSmartPixelsOn: Boolean = false,
+    val toggleSmartPixels: ((Boolean) -> Unit)? = null
 )
 
 /**
@@ -79,7 +81,10 @@ data class MainScreenParams(
     val onAdbDialogDismiss: () -> Unit,
     val openPermissionSettings: () -> Unit,
     val currentRingerMode: LiveData<RingerMode>,
-    val onRingerModeChange: (RingerMode) -> Unit
+    val onRingerModeChange: (RingerMode) -> Unit,
+    val isSmartPixels: LiveData<Boolean>? = null,
+    val toggleSmartPixels: ((Boolean) -> Unit)? = null,
+    val openSettings: Boolean = false
 )
 
 /**
@@ -101,7 +106,9 @@ data class MainScreenNavHostParams(
     val setChargingOptimization: (Boolean) -> Unit,
     val toggleChargingOptimization: (Boolean) -> Unit,
     val currentRingerMode: LiveData<RingerMode>,
-    val onRingerModeChange: (RingerMode) -> Unit
+    val onRingerModeChange: (RingerMode) -> Unit,
+    val isSmartPixelsOn: Boolean = false,
+    val toggleSmartPixels: ((Boolean) -> Unit)? = null
 )
 
 /**
@@ -143,7 +150,9 @@ fun MainScreenScaffold(params: MainScreenScaffoldParams) {
                 params.setChargingOptimization,
                 params.toggleChargingOptimization,
                 params.currentRingerMode,
-                params.onRingerModeChange
+                params.onRingerModeChange,
+                params.isSmartPixelsOn,
+                params.toggleSmartPixels
             )
         )
     }
@@ -210,10 +219,20 @@ fun MainScreenNavHost(params: MainScreenNavHostParams) {
                                     true
                                 )
                             )
+                        },
+                        smartPixelsSwitch = rememberSaveable {
+                            mutableStateOf(
+                                sharedPreferences.getBoolean(
+                                    "smartPixelsSwitch",
+                                    true
+                                )
+                            )
                         }
                     ),
                     currentRingerMode = currentRingerMode,
-                    onRingerModeChange = params.onRingerModeChange
+                    onRingerModeChange = params.onRingerModeChange,
+                    isSmartPixelsOn = params.isSmartPixelsOn,
+                    toggleSmartPixels = params.toggleSmartPixels
                 )
                 SettingsComponents(settingsCompParams)
             }
@@ -266,6 +285,8 @@ fun MainScreen(params: MainScreenParams) {
     val isChargingOptimizationSupportedState by params.isChargingOptimizationSupported.observeAsState(
         initial = false
     )
+    val isSmartPixelsState by (params.isSmartPixels?.observeAsState(initial = false)
+        ?: rememberSaveable { mutableStateOf(false) })
 
     val (isSwitchedOn, setSwitchedOn) = rememberSaveable { mutableStateOf(isAdaptiveState) }
     val (isVibrationModeOn, setVibrationMode) = rememberSaveable {
@@ -278,6 +299,11 @@ fun MainScreen(params: MainScreenParams) {
     }
     LaunchedEffect(isVibrationModeState) {
         setVibrationMode(isVibrationModeState)
+    }
+    LaunchedEffect(params.openSettings) {
+        if (params.openSettings) {
+            navController.navigate(Screen.Settings.route)
+        }
     }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -312,7 +338,9 @@ fun MainScreen(params: MainScreenParams) {
             {},
             params.toggleChargingOptimization,
             params.currentRingerMode,
-            params.onRingerModeChange
+            params.onRingerModeChange,
+            isSmartPixelsState,
+            params.toggleSmartPixels
         )
     )
 }

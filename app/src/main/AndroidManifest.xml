@@ -30,6 +30,9 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE_PREFERENCES" />
+            </intent-filter>
         </activity>
         <activity
             android:name=".activities.ToggleAdaptiveBrightnessActivity"
@@ -43,6 +46,29 @@
             android:theme="@style/Theme.OverlayActivity" />
 
         <service
+            android:name=".smartpixels.SmartPixelsAccessibilityService"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/smart_pixels_accessibility_config" />
+        </service>
+
+        <service
+            android:name=".quicksettingstiles.SmartPixelsTileService"
+            android:exported="true"
+            android:icon="@drawable/rounded_grain_24"
+            android:label="@string/smart_pixels_title"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
+        <service
             android:name=".quicksettingstiles.AdaptiveBrightnessTileService"
             android:exported="true"
             android:icon="@drawable/baseline_brightness_auto_24"
@@ -53,6 +79,5 @@
             </intent-filter>
         </service>
     </application>
-
 
 </manifest>

@@ -3154,6 +3154,29 @@
         "CC0-1.0"
       ],
       "funding": []
+    },
+    {
+      "uniqueId": "com.sameerasw:essentials",
+      "artifactVersion": "1.0.0",
+      "name": "Essentials (Smart Pixels)",
+      "description": "Smart Pixels battery-saving screen filter and pattern rendering algorithm.",
+      "website": "https://github.com/sameerasw/essentials",
+      "developers": [
+        {
+          "name": "Sameera Sandakelum"
+        }
+      ],
+      "organization": {
+        "name": "sameerasw"
+      },
+      "scm": {
+        "connection": "scm:git:https://github.com/sameerasw/essentials.git",
+        "url": "https://github.com/sameerasw/essentials"
+      },
+      "licenses": [
+        "mit"
+      ],
+      "funding": []
     }
   ],
   "licenses": {

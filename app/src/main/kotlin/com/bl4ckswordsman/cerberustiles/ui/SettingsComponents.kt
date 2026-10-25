@@ -13,6 +13,7 @@ import androidx.compose.material3.ToggleButton
 import androidx.compose.material3.ToggleButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -32,7 +33,8 @@ data class ComponentVisibilityDialogParams(
     val adaptBrightnessSwitch: MutableState<Boolean>,
     val brightnessSlider: MutableState<Boolean>,
     val ringerModeSelector: MutableState<Boolean>,
-    val chargingOptimizationSwitch: MutableState<Boolean>
+    val chargingOptimizationSwitch: MutableState<Boolean>,
+    val smartPixelsSwitch: MutableState<Boolean> = mutableStateOf(true)
 )
 
 /**
@@ -54,7 +56,9 @@ data class SettingsComponentsParams(
     val sharedParams: SharedParams,
     val currentRingerMode: RingerMode,
     val onRingerModeChange: (RingerMode) -> Unit,
-    val isOverlayContext: Boolean = false
+    val isOverlayContext: Boolean = false,
+    val isSmartPixelsOn: Boolean = false,
+    val toggleSmartPixels: ((Boolean) -> Unit)? = null
 )
 
 /**
@@ -84,6 +88,22 @@ fun SettingsComponents(params: SettingsComponentsParams) {
                 params.toggleChargingOptimization(it)
             },
             label = if (params.isChargingOptimizationOn) "Charging Optimization is ON" else "Charging Optimization is OFF"
+        )
+    }
+
+    if (params.componentVisibilityParams.smartPixelsSwitch.value) {
+        val context = LocalContext.current
+        SwitchWithLabel(
+            isSwitchedOn = params.isSmartPixelsOn,
+            onCheckedChange = { checked ->
+                val hasPerm = SettingsUtils.SmartPixels.isAccessibilityServiceEnabled(context)
+                if (!hasPerm) {
+                    SettingsUtils.SmartPixels.openAccessibilitySettings(context)
+                } else {
+                    params.toggleSmartPixels?.invoke(checked)
+                }
+            },
+            label = if (params.isSmartPixelsOn) "Smart Pixels is ON" else "Smart Pixels is OFF"
         )
     }
 

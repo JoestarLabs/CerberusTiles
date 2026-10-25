@@ -42,6 +42,7 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
     private val isChargingOptimizationLiveData = MutableLiveData(false)
     private val isChargingOptimizationSupportedLiveData = MutableLiveData(false)
     private val showAdbDialogLiveData = MutableLiveData(false)
+    private val isSmartPixelsLiveData = MutableLiveData(false)
 
     /**
      * Creates all app shortcuts via [ShortcutHelper] when the activity becomes visible.
@@ -65,6 +66,7 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
         viewModel.updateIsVibrationModeOn(this)
         viewModel.updateIsChargingOptimizationOn(this)
         viewModel.updateCurrentRingerMode(this)
+        viewModel.updateSmartPixelsState(this)
         syncLiveDataWrappers()
     }
 
@@ -79,6 +81,7 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
         isChargingOptimizationSupportedLiveData.value =
             viewModel.isChargingOptimizationSupported.value
         showAdbDialogLiveData.value = viewModel.showAdbDialog.value
+        isSmartPixelsLiveData.value = viewModel.isSmartPixelsOn.value
     }
 
     /**
@@ -113,11 +116,24 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
                             viewModel.currentRingerMode.value = newMode
                             viewModel.isVibrationModeOn.value = newMode == RingerMode.VIBRATE
                             isVibrationModeLiveData.value = newMode == RingerMode.VIBRATE
-                        }
+                        },
+                        isSmartPixels = isSmartPixelsLiveData,
+                        toggleSmartPixels = ::toggleSmartPixels,
+                        openSettings = intent?.action == "android.service.quicksettings.action.QS_TILE_PREFERENCES"
                     )
                 )
             }
         }
+    }
+
+    /**
+     * Toggles the Smart Pixels feature state, persists the setting, and updates the ViewModel
+     * and LiveData wrapper.
+     */
+    private fun toggleSmartPixels(enabled: Boolean) {
+        SettingsUtils.SmartPixels.setSmartPixelsEnabled(this, enabled)
+        viewModel.isSmartPixelsOn.value = enabled
+        isSmartPixelsLiveData.value = enabled
     }
 
     /**

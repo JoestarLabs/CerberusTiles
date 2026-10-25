@@ -1,10 +1,12 @@
 package com.bl4ckswordsman.cerberustiles
 
+import android.accessibilityservice.AccessibilityServiceInfo
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.media.AudioManager
 import android.provider.Settings
+import android.view.accessibility.AccessibilityManager
 import android.widget.Toast
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.net.toUri
@@ -13,6 +15,7 @@ import androidx.lifecycle.ViewModel
 import com.bl4ckswordsman.cerberustiles.SettingsUtils.Charging.CHARGE_OPTIMIZATION_MODE
 import com.bl4ckswordsman.cerberustiles.SettingsUtils.canWriteSettings
 import com.bl4ckswordsman.cerberustiles.models.RingerMode
+import com.bl4ckswordsman.cerberustiles.smartpixels.SmartPixelsAccessibilityService
 import com.bl4ckswordsman.cerberustiles.util.Ringer
 import kotlin.math.pow
 
@@ -259,6 +262,107 @@ object SettingsUtils {
         }
         context.startActivity(intent)
     }
+
+    /**
+     * Utilities for Smart Pixels settings and accessibility overlay management.
+     */
+    object SmartPixels {
+        const val PREFS_NAME = "settings"
+        const val KEY_SMART_PIXELS_ENABLED = "smart_pixels_enabled"
+        const val KEY_SMART_PIXELS_INTENSITY = "smart_pixels_intensity"
+        const val KEY_SMART_PIXELS_DISABLE_ON_CAST = "smart_pixels_disable_on_cast"
+        const val DEFAULT_INTENSITY = 50f
+
+        /**
+         * Checks whether the Smart Pixels AccessibilityService is enabled in Android settings.
+         */
+        fun isAccessibilityServiceEnabled(context: Context): Boolean {
+            if (SmartPixelsAccessibilityService.isRunning()) return true
+            val am = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as? AccessibilityManager
+            val enabledServices = am?.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK)
+            if (enabledServices?.any {
+                it.resolveInfo?.serviceInfo?.packageName == context.packageName &&
+                    it.resolveInfo?.serviceInfo?.name == SmartPixelsAccessibilityService::class.java.name
+            } == true) {
+                return true
+            }
+            val enabledServicesSetting = try {
+                Settings.Secure.getString(
+                    context.contentResolver,
+                    Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+                )
+            } catch (_: Exception) {
+                null
+            } ?: return false
+
+            val expectedFull = "${context.packageName}/${SmartPixelsAccessibilityService::class.java.name}"
+            val expectedShort = "${context.packageName}/.${SmartPixelsAccessibilityService::class.java.simpleName}"
+            return enabledServicesSetting.split(':').any {
+                it.equals(expectedFull, ignoreCase = true) || it.equals(expectedShort, ignoreCase = true)
+            }
+        }
+
+        /**
+         * Opens the system accessibility settings screen.
+         */
+        fun openAccessibilitySettings(context: Context) {
+            val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            }
+            context.startActivity(intent)
+        }
+
+        /**
+         * Checks whether Smart Pixels is currently enabled in settings.
+         */
+        fun isSmartPixelsEnabled(context: Context): Boolean {
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            return prefs.getBoolean(KEY_SMART_PIXELS_ENABLED, false)
+        }
+
+        /**
+         * Sets whether Smart Pixels is enabled, persists the setting, and updates the service overlay.
+         */
+        fun setSmartPixelsEnabled(context: Context, enabled: Boolean) {
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            prefs.edit().putBoolean(KEY_SMART_PIXELS_ENABLED, enabled).apply()
+            SmartPixelsAccessibilityService.updateState(context)
+        }
+
+        /**
+         * Gets the configured Smart Pixels intensity (percentage 10f..90f, default 50f).
+         */
+        fun getSmartPixelsIntensity(context: Context): Float {
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            return prefs.getFloat(KEY_SMART_PIXELS_INTENSITY, DEFAULT_INTENSITY)
+        }
+
+        /**
+         * Sets the configured Smart Pixels intensity and notifies the service.
+         */
+        fun setSmartPixelsIntensity(context: Context, intensity: Float) {
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            prefs.edit().putFloat(KEY_SMART_PIXELS_INTENSITY, intensity).apply()
+            SmartPixelsAccessibilityService.updateIntensity(context, intensity)
+        }
+
+        /**
+         * Gets whether Smart Pixels automatically pauses during screen recording or casting.
+         */
+        fun isDisableOnCastEnabled(context: Context): Boolean {
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            return prefs.getBoolean(KEY_SMART_PIXELS_DISABLE_ON_CAST, true)
+        }
+
+        /**
+         * Sets whether Smart Pixels automatically pauses during screen recording or casting.
+         */
+        fun setDisableOnCastEnabled(context: Context, enabled: Boolean) {
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            prefs.edit().putBoolean(KEY_SMART_PIXELS_DISABLE_ON_CAST, enabled).apply()
+            SmartPixelsAccessibilityService.updateState(context)
+        }
+    }
 }
 
 /**
@@ -277,7 +381,7 @@ object SettingsUtils {
  *   [com.bl4ckswordsman.cerberustiles.ui.OverlayDialogParams] declare those
  *   parameters as `LiveData<T>`, so they must stay as LiveData to satisfy
  *   the shared UI contract.
- * - The remaining five fields are [mutableStateOf] because they are read as
+ * - The remaining fields are [mutableStateOf] because they are read as
  *   plain `.value` (Boolean) in OverlayDialogParams, which does not accept
  *   LiveData for those slots.
  */
@@ -302,6 +406,18 @@ class MainViewModel : ViewModel() {
 
     /** The current ringer mode of the device. */
     val currentRingerMode = MutableLiveData(RingerMode.NORMAL)
+
+    /** Whether the Smart Pixels AccessibilityService is enabled. */
+    val isAccessibilityEnabled = MutableLiveData<Boolean>()
+
+    /** Whether Smart Pixels is currently enabled. */
+    val isSmartPixelsOn = mutableStateOf(false)
+
+    /** Current intensity for Smart Pixels (10% to 90%, default 50%). */
+    val smartPixelsIntensity = mutableStateOf(SettingsUtils.SmartPixels.DEFAULT_INTENSITY)
+
+    /** Whether Smart Pixels should pause during screen recording / casting. */
+    val isSmartPixelsDisableOnCast = mutableStateOf(true)
 
     /**
      * Updates the state of the canWrite setting.
@@ -341,6 +457,16 @@ class MainViewModel : ViewModel() {
      */
     fun updateCurrentRingerMode(context: Context) {
         currentRingerMode.value = Ringer.getCurrentRingerMode(context)
+    }
+
+    /**
+     * Updates the state of the Smart Pixels settings and accessibility status.
+     */
+    fun updateSmartPixelsState(context: Context) {
+        isAccessibilityEnabled.value = SettingsUtils.SmartPixels.isAccessibilityServiceEnabled(context)
+        isSmartPixelsOn.value = SettingsUtils.SmartPixels.isSmartPixelsEnabled(context)
+        smartPixelsIntensity.value = SettingsUtils.SmartPixels.getSmartPixelsIntensity(context)
+        isSmartPixelsDisableOnCast.value = SettingsUtils.SmartPixels.isDisableOnCastEnabled(context)
     }
 }
 

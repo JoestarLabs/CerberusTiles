@@ -47,6 +47,7 @@ Tested in a Pixel 8 Pro.
 |            Vibration Ringer Mode             |       ✅       |      ✅       |          -          |
 |                Overlay dialog                |       -       |      ✅       |          -          |
 | Limit Charge to 80%<br>*(requires adb perm)* |       ✅       |      -       |          -          |
+|                 Smart Pixels                 |       ✅       |      -       |          ✅          |
 
 > [!NOTE]
 > More features coming soon.
@@ -65,6 +66,7 @@ Or from IzzyOnDroid:
 
 ### Kudos to
 
-[This cool Gradient Generator](https://doodad.dev/gradient-generator/) used in the app icon.
+- [This cool Gradient Generator](https://doodad.dev/gradient-generator/) used in the app icon.
+- [sameerasw/essentials](https://github.com/sameerasw/essentials) (Sameera Sandakelum) for the Smart Pixels feature and pattern rendering algorithm, licensed under the MIT License.
 
 [^1]: Name inspired by the multi-headed hound of Hades that guards the underworld.

@@ -36,7 +36,9 @@ data class OverlayDialogParams(
     val toggleChargingOptimization: (Boolean) -> Unit,
     val sharedParams: SharedParams,
     val currentRingerMode: RingerMode,
-    val onRingerModeChange: (RingerMode) -> Unit
+    val onRingerModeChange: (RingerMode) -> Unit,
+    val isSmartPixelsOn: Boolean = false,
+    val toggleSmartPixels: ((Boolean) -> Unit)? = null
 )
 
 /**
@@ -52,6 +54,8 @@ fun OverlayDialog(params: OverlayDialogParams) {
         params.sharedParams.sharedPreferences.getBoolean("ringerModeSelector", true)
     val chargingOptimizationSwitch =
         params.sharedParams.sharedPreferences.getBoolean("chargingOptimizationSwitch", true)
+    val smartPixelsSwitch =
+        params.sharedParams.sharedPreferences.getBoolean("smartPixelsSwitch", true)
     val canWriteState by params.canWrite.observeAsState(initial = false)
     val currentRingerMode = rememberSaveable {
         mutableStateOf(Ringer.getCurrentRingerMode(params.sharedParams.context))
@@ -88,6 +92,9 @@ fun OverlayDialog(params: OverlayDialogParams) {
                                 },
                                 chargingOptimizationSwitch = rememberSaveable {
                                     mutableStateOf(chargingOptimizationSwitch)
+                                },
+                                smartPixelsSwitch = rememberSaveable {
+                                    mutableStateOf(smartPixelsSwitch)
                                 }
                             )
                             val settingsComponentsParams = SettingsComponentsParams(
@@ -108,7 +115,9 @@ fun OverlayDialog(params: OverlayDialogParams) {
                                 onRingerModeChange = { newMode ->
                                     currentRingerMode.value = newMode
                                 },
-                                isOverlayContext = true
+                                isOverlayContext = true,
+                                isSmartPixelsOn = params.isSmartPixelsOn,
+                                toggleSmartPixels = params.toggleSmartPixels
                             )
                             SettingsComponents(settingsComponentsParams)
                         }

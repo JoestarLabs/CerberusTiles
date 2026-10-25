@@ -45,6 +45,7 @@ class MainViewModelTest {
         mockkObject(SettingsUtils.Charging)
         mockkObject(SettingsUtils.Brightness)
         mockkObject(SettingsUtils.Vibration)
+        mockkObject(SettingsUtils.SmartPixels)
         mockkObject(Ringer)
         viewModel = MainViewModel()
     }
@@ -262,5 +263,25 @@ class MainViewModelTest {
     @Test
     fun `initial currentRingerMode value is RingerMode NORMAL`() {
         assertEquals(RingerMode.NORMAL, viewModel.currentRingerMode.value)
+    }
+
+    @Test
+    fun `initial isSmartPixelsOn state is false`() {
+        assertFalse(viewModel.isSmartPixelsOn.value)
+    }
+
+    @Test
+    fun `updateSmartPixelsState updates all smart pixels properties`() {
+        every { SettingsUtils.SmartPixels.isAccessibilityServiceEnabled(context) } returns true
+        every { SettingsUtils.SmartPixels.isSmartPixelsEnabled(context) } returns true
+        every { SettingsUtils.SmartPixels.getSmartPixelsIntensity(context) } returns 70f
+        every { SettingsUtils.SmartPixels.isDisableOnCastEnabled(context) } returns false
+
+        viewModel.updateSmartPixelsState(context)
+
+        assertEquals(true, viewModel.isAccessibilityEnabled.value)
+        assertTrue(viewModel.isSmartPixelsOn.value)
+        assertEquals(70f, viewModel.smartPixelsIntensity.value, 0.01f)
+        assertFalse(viewModel.isSmartPixelsDisableOnCast.value)
     }
 }
