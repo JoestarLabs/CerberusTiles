@@ -3,14 +3,30 @@ package com.bl4ckswordsman.cerberustiles.ui
 import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import com.bl4ckswordsman.cerberustiles.R
 
 /**
  * The settings list item parameters.
@@ -64,51 +80,106 @@ fun createSharedParams(
 }
 
 /**
+ * A rounded container for grouping related settings list items with Material 3 styling.
+ */
+@Composable
+fun RoundedCardContainer(
+    modifier: Modifier = Modifier,
+    spacing: Dp = 2.dp,
+    cornerRadius: Dp = 20.dp,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(cornerRadius)),
+        verticalArrangement = Arrangement.spacedBy(spacing),
+        content = content
+    )
+}
+
+/**
+ * A section header for grouping settings categories with primary-tinted typography.
+ */
+@Composable
+fun SettingsSectionHeader(title: String) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+    )
+}
+
+/**
  * Creates the list items of the settings screen.
  * @param params The parameters of the list items.
  */
 @Composable
 fun CreateSettingsListItem(params: SettingsListItemParams) {
-    CreateSettingsListItem(
-        headlineText = "Smart Pixels",
-        supportingText = "Dim pixels to save power on OLED screens",
-        onClick = {
-            params.sharedParams.showDialog.value = true
-            params.sharedParams.dialogType.value = DialogType.SMART_PIXELS
-        }
-    )
-    CreateSettingsListItem(
-        headlineText = "Component Visibility in Overlay Dialog",
-        supportingText = "Select which components should be visible",
-        onClick = {
-            params.sharedParams.showDialog.value = true
-            params.sharedParams.dialogType.value = DialogType.COMPONENT_VISIBILITY
-        }
-    )
-    CreateSettingsListItem(
-        headlineText = "App version",
-        supportingText = "Click to view app version",
-        onClick = {
-            params.sharedParams.showDialog.value = true
-            params.sharedParams.dialogType.value = DialogType.APP_VERSION
-        }
-    )
-    CreateSettingsListItem(
-        headlineText = "Permissions & Privacy",
-        supportingText = "View required permissions, security details, and privacy FAQ",
-        onClick = {
-            params.sharedParams.onNavigateToPermissions?.invoke()
-                ?: Log.w("SettingsScreen", "onNavigateToPermissions callback is null")
-        }
-    )
-    CreateSettingsListItem(
-        headlineText = "Open Source Licenses",
-        supportingText = "View licenses of the libraries that made this app possible",
-        onClick = {
-            params.sharedParams.onNavigateToLicenses?.invoke()
-                ?: Log.w("SettingsScreen", "onNavigateToLicenses callback is null")
-        }
-    )
+    SettingsSectionHeader("Features & Overlay")
+    RoundedCardContainer {
+        CreateSettingsListItem(
+            headlineText = "Smart Pixels",
+            supportingText = "Dim pixels to save power on OLED screens",
+            onClick = {
+                params.sharedParams.showDialog.value = true
+                params.sharedParams.dialogType.value = DialogType.SMART_PIXELS
+            }
+        )
+        CreateSettingsListItem(
+            headlineText = "Component Visibility in Overlay Dialog",
+            supportingText = "Select which components should be visible",
+            onClick = {
+                params.sharedParams.showDialog.value = true
+                params.sharedParams.dialogType.value = DialogType.COMPONENT_VISIBILITY
+            }
+        )
+    }
+
+    Spacer(modifier = Modifier.height(16.dp))
+
+    SettingsSectionHeader("About & Privacy")
+    RoundedCardContainer {
+        CreateSettingsListItem(
+            headlineText = "Permissions & Privacy",
+            supportingText = "View required permissions, security details, and privacy FAQ",
+            trailingContent = {
+                Icon(
+                    painter = painterResource(id = R.drawable.round_open_in_new_24),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            },
+            onClick = {
+                params.sharedParams.onNavigateToPermissions?.invoke()
+                    ?: Log.w("SettingsScreen", "onNavigateToPermissions callback is null")
+            }
+        )
+        CreateSettingsListItem(
+            headlineText = "Open Source Licenses",
+            supportingText = "View licenses of the libraries that made this app possible",
+            trailingContent = {
+                Icon(
+                    painter = painterResource(id = R.drawable.round_open_in_new_24),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            },
+            onClick = {
+                params.sharedParams.onNavigateToLicenses?.invoke()
+                    ?: Log.w("SettingsScreen", "onNavigateToLicenses callback is null")
+            }
+        )
+        CreateSettingsListItem(
+            headlineText = "App version",
+            supportingText = "Click to view app version",
+            onClick = {
+                params.sharedParams.showDialog.value = true
+                params.sharedParams.dialogType.value = DialogType.APP_VERSION
+            }
+        )
+    }
 }
 
 /**
@@ -181,16 +252,26 @@ fun CreateSmartPixelsDialog(params: DialogCreationParams) {
  * @param headlineText The headline text of the item.
  * @param supportingText The supporting text of the item.
  * @param onClick The action to perform when the item is clicked.
+ * @param modifier Optional modifier.
+ * @param trailingContent Optional trailing composable.
  */
 @Composable
 fun CreateSettingsListItem(
     headlineText: String,
     supportingText: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    trailingContent: (@Composable () -> Unit)? = null
 ) {
     ListItem(
-        modifier = Modifier.clickable { onClick() },
-        supportingContent = { Text(supportingText) }
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
+        supportingContent = { Text(supportingText) },
+        trailingContent = trailingContent,
+        colors = ListItemDefaults.colors(
+            containerColor = MaterialTheme.colorScheme.surfaceBright
+        )
     ) {
         Text(headlineText)
     }

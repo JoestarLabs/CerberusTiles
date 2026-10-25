@@ -4,7 +4,9 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -55,12 +57,14 @@ fun SettingsScreen(params: SettingsScreenParams) {
             .fillMaxSize()
             .padding(params.paddingValues)
             .verticalScroll(rememberScrollState())
+            .padding(horizontal = 16.dp)
     ) {
         val settingsListItemParams = SettingsListItemParams(
             sharedParams = params.sharedParams
         )
 
         CreateSettingsListItem(settingsListItemParams)
+        Spacer(modifier = Modifier.height(16.dp))
     }
 
     if (params.sharedParams.showDialog.value) {
