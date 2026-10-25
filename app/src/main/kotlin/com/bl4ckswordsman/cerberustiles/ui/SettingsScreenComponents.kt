@@ -18,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
@@ -171,9 +172,17 @@ fun CreateSettingsListItem(params: SettingsListItemParams) {
                     ?: Log.w("SettingsScreen", "onNavigateToLicenses callback is null")
             }
         )
+        val context = params.sharedParams.context
+        val appVersion = remember(context) {
+            try {
+                context.packageManager.getPackageInfo(context.packageName, 0).versionName
+            } catch (e: Exception) {
+                null
+            }
+        }
         CreateSettingsListItem(
-            headlineText = "App version",
-            supportingText = "Click to view app version",
+            headlineText = "About",
+            supportingText = if (appVersion != null) "Version v$appVersion • JoestarLabs" else "JoestarLabs",
             onClick = {
                 params.sharedParams.showDialog.value = true
                 params.sharedParams.dialogType.value = DialogType.APP_VERSION
