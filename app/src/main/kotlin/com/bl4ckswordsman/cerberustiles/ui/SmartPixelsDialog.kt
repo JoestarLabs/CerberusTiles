@@ -102,14 +102,20 @@ fun SmartPixelsDialog(
 
                 Text("Intensity: ${intensity.floatValue.toInt()}%")
 
+                val sliderState = remember(intensity.floatValue) {
+                    androidx.compose.material3.SliderState(
+                        value = intensity.floatValue,
+                        steps = 7,
+                        trackRange = 10f..90f
+                    )
+                }
+
                 Slider(
-                    value = intensity.floatValue,
+                    state = sliderState,
                     onValueChange = { newVal ->
                         intensity.floatValue = newVal
                         SettingsUtils.SmartPixels.setSmartPixelsIntensity(context, newVal)
                     },
-                    valueRange = 10f..90f,
-                    steps = 7,
                     enabled = isEnabled.value && hasAccessPerm.value
                 )
 
