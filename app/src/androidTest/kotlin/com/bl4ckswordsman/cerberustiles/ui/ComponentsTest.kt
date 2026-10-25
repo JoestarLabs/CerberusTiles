@@ -79,16 +79,20 @@ class ComponentsTest {
     }
 
     @Test
-    fun brightnessSlider_rendersMinimizeAndMaximizeButtons() {
+    fun brightnessPresetButtonGroup_rendersAllPresets() {
         composeTestRule.setContent {
             val context = LocalContext.current
             CerberusTilesTheme {
-                BrightnessSlider(context = context)
+                BrightnessPresetButtonGroup(context = context)
             }
         }
 
-        // Verify minimize and maximize buttons exist
-        composeTestRule.onNodeWithContentDescription("Minimize brightness").assertIsDisplayed()
-        composeTestRule.onNodeWithContentDescription("Maximize brightness").assertIsDisplayed()
+        // Verify all preset buttons and content descriptions exist
+        composeTestRule.onNodeWithContentDescription("Minimum brightness").assertIsDisplayed()
+        composeTestRule.onNodeWithContentDescription("Balanced brightness").assertIsDisplayed()
+        composeTestRule.onNodeWithContentDescription("Maximum brightness").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Min").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Balanced").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Max").assertIsDisplayed()
     }
 }

@@ -46,7 +46,7 @@ fun ComponentVisibilityDialog(
                         ComponentVisibility.KEY_BRIGHTNESS_SLIDER,
                         true
                     ),
-                    text = "2. Brightness Slider",
+                    text = "2. Brightness Presets (Min, Balanced, Max)",
                     onCheckedChange = { newValue ->
                         sharedPreferences.edit {
                             putBoolean(ComponentVisibility.KEY_BRIGHTNESS_SLIDER, newValue)

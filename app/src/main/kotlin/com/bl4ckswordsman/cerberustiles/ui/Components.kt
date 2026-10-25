@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -16,27 +17,31 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.ToggleButton
+import androidx.compose.material3.ToggleButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.bl4ckswordsman.cerberustiles.R
 import com.bl4ckswordsman.cerberustiles.SettingsUtils
-import kotlin.math.ln
+import com.bl4ckswordsman.cerberustiles.models.BrightnessPreset
 
 /**
  * A switch with a label. The label is clickable and toggles the switch.
@@ -127,64 +132,89 @@ fun AdbPermissionDialog(context: Context, onDismiss: () -> Unit) {
 }
 
 /**
- * A slider for adjusting screen brightness.
+ * A segmented button group for selecting screen brightness presets (Min, Balanced, Max).
  *
- * The slider is initialised from the current system screen brightness and applies
- * changes in real time via [SettingsUtils.Brightness.setScreenBrightness]. The
- * brightness value is mapped on a logarithmic scale so that the perceived brightness
- * change feels linear to the user.
+ * Each button applies the preset brightness level in real-time via
+ * [SettingsUtils.Brightness.setScreenBrightness] and updates the selection state.
  *
- * @param context The application context used to read and write the system brightness setting.
+ * @param context Application context used to read and set screen brightness.
+ * @param isOverlayContext Whether this component is rendered inside an overlay
+ *   (compact view with smaller icons and no labels).
+ * @param initialPreset Optional initial preset to override system brightness lookup.
+ * @param onPresetSelected Optional callback invoked when a preset is selected.
  */
 @Composable
-fun BrightnessSlider(context: Context) {
-    var sliderPosition by rememberSaveable {
-        mutableFloatStateOf(
-            (ln(
-                SettingsUtils.Brightness.getScreenBrightness(context).toDouble()
-            ) / ln(255.0)).toFloat()
+fun BrightnessPresetButtonGroup(
+    context: Context,
+    isOverlayContext: Boolean = false,
+    initialPreset: BrightnessPreset? = null,
+    onPresetSelected: ((BrightnessPreset) -> Unit)? = null
+) {
+    var selectedPreset by rememberSaveable {
+        mutableStateOf(
+            initialPreset ?: BrightnessPreset.fromBrightness(
+                SettingsUtils.Brightness.getScreenBrightness(context)
+            )
         )
     }
+
+    val presets = BrightnessPreset.entries
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(12.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly
+            .padding(
+                horizontal = 16.dp,
+                vertical = 12.dp
+            ),
+        horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween)
     ) {
-        val sliderState = androidx.compose.runtime.remember(sliderPosition) {
-            androidx.compose.material3.SliderState(
-                value = sliderPosition
-            )
-        }
+        presets.forEachIndexed { index, preset ->
+            val isSelected = selectedPreset == preset
 
-        IconButton(onClick = {
-            sliderPosition = 0f
-            SettingsUtils.Brightness.setScreenBrightness(context, 0f)
-        }) {
-            Icon(
-                painter = painterResource(id = R.drawable.rounded_brightness_empty_24),
-                contentDescription = "Minimize brightness"
-            )
-        }
-
-        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-            Slider(
-                state = sliderState,
-                onValueChange = {
-                    sliderPosition = it
-                    SettingsUtils.Brightness.setScreenBrightness(context, it)
+            ToggleButton(
+                checked = isSelected,
+                onCheckedChange = {
+                    selectedPreset = preset
+                    SettingsUtils.Brightness.setScreenBrightness(context, preset.level)
+                    onPresetSelected?.invoke(preset)
+                },
+                modifier = Modifier
+                    .weight(1f)
+                    .semantics { role = Role.RadioButton },
+                shapes = when (index) {
+                    0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
+                    presets.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
+                    else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
                 }
-            )
-        }
-
-        IconButton(onClick = {
-            sliderPosition = 1f
-            SettingsUtils.Brightness.setScreenBrightness(context, 1f)
-        }) {
-            Icon(
-                painter = painterResource(id = R.drawable.rounded_brightness_high_24),
-                contentDescription = "Maximize brightness"
-            )
+            ) {
+                Icon(
+                    painter = painterResource(
+                        id = when (preset) {
+                            BrightnessPreset.MIN -> R.drawable.rounded_brightness_empty_24
+                            BrightnessPreset.BALANCED -> R.drawable.rounded_brightness_medium_24
+                            BrightnessPreset.MAX -> R.drawable.rounded_brightness_high_24
+                        }
+                    ),
+                    contentDescription = preset.contentDescription,
+                    modifier = if (isOverlayContext)
+                        Modifier.size(16.dp)
+                    else
+                        Modifier.size(ToggleButtonDefaults.IconSize)
+                )
+                if (!isOverlayContext) {
+                    Spacer(Modifier.size(ToggleButtonDefaults.IconSpacing))
+                    Text(text = preset.label)
+                }
+            }
         }
     }
+}
+
+/**
+ * Backwards-compatible composable for adjusting screen brightness using [BrightnessPresetButtonGroup].
+ */
+@Composable
+fun BrightnessSlider(context: Context) {
+    BrightnessPresetButtonGroup(context = context)
 }

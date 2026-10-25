@@ -95,7 +95,10 @@ fun SettingsComponents(params: SettingsComponentsParams) {
     }
 
     if (params.componentVisibilityParams.brightnessSlider) {
-        BrightnessSlider(context = LocalContext.current)
+        BrightnessPresetButtonGroup(
+            context = LocalContext.current,
+            isOverlayContext = params.isOverlayContext
+        )
     }
 
     if (params.componentVisibilityParams.ringerModeSelector) {

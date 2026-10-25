@@ -88,4 +88,28 @@ class AppModelsTest {
         params.toggleSmartPixels?.invoke(false)
         assertFalse(smartPixelsToggled)
     }
+
+    @Test
+    fun `BrightnessPreset contains expected enum constants and levels`() {
+        val presets = BrightnessPreset.entries.map { it.name }.toSet()
+        assertEquals(setOf("MIN", "BALANCED", "MAX"), presets)
+
+        assertEquals(0f, BrightnessPreset.MIN.level, 0.001f)
+        assertEquals(0.75f, BrightnessPreset.BALANCED.level, 0.001f)
+        assertEquals(1f, BrightnessPreset.MAX.level, 0.001f)
+    }
+
+    @Test
+    fun `BrightnessPreset fromBrightness maps thresholds correctly`() {
+        assertEquals(BrightnessPreset.MIN, BrightnessPreset.fromBrightness(0))
+        assertEquals(BrightnessPreset.MIN, BrightnessPreset.fromBrightness(1))
+        assertEquals(BrightnessPreset.MIN, BrightnessPreset.fromBrightness(30))
+
+        assertEquals(BrightnessPreset.BALANCED, BrightnessPreset.fromBrightness(31))
+        assertEquals(BrightnessPreset.BALANCED, BrightnessPreset.fromBrightness(128))
+        assertEquals(BrightnessPreset.BALANCED, BrightnessPreset.fromBrightness(199))
+
+        assertEquals(BrightnessPreset.MAX, BrightnessPreset.fromBrightness(200))
+        assertEquals(BrightnessPreset.MAX, BrightnessPreset.fromBrightness(255))
+    }
 }
