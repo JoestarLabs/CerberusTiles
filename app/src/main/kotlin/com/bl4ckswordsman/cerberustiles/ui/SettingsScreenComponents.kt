@@ -14,9 +14,9 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberSliderState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.mutableFloatStateOf
@@ -161,11 +161,11 @@ fun CreateDialog(params: DialogCreationParams) {
                         }
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween,
+                            horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Row(
-                                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(
+                                horizontalArrangement = Arrangement.spacedBy(
                                     8.dp
                                 )
                             ) {
@@ -294,7 +294,8 @@ fun CreateSmartPixelsDialog(params: DialogCreationParams) {
         DisposableEffect(lifecycleOwner) {
             val observer = LifecycleEventObserver { _, event ->
                 if (event == Lifecycle.Event.ON_RESUME) {
-                    val currentPerm = SettingsUtils.SmartPixels.isAccessibilityServiceEnabled(context)
+                    val currentPerm =
+                        SettingsUtils.SmartPixels.isAccessibilityServiceEnabled(context)
                     hasAccessPerm.value = currentPerm
                     isEnabled.value = SettingsUtils.SmartPixels.isSmartPixelsEnabled(context)
                 }
@@ -324,7 +325,8 @@ fun CreateSmartPixelsDialog(params: DialogCreationParams) {
                     SwitchWithLabel(
                         isSwitchedOn = isEnabled.value,
                         onCheckedChange = { checked ->
-                            val currentPerm = SettingsUtils.SmartPixels.isAccessibilityServiceEnabled(context)
+                            val currentPerm =
+                                SettingsUtils.SmartPixels.isAccessibilityServiceEnabled(context)
                             hasAccessPerm.value = currentPerm
                             if (!currentPerm) {
                                 SettingsUtils.SmartPixels.openAccessibilitySettings(context)
@@ -339,14 +341,19 @@ fun CreateSmartPixelsDialog(params: DialogCreationParams) {
                     Text("Intensity: ${intensity.floatValue.toInt()}%")
 
                     Slider(
-                        value = intensity.floatValue,
+                        state = rememberSliderState(
+                            value = intensity.floatValue,
+                            steps = 7, trackRange = 10f..90f
+                        ),
                         onValueChange = { newVal ->
                             intensity.floatValue = newVal
                             SettingsUtils.SmartPixels.setSmartPixelsIntensity(context, newVal)
                         },
-                        valueRange = 10f..90f,
-                        steps = 7,
-                        enabled = isEnabled.value && hasAccessPerm.value
+                        modifier = COMPILED_CODE,
+                        enabled = isEnabled.value && hasAccessPerm.value,
+                        onValueChangeFinished = COMPILED_CODE,
+                        colors = COMPILED_CODE,
+                        interactionSource = COMPILED_CODE
                     )
 
                     Row(

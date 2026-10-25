@@ -1,9 +1,7 @@
 package com.bl4ckswordsman.cerberustiles
 
 import android.accessibilityservice.AccessibilityServiceInfo
-import android.content.ComponentName
 import android.content.Context
-import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.ResolveInfo
 import android.content.pm.ServiceInfo
@@ -44,7 +42,12 @@ class SettingsUtilsSmartPixelsTest {
         MockKAnnotations.init(this)
 
         every { context.packageName } returns "com.bl4ckswordsman.cerberustiles"
-        every { context.getSharedPreferences("settings", Context.MODE_PRIVATE) } returns sharedPreferences
+        every {
+            context.getSharedPreferences(
+                "settings",
+                Context.MODE_PRIVATE
+            )
+        } returns sharedPreferences
         every { sharedPreferences.edit() } returns editor
         every { editor.putBoolean(any(), any()) } returns editor
         every { editor.putFloat(any(), any()) } returns editor
@@ -97,7 +100,8 @@ class SettingsUtilsSmartPixelsTest {
             accessibilityManager.getEnabledAccessibilityServiceList(any())
         } returns emptyList()
 
-        val expectedComponent = "com.bl4ckswordsman.cerberustiles/${SmartPixelsAccessibilityService::class.java.name}"
+        val expectedComponent =
+            "com.bl4ckswordsman.cerberustiles/${SmartPixelsAccessibilityService::class.java.name}"
         every {
             Settings.Secure.getString(any(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES)
         } returns "other.pkg/other.Service:$expectedComponent"
@@ -127,10 +131,20 @@ class SettingsUtilsSmartPixelsTest {
 
     @Test
     fun `isSmartPixelsEnabled reads from shared preferences`() {
-        every { sharedPreferences.getBoolean(SettingsUtils.SmartPixels.KEY_SMART_PIXELS_ENABLED, false) } returns true
+        every {
+            sharedPreferences.getBoolean(
+                SettingsUtils.SmartPixels.KEY_SMART_PIXELS_ENABLED,
+                false
+            )
+        } returns true
         assertTrue(SettingsUtils.SmartPixels.isSmartPixelsEnabled(context))
 
-        every { sharedPreferences.getBoolean(SettingsUtils.SmartPixels.KEY_SMART_PIXELS_ENABLED, false) } returns false
+        every {
+            sharedPreferences.getBoolean(
+                SettingsUtils.SmartPixels.KEY_SMART_PIXELS_ENABLED,
+                false
+            )
+        } returns false
         assertFalse(SettingsUtils.SmartPixels.isSmartPixelsEnabled(context))
     }
 
@@ -167,7 +181,10 @@ class SettingsUtilsSmartPixelsTest {
     @Test
     fun `isDisableOnCastEnabled returns stored value or default true`() {
         every {
-            sharedPreferences.getBoolean(SettingsUtils.SmartPixels.KEY_SMART_PIXELS_DISABLE_ON_CAST, true)
+            sharedPreferences.getBoolean(
+                SettingsUtils.SmartPixels.KEY_SMART_PIXELS_DISABLE_ON_CAST,
+                true
+            )
         } returns false
 
         assertFalse(SettingsUtils.SmartPixels.isDisableOnCastEnabled(context))
@@ -177,7 +194,12 @@ class SettingsUtilsSmartPixelsTest {
     fun `setDisableOnCastEnabled saves value and updates service state`() {
         SettingsUtils.SmartPixels.setDisableOnCastEnabled(context, false)
 
-        verify { editor.putBoolean(SettingsUtils.SmartPixels.KEY_SMART_PIXELS_DISABLE_ON_CAST, false) }
+        verify {
+            editor.putBoolean(
+                SettingsUtils.SmartPixels.KEY_SMART_PIXELS_DISABLE_ON_CAST,
+                false
+            )
+        }
         verify { editor.apply() }
         verify { SmartPixelsAccessibilityService.updateState(context) }
     }

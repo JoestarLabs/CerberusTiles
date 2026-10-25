@@ -278,12 +278,14 @@ object SettingsUtils {
          */
         fun isAccessibilityServiceEnabled(context: Context): Boolean {
             if (SmartPixelsAccessibilityService.isRunning()) return true
-            val am = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as? AccessibilityManager
-            val enabledServices = am?.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK)
+            val am =
+                context.getSystemService(Context.ACCESSIBILITY_SERVICE) as? AccessibilityManager
+            val enabledServices =
+                am?.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK)
             if (enabledServices?.any {
-                it.resolveInfo?.serviceInfo?.packageName == context.packageName &&
-                    it.resolveInfo?.serviceInfo?.name == SmartPixelsAccessibilityService::class.java.name
-            } == true) {
+                    it.resolveInfo?.serviceInfo?.packageName == context.packageName &&
+                            it.resolveInfo?.serviceInfo?.name == SmartPixelsAccessibilityService::class.java.name
+                } == true) {
                 return true
             }
             val enabledServicesSetting = try {
@@ -295,10 +297,15 @@ object SettingsUtils {
                 null
             } ?: return false
 
-            val expectedFull = "${context.packageName}/${SmartPixelsAccessibilityService::class.java.name}"
-            val expectedShort = "${context.packageName}/.${SmartPixelsAccessibilityService::class.java.simpleName}"
+            val expectedFull =
+                "${context.packageName}/${SmartPixelsAccessibilityService::class.java.name}"
+            val expectedShort =
+                "${context.packageName}/.${SmartPixelsAccessibilityService::class.java.simpleName}"
             return enabledServicesSetting.split(':').any {
-                it.equals(expectedFull, ignoreCase = true) || it.equals(expectedShort, ignoreCase = true)
+                it.equals(expectedFull, ignoreCase = true) || it.equals(
+                    expectedShort,
+                    ignoreCase = true
+                )
             }
         }
 
@@ -463,7 +470,8 @@ class MainViewModel : ViewModel() {
      * Updates the state of the Smart Pixels settings and accessibility status.
      */
     fun updateSmartPixelsState(context: Context) {
-        isAccessibilityEnabled.value = SettingsUtils.SmartPixels.isAccessibilityServiceEnabled(context)
+        isAccessibilityEnabled.value =
+            SettingsUtils.SmartPixels.isAccessibilityServiceEnabled(context)
         isSmartPixelsOn.value = SettingsUtils.SmartPixels.isSmartPixelsEnabled(context)
         smartPixelsIntensity.value = SettingsUtils.SmartPixels.getSmartPixelsIntensity(context)
         isSmartPixelsDisableOnCast.value = SettingsUtils.SmartPixels.isDisableOnCastEnabled(context)

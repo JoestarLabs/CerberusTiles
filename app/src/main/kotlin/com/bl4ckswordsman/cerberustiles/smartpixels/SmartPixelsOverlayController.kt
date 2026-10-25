@@ -82,6 +82,7 @@ class SmartPixelsOverlayController(
                 Intent.ACTION_SCREEN_OFF -> {
                     handler.removeCallbacks(shiftPatternRunnable)
                 }
+
                 Intent.ACTION_SCREEN_ON -> {
                     if (isOverlayAdded) {
                         handler.removeCallbacks(shiftPatternRunnable)
@@ -118,11 +119,15 @@ class SmartPixelsOverlayController(
         if (Build.VERSION.SDK_INT >= 35 && windowManager != null) {
             try {
                 val callback = Consumer<Int> { state ->
-                    isScreenRecordingActive = (state == WindowManager.SCREEN_RECORDING_STATE_VISIBLE)
+                    isScreenRecordingActive =
+                        (state == WindowManager.SCREEN_RECORDING_STATE_VISIBLE)
                     updateState()
                 }
                 screenRecordingCallback = callback
-                windowManager?.addScreenRecordingCallback({ command -> handler.post(command) }, callback)
+                windowManager?.addScreenRecordingCallback(
+                    { command -> handler.post(command) },
+                    callback
+                )
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to register screen recording callback", e)
             }
@@ -182,10 +187,10 @@ class SmartPixelsOverlayController(
                 WindowManager.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
                 WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or
-                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
-                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
-                    WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
+                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                        WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+                        WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
+                        WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
                 PixelFormat.TRANSLUCENT
             ).apply {
                 alpha = 1.0f
