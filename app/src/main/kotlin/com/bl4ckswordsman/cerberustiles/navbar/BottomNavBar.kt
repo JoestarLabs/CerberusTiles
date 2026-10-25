@@ -36,6 +36,11 @@ sealed class Screen(val route: String) {
      * The open source licenses screen of the app.
      */
     data object Licenses : Screen("Licenses")
+
+    /**
+     * The permissions and privacy documentation screen of the app.
+     */
+    data object Permissions : Screen("Permissions")
 }
 
 /**

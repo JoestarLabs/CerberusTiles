@@ -16,7 +16,6 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberSliderState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.mutableFloatStateOf
@@ -112,6 +111,13 @@ fun CreateSettingsListItem(params: SettingsListItemParams) {
         onClick = {
             params.sharedParams.showDialog.value = true
             params.sharedParams.dialogType.value = DialogType.APP_VERSION
+        })
+    CreateSettingsListItem(
+        headlineText = "Permissions & Privacy",
+        supportingText = "View required permissions, security details, and privacy FAQ",
+        onClick = {
+            params.sharedParams.navController?.navigate(Screen.Permissions.route)
+                ?: Log.w("SettingsScreen", "NavController is null, cannot navigate to permissions")
         })
     CreateSettingsListItem(
         headlineText = "Open Source Licenses",
@@ -341,19 +347,14 @@ fun CreateSmartPixelsDialog(params: DialogCreationParams) {
                     Text("Intensity: ${intensity.floatValue.toInt()}%")
 
                     Slider(
-                        state = rememberSliderState(
-                            value = intensity.floatValue,
-                            steps = 7, trackRange = 10f..90f
-                        ),
+                        value = intensity.floatValue,
                         onValueChange = { newVal ->
                             intensity.floatValue = newVal
                             SettingsUtils.SmartPixels.setSmartPixelsIntensity(context, newVal)
                         },
-                        modifier = COMPILED_CODE,
-                        enabled = isEnabled.value && hasAccessPerm.value,
-                        onValueChangeFinished = COMPILED_CODE,
-                        colors = COMPILED_CODE,
-                        interactionSource = COMPILED_CODE
+                        valueRange = 10f..90f,
+                        steps = 7,
+                        enabled = isEnabled.value && hasAccessPerm.value
                     )
 
                     Row(

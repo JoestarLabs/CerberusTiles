@@ -52,6 +52,55 @@ Tested in a Pixel 8 Pro.
 > [!NOTE]
 > More features coming soon.
 
+<!-- PERMISSIONS_START -->
+## Permissions & Privacy
+
+Cerberus Tiles operates with **zero internet access**, **zero analytics**, and **zero tracking**. All permissions are strictly optional and only prompted when you choose to enable the corresponding feature.
+
+| Permission | Feature | Why It Is Needed | How It Is Granted |
+| :--- | :--- | :--- | :--- |
+| **Write System Settings** | Adaptive Brightness, Ringer Mode | Toggles device brightness mode and ringer/vibration states. | Standard system settings screen |
+| **Notification Policy (DND)** | Vibration Ringer Mode | Prevents system crashes when switching ringer mode while Do Not Disturb is active. | Standard system settings screen |
+| **Write Secure Settings** | Limit Charge to 80% | Modifies the system charge_optimization_mode setting on Pixel devices. | One-time ADB command |
+| **Accessibility Service** | Smart Pixels | Draws a hardware-accelerated true-black pixel grid over the display without blocking touch interaction. | Accessibility Settings |
+
+### Frequently Asked Questions
+
+<details>
+  <summary><strong>Why does Smart Pixels require an Accessibility Service?</strong></summary>
+
+  To save battery on OLED displays, Smart Pixels renders an overlay of blacked-out pixels across the screen.
+  - Using standard screen overlays (`TYPE_APPLICATION_OVERLAY`) causes Android to block touch inputs in secure apps (like GitHub, banking apps, and system dialogs) due to tapjacking protection (`filterTouchesWhenObscured`).
+  - An Accessibility Overlay (`TYPE_ACCESSIBILITY_OVERLAY`) is treated by Android as a trusted visual layer, allowing 100% transparent touch pass-through across all apps and system bars.
+</details>
+
+<details>
+  <summary><strong>Why does Android warn that the app has "full control of your device"?</strong></summary>
+
+  This is Android's mandatory, static system warning shown for *all* accessibility services regardless of their actual declared capabilities. Cerberus Tiles' service is strictly hardened:
+  - `canRetrieveWindowContent="false"`: Cannot read screen content, text, or passwords.
+  - `canPerformGestures="false"`: Cannot simulate clicks, gestures, or taps.
+  - `canRequestFilterKeyEvents="false"`: Cannot log or intercept keystrokes.
+  - `canRequestTouchExplorationMode="false"`: Cannot intercept touch exploration.
+  - **Zero Event Types**: Does not receive or listen to window or UI events.
+</details>
+
+<details>
+  <summary><strong>How do I grant the Charging Optimization permission?</strong></summary>
+
+  The 80% charging limit modifies an Android secure system setting, which requires granting permission once via ADB:
+  ```bash
+  adb shell pm grant com.bl4ckswordsman.cerberustiles android.permission.WRITE_SECURE_SETTINGS
+  ```
+</details>
+
+<details>
+  <summary><strong>Does Cerberus Tiles collect any personal data?</strong></summary>
+
+  No. The app does not request `INTERNET` permission in its manifest and has no ability to send data anywhere. Everything runs strictly on your device.
+</details>
+<!-- PERMISSIONS_END -->
+
 ## Download
 
 Download a GitHub Actions build (scanned by 🛡VirusTotal) here:

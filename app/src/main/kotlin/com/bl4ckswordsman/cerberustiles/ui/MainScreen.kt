@@ -12,6 +12,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -121,17 +125,28 @@ data class MainScreenNavHostParams(
 fun MainScreenScaffold(params: MainScreenScaffoldParams) {
     Scaffold(topBar = {
         TopAppBar(
-            colors = TopAppBarDefaults.topAppBarColors(
-
-            ), title = {
+            colors = TopAppBarDefaults.topAppBarColors(),
+            title = {
                 Text(
                     text = when (params.selectedScreen) {
                         is Screen.Home -> label.HOME_SCREEN
                         is Screen.Settings -> label.SETTINGS_SCREEN
                         is Screen.Licenses -> "Open Source Licenses"
+                        is Screen.Permissions -> "Permissions & Privacy"
                     }
                 )
-            })
+            },
+            navigationIcon = {
+                if (params.selectedScreen is Screen.Licenses || params.selectedScreen is Screen.Permissions) {
+                    IconButton(onClick = { params.navController.popBackStack() }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
+                }
+            }
+        )
     }, bottomBar = { BottomNavBar(params.navController) }) { innerPadding ->
         MainScreenNavHost(
             MainScreenNavHostParams(
@@ -266,6 +281,13 @@ fun MainScreenNavHost(params: MainScreenNavHostParams) {
                 )
             }
         }
+        composable(
+            Screen.Permissions.route,
+            enterTransition = enterTrans,
+            exitTransition = exitTrans
+        ) {
+            PermissionsScreen(paddingValues = params.innerPadding)
+        }
     }
 }
 
@@ -311,6 +333,7 @@ fun MainScreen(params: MainScreenParams) {
         Screen.Home.route -> Screen.Home
         Screen.Settings.route -> Screen.Settings
         Screen.Licenses.route -> Screen.Licenses
+        Screen.Permissions.route -> Screen.Permissions
         else -> Screen.Home
     }
 
