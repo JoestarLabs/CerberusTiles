@@ -21,7 +21,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.lifecycleScope
-import com.bl4ckswordsman.cerberustiles.Constants as label
 import com.bl4ckswordsman.cerberustiles.MainViewModel
 import com.bl4ckswordsman.cerberustiles.SettingsUtils
 import com.bl4ckswordsman.cerberustiles.SettingsUtils.openPermissionSettings
@@ -32,6 +31,7 @@ import com.bl4ckswordsman.cerberustiles.ui.HomeScreen
 import com.bl4ckswordsman.cerberustiles.ui.HomeScreenParams
 import com.bl4ckswordsman.cerberustiles.ui.theme.CerberusTilesTheme
 import kotlinx.coroutines.launch
+import com.bl4ckswordsman.cerberustiles.Constants as label
 
 /**
  * Main activity of the app, hosting the Home screen and quick settings controls.
@@ -104,7 +104,12 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
                             title = { Text(label.HOME_SCREEN) },
                             actions = {
                                 IconButton(onClick = {
-                                    startActivity(Intent(this@MainActivity, SettingsActivity::class.java))
+                                    startActivity(
+                                        Intent(
+                                            this@MainActivity,
+                                            SettingsActivity::class.java
+                                        )
+                                    )
                                 }) {
                                     Icon(
                                         imageVector = Icons.Filled.Settings,

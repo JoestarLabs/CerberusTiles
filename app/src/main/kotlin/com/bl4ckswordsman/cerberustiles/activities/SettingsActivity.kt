@@ -17,11 +17,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import com.bl4ckswordsman.cerberustiles.Constants as label
 import com.bl4ckswordsman.cerberustiles.ui.SettingsScreen
 import com.bl4ckswordsman.cerberustiles.ui.SettingsScreenParams
 import com.bl4ckswordsman.cerberustiles.ui.createSharedParams
 import com.bl4ckswordsman.cerberustiles.ui.theme.CerberusTilesTheme
+import com.bl4ckswordsman.cerberustiles.Constants as label
 
 /**
  * Activity for displaying application settings, dialogs, and navigation to
