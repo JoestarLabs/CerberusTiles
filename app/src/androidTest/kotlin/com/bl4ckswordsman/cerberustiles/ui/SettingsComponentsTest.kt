@@ -202,6 +202,46 @@ class SettingsComponentsTest {
         composeTestRule.onNodeWithText("Min").assertIsNotEnabled()
         composeTestRule.onNodeWithText("Balanced").assertIsNotEnabled()
         composeTestRule.onNodeWithText("Max").assertIsNotEnabled()
+        composeTestRule.onNodeWithText("Adaptive brightness is active").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Turn off").assertIsDisplayed()
+    }
+
+    @Test
+    fun brightnessSetting_whenAdaptiveBrightnessOn_clickTurnOff_togglesAdaptiveBrightness() {
+        var toggleCalled = false
+        var setSwitchedOnCalled = false
+
+        composeTestRule.setContent {
+            val sharedParams = rememberTestSharedParams()
+            val visibilityParams = testVisibilityParams(brightnessSlider = true)
+
+            val params = SettingsComponentsParams(
+                componentVisibilityParams = visibilityParams,
+                canWriteState = true,
+                isSwitchedOn = true,
+                setSwitchedOn = { setSwitchedOnCalled = true },
+                toggleAdaptiveBrightness = { toggleCalled = true },
+                openPermissionSettings = {},
+                isVibrationModeOn = false,
+                setVibrationMode = {},
+                toggleVibrationMode = { true },
+                isChargingOptimizationOn = false,
+                setChargingOptimization = {},
+                toggleChargingOptimization = {},
+                sharedParams = sharedParams,
+                currentRingerMode = RingerMode.NORMAL,
+                onRingerModeChange = {}
+            )
+
+            CerberusTilesTheme {
+                SettingsComponents(params = params)
+            }
+        }
+
+        composeTestRule.onNodeWithText("Turn off").performClick()
+
+        assertTrue(toggleCalled)
+        assertTrue(setSwitchedOnCalled)
     }
 
     @Test

@@ -3,13 +3,17 @@ package com.bl4ckswordsman.cerberustiles.ui
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.provider.Settings
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -25,9 +29,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.ToggleButton
 import androidx.compose.material3.ToggleButtonDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -144,6 +150,7 @@ fun AdbPermissionDialog(context: Context, onDismiss: () -> Unit) {
  * @param canWriteState Whether the app currently has permission to write system settings.
  * @param isAdaptiveBrightnessOn Whether adaptive brightness is currently enabled.
  *   When enabled, preset selection is disabled and no preset is marked as selected.
+ * @param onTurnOffAdaptiveBrightness Optional callback to turn off adaptive brightness.
  * @param openPermissionSettings Callback to open the system write settings permission screen.
  * @param onPresetSelected Optional callback invoked when a preset is selected.
  */
@@ -154,6 +161,7 @@ fun BrightnessPresetButtonGroup(
     initialPreset: BrightnessPreset? = null,
     canWriteState: Boolean = true,
     isAdaptiveBrightnessOn: Boolean = false,
+    onTurnOffAdaptiveBrightness: (() -> Unit)? = null,
     openPermissionSettings: (() -> Unit)? = null,
     onPresetSelected: ((BrightnessPreset) -> Unit)? = null
 ) {
@@ -165,64 +173,104 @@ fun BrightnessPresetButtonGroup(
         )
     }
 
+    LaunchedEffect(isAdaptiveBrightnessOn) {
+        if (!isAdaptiveBrightnessOn) {
+            selectedPreset = BrightnessPreset.fromBrightness(
+                SettingsUtils.Brightness.getScreenBrightness(context)
+            )
+        }
+    }
+
     val presets = BrightnessPreset.entries
 
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(
                 horizontal = 16.dp,
                 vertical = 12.dp
-            ),
-        horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween)
+            )
     ) {
-        presets.forEachIndexed { index, preset ->
-            val isSelected = !isAdaptiveBrightnessOn && selectedPreset == preset
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween)
+        ) {
+            presets.forEachIndexed { index, preset ->
+                val isSelected = !isAdaptiveBrightnessOn && selectedPreset == preset
 
-            ToggleButton(
-                checked = isSelected,
-                onCheckedChange = {
-                    if (isAdaptiveBrightnessOn) {
-                        return@ToggleButton
-                    }
-                    if (!canWriteState) {
-                        openPermissionSettings?.invoke()
-                    } else {
-                        val writeSucceeded =
-                            SettingsUtils.Brightness.setScreenBrightness(context, preset.level)
-                        if (writeSucceeded) {
-                            selectedPreset = preset
-                            onPresetSelected?.invoke(preset)
+                ToggleButton(
+                    checked = isSelected,
+                    onCheckedChange = {
+                        if (isAdaptiveBrightnessOn) {
+                            return@ToggleButton
                         }
+                        if (!canWriteState) {
+                            openPermissionSettings?.invoke()
+                        } else {
+                            val writeSucceeded =
+                                SettingsUtils.Brightness.setScreenBrightness(context, preset.level)
+                            if (writeSucceeded) {
+                                selectedPreset = preset
+                                onPresetSelected?.invoke(preset)
+                            }
+                        }
+                    },
+                    enabled = !isAdaptiveBrightnessOn,
+                    modifier = Modifier
+                        .weight(1f)
+                        .semantics { role = Role.RadioButton },
+                    shapes = when (index) {
+                        0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
+                        presets.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
+                        else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
                     }
-                },
-                enabled = !isAdaptiveBrightnessOn,
-                modifier = Modifier
-                    .weight(1f)
-                    .semantics { role = Role.RadioButton },
-                shapes = when (index) {
-                    0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
-                    presets.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
-                    else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
+                ) {
+                    Icon(
+                        painter = painterResource(
+                            id = when (preset) {
+                                BrightnessPreset.MIN -> R.drawable.rounded_brightness_empty_24
+                                BrightnessPreset.BALANCED -> R.drawable.rounded_brightness_medium_24
+                                BrightnessPreset.MAX -> R.drawable.rounded_brightness_high_24
+                            }
+                        ),
+                        contentDescription = preset.contentDescription,
+                        modifier = if (isOverlayContext)
+                            Modifier.size(16.dp)
+                        else
+                            Modifier.size(ToggleButtonDefaults.IconSize)
+                    )
+                    if (!isOverlayContext) {
+                        Spacer(Modifier.size(ToggleButtonDefaults.IconSpacing))
+                        Text(text = preset.label)
+                    }
                 }
+            }
+        }
+
+        if (isAdaptiveBrightnessOn) {
+            Spacer(modifier = Modifier.height(4.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    painter = painterResource(
-                        id = when (preset) {
-                            BrightnessPreset.MIN -> R.drawable.rounded_brightness_empty_24
-                            BrightnessPreset.BALANCED -> R.drawable.rounded_brightness_medium_24
-                            BrightnessPreset.MAX -> R.drawable.rounded_brightness_high_24
-                        }
-                    ),
-                    contentDescription = preset.contentDescription,
-                    modifier = if (isOverlayContext)
-                        Modifier.size(16.dp)
-                    else
-                        Modifier.size(ToggleButtonDefaults.IconSize)
+                Text(
+                    text = "Adaptive brightness is active",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                if (!isOverlayContext) {
-                    Spacer(Modifier.size(ToggleButtonDefaults.IconSpacing))
-                    Text(text = preset.label)
+                if (onTurnOffAdaptiveBrightness != null) {
+                    TextButton(
+                        onClick = onTurnOffAdaptiveBrightness,
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+                    ) {
+                        Text(
+                            text = "Turn off",
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                    }
                 }
             }
         }
@@ -236,6 +284,17 @@ fun BrightnessPresetButtonGroup(
 fun BrightnessSlider(context: Context) {
     BrightnessPresetButtonGroup(
         context = context,
-        isAdaptiveBrightnessOn = SettingsUtils.Brightness.isAdaptiveBrightnessEnabled(context)
+        isAdaptiveBrightnessOn = SettingsUtils.Brightness.isAdaptiveBrightnessEnabled(context),
+        onTurnOffAdaptiveBrightness = {
+            if (Settings.System.canWrite(context)) {
+                Settings.System.putInt(
+                    context.contentResolver,
+                    Settings.System.SCREEN_BRIGHTNESS_MODE,
+                    0
+                )
+            } else {
+                SettingsUtils.openPermissionSettings(context)
+            }
+        }
     )
 }
