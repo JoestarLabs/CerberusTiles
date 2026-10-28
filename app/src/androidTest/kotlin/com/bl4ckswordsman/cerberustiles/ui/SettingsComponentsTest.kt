@@ -207,9 +207,8 @@ class SettingsComponentsTest {
     }
 
     @Test
-    fun brightnessSetting_whenAdaptiveBrightnessOn_clickTurnOff_togglesAdaptiveBrightness() {
-        var toggleCalled = false
-        var setSwitchedOnCalled = false
+    fun brightnessSetting_whenAdaptiveBrightnessOnAndCannotWrite_clickTurnOff_opensPermissionSettings() {
+        var openPermissionCalled = false
 
         composeTestRule.setContent {
             val sharedParams = rememberTestSharedParams()
@@ -217,11 +216,11 @@ class SettingsComponentsTest {
 
             val params = SettingsComponentsParams(
                 componentVisibilityParams = visibilityParams,
-                canWriteState = true,
+                canWriteState = false,
                 isSwitchedOn = true,
-                setSwitchedOn = { setSwitchedOnCalled = true },
-                toggleAdaptiveBrightness = { toggleCalled = true },
-                openPermissionSettings = {},
+                setSwitchedOn = {},
+                toggleAdaptiveBrightness = {},
+                openPermissionSettings = { openPermissionCalled = true },
                 isVibrationModeOn = false,
                 setVibrationMode = {},
                 toggleVibrationMode = { true },
@@ -240,8 +239,7 @@ class SettingsComponentsTest {
 
         composeTestRule.onNodeWithText("Turn off").performClick()
 
-        assertTrue(toggleCalled)
-        assertTrue(setSwitchedOnCalled)
+        assertTrue(openPermissionCalled)
     }
 
     @Test

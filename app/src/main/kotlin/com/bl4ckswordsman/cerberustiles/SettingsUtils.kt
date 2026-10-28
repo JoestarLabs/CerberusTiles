@@ -62,18 +62,35 @@ object SettingsUtils {
         }
 
         /**
+         * Sets the adaptive brightness mode directly.
+         *
+         * @return True if the setting was successfully written, false otherwise.
+         */
+        fun setAdaptiveBrightness(context: Context, enabled: Boolean): Boolean {
+            if (Settings.System.canWrite(context)) {
+                val success = Settings.System.putInt(
+                    context.contentResolver,
+                    Settings.System.SCREEN_BRIGHTNESS_MODE,
+                    if (enabled) 1 else 0
+                )
+                if (success) {
+                    showToast(context, "Adaptive brightness", enabled)
+                }
+                return success
+            }
+            return false
+        }
+
+        /**
          * Toggles the adaptive brightness setting.
          */
         fun toggleAdaptiveBrightness(params: SettingsToggleParams) {
             if (Settings.System.canWrite(params.context)) {
                 val isAdaptive = isAdaptiveBrightnessEnabled(params.context)
-                Settings.System.putInt(
-                    params.context.contentResolver,
-                    Settings.System.SCREEN_BRIGHTNESS_MODE,
-                    if (isAdaptive) 0 else 1
-                )
-                showToast(params.context, "Adaptive brightness", !isAdaptive)
-                params.onSettingChanged(!isAdaptive)
+                val success = setAdaptiveBrightness(params.context, !isAdaptive)
+                if (success) {
+                    params.onSettingChanged(!isAdaptive)
+                }
             }
         }
 
