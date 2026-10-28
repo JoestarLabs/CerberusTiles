@@ -234,5 +234,8 @@ fun BrightnessPresetButtonGroup(
  */
 @Composable
 fun BrightnessSlider(context: Context) {
-    BrightnessPresetButtonGroup(context = context)
+    BrightnessPresetButtonGroup(
+        context = context,
+        isAdaptiveBrightnessOn = SettingsUtils.Brightness.isAdaptiveBrightnessEnabled(context)
+    )
 }
