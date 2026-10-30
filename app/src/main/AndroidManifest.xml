@@ -30,10 +30,20 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".activities.SettingsActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE_PREFERENCES" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".activities.PermissionsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.LicensesActivity"
+            android:exported="false" />
         <activity
             android:name=".activities.ToggleAdaptiveBrightnessActivity"
             android:exported="false" />

@@ -12,8 +12,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleButton
 import androidx.compose.material3.ToggleButtonDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -27,21 +25,10 @@ import com.bl4ckswordsman.cerberustiles.models.RingerMode
 import com.bl4ckswordsman.cerberustiles.util.Ringer
 
 /**
- * Parameters for controlling the visibility of settings components in the dialog.
- */
-data class ComponentVisibilityDialogParams(
-    val adaptBrightnessSwitch: MutableState<Boolean>,
-    val brightnessSlider: MutableState<Boolean>,
-    val ringerModeSelector: MutableState<Boolean>,
-    val chargingOptimizationSwitch: MutableState<Boolean>,
-    val smartPixelsSwitch: MutableState<Boolean> = mutableStateOf(true)
-)
-
-/**
  * Parameters for the settings components.
  */
 data class SettingsComponentsParams(
-    val componentVisibilityParams: ComponentVisibilityDialogParams,
+    val componentVisibilityParams: ComponentVisibility = ComponentVisibility(),
     val canWriteState: Boolean,
     val isSwitchedOn: Boolean,
     val setSwitchedOn: (Boolean) -> Unit,
@@ -66,7 +53,7 @@ data class SettingsComponentsParams(
  */
 @Composable
 fun SettingsComponents(params: SettingsComponentsParams) {
-    if (params.componentVisibilityParams.adaptBrightnessSwitch.value) {
+    if (params.componentVisibilityParams.adaptBrightnessSwitch) {
         SwitchWithLabel(
             isSwitchedOn = params.isSwitchedOn,
             onCheckedChange = {
@@ -81,7 +68,7 @@ fun SettingsComponents(params: SettingsComponentsParams) {
         )
     }
 
-    if (params.componentVisibilityParams.chargingOptimizationSwitch.value) {
+    if (params.componentVisibilityParams.chargingOptimizationSwitch) {
         SwitchWithLabel(
             isSwitchedOn = params.isChargingOptimizationOn,
             onCheckedChange = {
@@ -91,7 +78,7 @@ fun SettingsComponents(params: SettingsComponentsParams) {
         )
     }
 
-    if (params.componentVisibilityParams.smartPixelsSwitch.value) {
+    if (params.componentVisibilityParams.smartPixelsSwitch) {
         val context = LocalContext.current
         SwitchWithLabel(
             isSwitchedOn = params.isSmartPixelsOn,
@@ -107,11 +94,29 @@ fun SettingsComponents(params: SettingsComponentsParams) {
         )
     }
 
-    if (params.componentVisibilityParams.brightnessSlider.value) {
-        BrightnessSlider(context = LocalContext.current)
+    if (params.componentVisibilityParams.brightnessSlider) {
+        val context = LocalContext.current
+        BrightnessPresetButtonGroup(
+            context = context,
+            isOverlayContext = params.isOverlayContext,
+            canWriteState = params.canWriteState,
+            isAdaptiveBrightnessOn = params.isSwitchedOn,
+            onTurnOffAdaptiveBrightness = if (params.canWriteState) {
+                {
+                    val writeSucceeded =
+                        SettingsUtils.Brightness.setAdaptiveBrightness(context, false)
+                    if (writeSucceeded) {
+                        params.setSwitchedOn(false)
+                    }
+                }
+            } else {
+                params.openPermissionSettings
+            },
+            openPermissionSettings = params.openPermissionSettings
+        )
     }
 
-    if (params.componentVisibilityParams.ringerModeSelector.value) {
+    if (params.componentVisibilityParams.ringerModeSelector) {
         val context = LocalContext.current
         RingerModeSelectionButtonGroup(
             currentMode = params.currentRingerMode,

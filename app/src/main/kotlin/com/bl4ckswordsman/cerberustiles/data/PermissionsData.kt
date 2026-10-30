@@ -56,7 +56,7 @@ object PermissionsData {
             howToGrant = "One-time ADB command",
             isGranted = { context ->
                 context.checkSelfPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) ==
-                    PackageManager.PERMISSION_GRANTED
+                        PackageManager.PERMISSION_GRANTED
             },
             onGrantClick = null
         ),
@@ -74,24 +74,24 @@ object PermissionsData {
         FaqItem(
             question = "Why does Smart Pixels require an Accessibility Service?",
             answer = "To save battery on OLED displays, Smart Pixels renders an overlay of blacked-out pixels across the screen.\n" +
-                "- Using standard screen overlays (`TYPE_APPLICATION_OVERLAY`) causes Android to block touch inputs in secure apps (like GitHub, banking apps, and system dialogs) due to tapjacking protection (`filterTouchesWhenObscured`).\n" +
-                "- An Accessibility Overlay (`TYPE_ACCESSIBILITY_OVERLAY`) is treated by Android as a trusted visual layer, allowing 100% transparent touch pass-through across all apps and system bars."
+                    "- Using standard screen overlays (`TYPE_APPLICATION_OVERLAY`) causes Android to block touch inputs in secure apps (like GitHub, banking apps, and system dialogs) due to tapjacking protection (`filterTouchesWhenObscured`).\n" +
+                    "- An Accessibility Overlay (`TYPE_ACCESSIBILITY_OVERLAY`) is treated by Android as a trusted visual layer, allowing 100% transparent touch pass-through across all apps and system bars."
         ),
         FaqItem(
             question = "Why does Android warn that the app has \"full control of your device\"?",
             answer = "This is Android's mandatory, static system warning shown for *all* accessibility services regardless of their actual declared capabilities. Cerberus Tiles' service is strictly hardened:\n" +
-                "- `canRetrieveWindowContent=\"false\"`: Cannot read screen content, text, or passwords.\n" +
-                "- `canPerformGestures=\"false\"`: Cannot simulate clicks, gestures, or taps.\n" +
-                "- `canRequestFilterKeyEvents=\"false\"`: Cannot log or intercept keystrokes.\n" +
-                "- `canRequestTouchExplorationMode=\"false\"`: Cannot intercept touch exploration.\n" +
-                "- **Zero Event Types**: Does not receive or listen to window or UI events."
+                    "- `canRetrieveWindowContent=\"false\"`: Cannot read screen content, text, or passwords.\n" +
+                    "- `canPerformGestures=\"false\"`: Cannot simulate clicks, gestures, or taps.\n" +
+                    "- `canRequestFilterKeyEvents=\"false\"`: Cannot log or intercept keystrokes.\n" +
+                    "- `canRequestTouchExplorationMode=\"false\"`: Cannot intercept touch exploration.\n" +
+                    "- **Zero Event Types**: Does not receive or listen to window or UI events."
         ),
         FaqItem(
             question = "How do I grant the Charging Optimization permission?",
             answer = "The 80% charging limit modifies an Android secure system setting, which requires granting permission once via ADB:\n" +
-                "```bash\n" +
-                "adb shell pm grant com.bl4ckswordsman.cerberustiles android.permission.WRITE_SECURE_SETTINGS\n" +
-                "```"
+                    "```bash\n" +
+                    "adb shell pm grant com.bl4ckswordsman.cerberustiles android.permission.WRITE_SECURE_SETTINGS\n" +
+                    "```"
         ),
         FaqItem(
             question = "Does Cerberus Tiles collect any personal data?",

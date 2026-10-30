@@ -43,6 +43,7 @@ android {
         }
         debug {
             applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
             enableUnitTestCoverage = true
         }
     }
@@ -94,7 +95,6 @@ dependencies {
     implementation("androidx.compose.runtime:runtime-rxjava2:1.12.1")
     implementation("androidx.appcompat:appcompat:1.8.0")
     implementation("androidx.lifecycle:lifecycle-process:2.11.0")
-    implementation("androidx.navigation:navigation-compose:2.10.2")
     implementation("androidx.compose.material:material-icons-core")
     implementation("androidx.compose.material3:material3:1.5.0-beta02") // TODO: Don't rely on alpha version
     implementation("com.mikepenz:aboutlibraries-compose-m3:15.3.0")

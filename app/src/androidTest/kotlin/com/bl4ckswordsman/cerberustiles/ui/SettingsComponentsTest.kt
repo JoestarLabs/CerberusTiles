@@ -7,6 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -38,18 +39,17 @@ class SettingsComponentsTest {
         )
     }
 
-    @Composable
-    private fun rememberTestVisibilityParams(
+    private fun testVisibilityParams(
         adaptBrightness: Boolean = false,
         chargingOptimization: Boolean = false,
         ringerMode: Boolean = false,
         brightnessSlider: Boolean = false
-    ): ComponentVisibilityDialogParams {
-        return ComponentVisibilityDialogParams(
-            adaptBrightnessSwitch = remember { mutableStateOf(adaptBrightness) },
-            brightnessSlider = remember { mutableStateOf(brightnessSlider) },
-            ringerModeSelector = remember { mutableStateOf(ringerMode) },
-            chargingOptimizationSwitch = remember { mutableStateOf(chargingOptimization) }
+    ): ComponentVisibility {
+        return ComponentVisibility(
+            adaptBrightnessSwitch = adaptBrightness,
+            brightnessSlider = brightnessSlider,
+            ringerModeSelector = ringerMode,
+            chargingOptimizationSwitch = chargingOptimization
         )
     }
 
@@ -60,7 +60,7 @@ class SettingsComponentsTest {
 
         composeTestRule.setContent {
             val sharedParams = rememberTestSharedParams()
-            val visibilityParams = rememberTestVisibilityParams(adaptBrightness = true)
+            val visibilityParams = testVisibilityParams(adaptBrightness = true)
 
             val params = SettingsComponentsParams(
                 componentVisibilityParams = visibilityParams,
@@ -101,7 +101,7 @@ class SettingsComponentsTest {
 
         composeTestRule.setContent {
             val sharedParams = rememberTestSharedParams()
-            val visibilityParams = rememberTestVisibilityParams(adaptBrightness = true)
+            val visibilityParams = testVisibilityParams(adaptBrightness = true)
 
             val params = SettingsComponentsParams(
                 componentVisibilityParams = visibilityParams,
@@ -133,12 +133,122 @@ class SettingsComponentsTest {
     }
 
     @Test
+    fun brightnessSetting_whenCanWriteFalse_opensPermissionSettings() {
+        var openPermissionCalled = false
+
+        composeTestRule.setContent {
+            val sharedParams = rememberTestSharedParams()
+            val visibilityParams = testVisibilityParams(brightnessSlider = true)
+
+            val params = SettingsComponentsParams(
+                componentVisibilityParams = visibilityParams,
+                canWriteState = false,
+                isSwitchedOn = false,
+                setSwitchedOn = {},
+                toggleAdaptiveBrightness = {},
+                openPermissionSettings = { openPermissionCalled = true },
+                isVibrationModeOn = false,
+                setVibrationMode = {},
+                toggleVibrationMode = { true },
+                isChargingOptimizationOn = false,
+                setChargingOptimization = {},
+                toggleChargingOptimization = {},
+                sharedParams = sharedParams,
+                currentRingerMode = RingerMode.NORMAL,
+                onRingerModeChange = {}
+            )
+
+            CerberusTilesTheme {
+                SettingsComponents(params = params)
+            }
+        }
+
+        // Click preset button when app lacks write-settings permission
+        composeTestRule.onNodeWithText("Max").performClick()
+
+        assertTrue(openPermissionCalled)
+    }
+
+    @Test
+    fun brightnessSetting_whenAdaptiveBrightnessOn_presetsAreDisabled() {
+        composeTestRule.setContent {
+            val sharedParams = rememberTestSharedParams()
+            val visibilityParams = testVisibilityParams(brightnessSlider = true)
+
+            val params = SettingsComponentsParams(
+                componentVisibilityParams = visibilityParams,
+                canWriteState = true,
+                isSwitchedOn = true,
+                setSwitchedOn = {},
+                toggleAdaptiveBrightness = {},
+                openPermissionSettings = {},
+                isVibrationModeOn = false,
+                setVibrationMode = {},
+                toggleVibrationMode = { true },
+                isChargingOptimizationOn = false,
+                setChargingOptimization = {},
+                toggleChargingOptimization = {},
+                sharedParams = sharedParams,
+                currentRingerMode = RingerMode.NORMAL,
+                onRingerModeChange = {}
+            )
+
+            CerberusTilesTheme {
+                SettingsComponents(params = params)
+            }
+        }
+
+        // Verify presets are disabled when adaptive brightness is ON
+        composeTestRule.onNodeWithText("Min").assertIsNotEnabled()
+        composeTestRule.onNodeWithText("Balanced").assertIsNotEnabled()
+        composeTestRule.onNodeWithText("Max").assertIsNotEnabled()
+        composeTestRule.onNodeWithText("Adaptive brightness is active").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Turn off").assertIsDisplayed()
+    }
+
+    @Test
+    fun brightnessSetting_whenAdaptiveBrightnessOnAndCannotWrite_clickTurnOff_opensPermissionSettings() {
+        var openPermissionCalled = false
+
+        composeTestRule.setContent {
+            val sharedParams = rememberTestSharedParams()
+            val visibilityParams = testVisibilityParams(brightnessSlider = true)
+
+            val params = SettingsComponentsParams(
+                componentVisibilityParams = visibilityParams,
+                canWriteState = false,
+                isSwitchedOn = true,
+                setSwitchedOn = {},
+                toggleAdaptiveBrightness = {},
+                openPermissionSettings = { openPermissionCalled = true },
+                isVibrationModeOn = false,
+                setVibrationMode = {},
+                toggleVibrationMode = { true },
+                isChargingOptimizationOn = false,
+                setChargingOptimization = {},
+                toggleChargingOptimization = {},
+                sharedParams = sharedParams,
+                currentRingerMode = RingerMode.NORMAL,
+                onRingerModeChange = {}
+            )
+
+            CerberusTilesTheme {
+                SettingsComponents(params = params)
+            }
+        }
+
+        composeTestRule.onNodeWithText("Turn off").performClick()
+
+        assertTrue(openPermissionCalled)
+    }
+
+    @Test
     fun chargingOptimizationSetting_togglesCorrectly() {
         var toggledValue = false
 
         composeTestRule.setContent {
             val sharedParams = rememberTestSharedParams()
-            val visibilityParams = rememberTestVisibilityParams(chargingOptimization = true)
+            val visibilityParams = testVisibilityParams(chargingOptimization = true)
 
             val params = SettingsComponentsParams(
                 componentVisibilityParams = visibilityParams,
@@ -173,7 +283,7 @@ class SettingsComponentsTest {
     fun ringerModeSelector_displaysModesAndChecksInitialSelection() {
         composeTestRule.setContent {
             val sharedParams = rememberTestSharedParams()
-            val visibilityParams = rememberTestVisibilityParams(ringerMode = true)
+            val visibilityParams = testVisibilityParams(ringerMode = true)
 
             val params = SettingsComponentsParams(
                 componentVisibilityParams = visibilityParams,

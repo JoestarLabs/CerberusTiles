@@ -213,6 +213,56 @@ class SettingsUtilsTest {
     }
 
     @Test
+    fun `setAdaptiveBrightness writes 0 and shows disabled toast when enabled is false`() {
+        every { Settings.System.canWrite(context) } returns true
+        every {
+            Settings.System.putInt(contentResolver, Settings.System.SCREEN_BRIGHTNESS_MODE, 0)
+        } returns true
+
+        val success = SettingsUtils.Brightness.setAdaptiveBrightness(context, false)
+
+        assertTrue(success)
+        verify {
+            Settings.System.putInt(
+                contentResolver,
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                0
+            )
+        }
+        verify { Toast.makeText(context, "Adaptive brightness disabled", Toast.LENGTH_SHORT) }
+    }
+
+    @Test
+    fun `setAdaptiveBrightness writes 1 and shows enabled toast when enabled is true`() {
+        every { Settings.System.canWrite(context) } returns true
+        every {
+            Settings.System.putInt(contentResolver, Settings.System.SCREEN_BRIGHTNESS_MODE, 1)
+        } returns true
+
+        val success = SettingsUtils.Brightness.setAdaptiveBrightness(context, true)
+
+        assertTrue(success)
+        verify {
+            Settings.System.putInt(
+                contentResolver,
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                1
+            )
+        }
+        verify { Toast.makeText(context, "Adaptive brightness enabled", Toast.LENGTH_SHORT) }
+    }
+
+    @Test
+    fun `setAdaptiveBrightness does nothing and returns false when canWrite is false`() {
+        every { Settings.System.canWrite(context) } returns false
+
+        val success = SettingsUtils.Brightness.setAdaptiveBrightness(context, false)
+
+        assertFalse(success)
+        verify(exactly = 0) { Settings.System.putInt(any(), any(), any()) }
+    }
+
+    @Test
     fun `getScreenBrightness returns value from system settings`() {
         every {
             Settings.System.getInt(contentResolver, Settings.System.SCREEN_BRIGHTNESS)
@@ -231,11 +281,13 @@ class SettingsUtilsTest {
         } returns true
 
         // 255.0.pow(1.0) = 255
-        SettingsUtils.Brightness.setScreenBrightness(context, 1.0f)
+        val result1 = SettingsUtils.Brightness.setScreenBrightness(context, 1.0f)
+        assertTrue(result1)
         verify { Settings.System.putInt(contentResolver, Settings.System.SCREEN_BRIGHTNESS, 255) }
 
         // 255.0.pow(0.5) = 15.968... -> 15
-        SettingsUtils.Brightness.setScreenBrightness(context, 0.5f)
+        val result2 = SettingsUtils.Brightness.setScreenBrightness(context, 0.5f)
+        assertTrue(result2)
         verify { Settings.System.putInt(contentResolver, Settings.System.SCREEN_BRIGHTNESS, 15) }
     }
 
@@ -243,9 +295,23 @@ class SettingsUtilsTest {
     fun `setScreenBrightness does not write when canWrite is false`() {
         every { Settings.System.canWrite(context) } returns false
 
-        SettingsUtils.Brightness.setScreenBrightness(context, 0.5f)
+        val result = SettingsUtils.Brightness.setScreenBrightness(context, 0.5f)
 
+        assertFalse(result)
         verify(exactly = 0) { Settings.System.putInt(any(), any(), any()) }
+    }
+
+    @Test
+    fun `setScreenBrightness returns false when putInt returns false`() {
+        every { Settings.System.canWrite(context) } returns true
+        every {
+            Settings.System.putInt(contentResolver, Settings.System.SCREEN_BRIGHTNESS, any())
+        } returns false
+
+        val result = SettingsUtils.Brightness.setScreenBrightness(context, 0.5f)
+
+        assertFalse(result)
+        verify { Settings.System.putInt(contentResolver, Settings.System.SCREEN_BRIGHTNESS, 15) }
     }
 
     // --- Vibration tests ---

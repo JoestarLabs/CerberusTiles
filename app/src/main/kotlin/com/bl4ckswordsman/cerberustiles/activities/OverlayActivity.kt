@@ -70,6 +70,7 @@ class OverlayActivity : ComponentActivity() {
         setContent {
             val showOverlayDialog = rememberSaveable { mutableStateOf(true) }
             val currentRingerMode by viewModel.currentRingerMode.observeAsState(RingerMode.NORMAL)
+            val canWrite by viewModel.canWrite.observeAsState(initial = false)
 
             if (viewModel.showAdbDialog.value) {
                 AdbPermissionDialog(
@@ -81,7 +82,7 @@ class OverlayActivity : ComponentActivity() {
             val params = OverlayDialogParams(
                 showDialog = showOverlayDialog,
                 onDismiss = { finish() },
-                canWrite = viewModel.canWrite,
+                canWrite = canWrite,
                 isSwitchedOn = viewModel.isAdaptiveBrightnessOn.value,
                 setSwitchedOn = { viewModel.isAdaptiveBrightnessOn.value = it },
                 toggleAdaptiveBrightness = {

@@ -4,14 +4,17 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.CoroutineScope
 
 /**
@@ -22,7 +25,8 @@ import kotlinx.coroutines.CoroutineScope
  * @property showDialog The state of the dialog visibility.
  * @property dialogType The type of dialog to be shown.
  * @property sharedPreferences The shared preferences for storing app settings.
- * @property navController Optional navigation controller for screen navigation.
+ * @property onNavigateToPermissions Optional callback to navigate to permissions screen.
+ * @property onNavigateToLicenses Optional callback to navigate to licenses screen.
  */
 data class SharedParams(
     val context: Context,
@@ -30,7 +34,8 @@ data class SharedParams(
     val showDialog: MutableState<Boolean>,
     val dialogType: MutableState<DialogType>,
     val sharedPreferences: SharedPreferences,
-    val navController: NavController? = null
+    val onNavigateToPermissions: (() -> Unit)? = null,
+    val onNavigateToLicenses: (() -> Unit)? = null
 )
 
 /**
@@ -47,12 +52,19 @@ data class SettingsScreenParams(
  */
 @Composable
 fun SettingsScreen(params: SettingsScreenParams) {
-    Column(modifier = Modifier.padding(params.paddingValues)) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(params.paddingValues)
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 16.dp)
+    ) {
         val settingsListItemParams = SettingsListItemParams(
             sharedParams = params.sharedParams
         )
 
         CreateSettingsListItem(settingsListItemParams)
+        Spacer(modifier = Modifier.height(16.dp))
     }
 
     if (params.sharedParams.showDialog.value) {
@@ -70,7 +82,7 @@ fun SettingsScreen(params: SettingsScreenParams) {
 @Composable
 fun SettingsScreenPreview() {
 
-    val sharedParams = createSharedParams(rememberNavController())
+    val sharedParams = createSharedParams()
     val settingsScreenParams = SettingsScreenParams(
         paddingValues = PaddingValues(16.dp),
         sharedParams = sharedParams

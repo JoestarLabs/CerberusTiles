@@ -6,7 +6,6 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -19,15 +18,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedAssistChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -49,6 +49,19 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.bl4ckswordsman.cerberustiles.data.FaqItem
 import com.bl4ckswordsman.cerberustiles.data.PermissionItem
 import com.bl4ckswordsman.cerberustiles.data.PermissionsData
+
+/**
+ * Section header matching Material 3 Expressive guidelines.
+ */
+@Composable
+private fun PermissionsSectionHeader(title: String, modifier: Modifier = Modifier) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = modifier.padding(start = 4.dp, top = 8.dp, bottom = 4.dp)
+    )
+}
 
 /**
  * A full-screen documentation view that presents all required permissions,
@@ -80,26 +93,25 @@ fun PermissionsScreen(paddingValues: PaddingValues) {
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "Privacy Guarantee",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "Cerberus Tiles operates with zero internet access, zero analytics, and zero tracking. All permissions are strictly optional and only prompted when you choose to enable the corresponding feature.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            PermissionsSectionHeader("Privacy Guarantee")
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceBright
+                )
+            ) {
+                Text(
+                    text = "Cerberus Tiles operates with zero internet access, zero analytics, and zero tracking. All permissions are strictly optional and only prompted when you choose to enable the corresponding feature.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
         }
 
         item {
-            Text(
-                text = "Required Permissions",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
+            PermissionsSectionHeader("Required Permissions")
         }
 
         items(PermissionsData.permissions) { item ->
@@ -109,11 +121,7 @@ fun PermissionsScreen(paddingValues: PaddingValues) {
         }
 
         item {
-            Text(
-                text = "Frequently Asked Questions",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
+            PermissionsSectionHeader("Frequently Asked Questions")
         }
 
         items(PermissionsData.faqs) { faq ->
@@ -130,10 +138,11 @@ fun PermissionsScreen(paddingValues: PaddingValues) {
 private fun PermissionCard(item: PermissionItem, isGranted: Boolean) {
     val context = LocalContext.current
 
-    OutlinedCard(
+    Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.outlinedCardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceBright
         )
     ) {
         Column(
@@ -206,12 +215,12 @@ private fun FaqCard(faq: FaqItem) {
         label = "faq_chevron_rotation"
     )
 
-    OutlinedCard(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { isExpanded = !isExpanded },
-        colors = CardDefaults.outlinedCardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+    Card(
+        onClick = { isExpanded = !isExpanded },
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceBright
         )
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
