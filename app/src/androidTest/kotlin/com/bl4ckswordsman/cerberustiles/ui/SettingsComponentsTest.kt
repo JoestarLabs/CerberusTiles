@@ -203,43 +203,7 @@ class SettingsComponentsTest {
         composeTestRule.onNodeWithText("Balanced").assertIsNotEnabled()
         composeTestRule.onNodeWithText("Max").assertIsNotEnabled()
         composeTestRule.onNodeWithText("Adaptive brightness is active").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Turn off").assertIsDisplayed()
-    }
-
-    @Test
-    fun brightnessSetting_whenAdaptiveBrightnessOnAndCannotWrite_clickTurnOff_opensPermissionSettings() {
-        var openPermissionCalled = false
-
-        composeTestRule.setContent {
-            val sharedParams = rememberTestSharedParams()
-            val visibilityParams = testVisibilityParams(brightnessSlider = true)
-
-            val params = SettingsComponentsParams(
-                componentVisibilityParams = visibilityParams,
-                canWriteState = false,
-                isSwitchedOn = true,
-                setSwitchedOn = {},
-                toggleAdaptiveBrightness = {},
-                openPermissionSettings = { openPermissionCalled = true },
-                isVibrationModeOn = false,
-                setVibrationMode = {},
-                toggleVibrationMode = { true },
-                isChargingOptimizationOn = false,
-                setChargingOptimization = {},
-                toggleChargingOptimization = {},
-                sharedParams = sharedParams,
-                currentRingerMode = RingerMode.NORMAL,
-                onRingerModeChange = {}
-            )
-
-            CerberusTilesTheme {
-                SettingsComponents(params = params)
-            }
-        }
-
-        composeTestRule.onNodeWithText("Turn off").performClick()
-
-        assertTrue(openPermissionCalled)
+        composeTestRule.onNodeWithText("Turn off").assertDoesNotExist()
     }
 
     @Test

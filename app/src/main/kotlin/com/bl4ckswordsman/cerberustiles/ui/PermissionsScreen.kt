@@ -16,9 +16,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -32,14 +32,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -49,6 +49,9 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.bl4ckswordsman.cerberustiles.data.FaqItem
 import com.bl4ckswordsman.cerberustiles.data.PermissionItem
 import com.bl4ckswordsman.cerberustiles.data.PermissionsData
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Section header matching Material 3 Expressive guidelines.
@@ -70,13 +73,26 @@ private fun PermissionsSectionHeader(title: String, modifier: Modifier = Modifie
 @Composable
 fun PermissionsScreen(paddingValues: PaddingValues) {
     val context = LocalContext.current
-    var refreshKey by remember { mutableIntStateOf(0) }
+    val coroutineScope = rememberCoroutineScope()
+
+    var permissionStatuses by remember {
+        mutableStateOf(
+            PermissionsData.permissions.associate { it.title to it.isGranted(context) }
+        )
+    }
 
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
-                refreshKey++
+                coroutineScope.launch(Dispatchers.IO) {
+                    val updated = PermissionsData.permissions.associate {
+                        it.title to it.isGranted(context)
+                    }
+                    withContext(Dispatchers.Main) {
+                        permissionStatuses = updated
+                    }
+                }
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -85,52 +101,44 @@ fun PermissionsScreen(paddingValues: PaddingValues) {
         }
     }
 
-    LazyColumn(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(paddingValues)
+            .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        item {
-            PermissionsSectionHeader("Privacy Guarantee")
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceBright
-                )
-            ) {
-                Text(
-                    text = "Cerberus Tiles operates with zero internet access, zero analytics, and zero tracking. All permissions are strictly optional and only prompted when you choose to enable the corresponding feature.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(16.dp)
-                )
-            }
+        PermissionsSectionHeader("Privacy Guarantee")
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceBright
+            )
+        ) {
+            Text(
+                text = "Cerberus Tiles operates with zero internet access, zero analytics, and zero tracking. All permissions are strictly optional and only prompted when you choose to enable the corresponding feature.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(16.dp)
+            )
         }
 
-        item {
-            PermissionsSectionHeader("Required Permissions")
-        }
+        PermissionsSectionHeader("Required Permissions")
 
-        items(PermissionsData.permissions) { item ->
-            // Re-evaluates isGranted when refreshKey increments on resume
-            val isGranted = remember(refreshKey) { item.isGranted(context) }
+        PermissionsData.permissions.forEach { item ->
+            val isGranted = permissionStatuses[item.title] ?: false
             PermissionCard(item = item, isGranted = isGranted)
         }
 
-        item {
-            PermissionsSectionHeader("Frequently Asked Questions")
-        }
+        PermissionsSectionHeader("Frequently Asked Questions")
 
-        items(PermissionsData.faqs) { faq ->
+        PermissionsData.faqs.forEach { faq ->
             FaqCard(faq = faq)
         }
 
-        item {
-            Spacer(modifier = Modifier.height(16.dp))
-        }
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 
@@ -209,7 +217,7 @@ private fun PermissionCard(item: PermissionItem, isGranted: Boolean) {
 
 @Composable
 private fun FaqCard(faq: FaqItem) {
-    var isExpanded by rememberSaveable { mutableStateOf(false) }
+    var isExpanded by rememberSaveable(faq.question) { mutableStateOf(false) }
     val rotationAngle by animateFloatAsState(
         targetValue = if (isExpanded) 180f else 0f,
         label = "faq_chevron_rotation"
@@ -238,7 +246,7 @@ private fun FaqCard(faq: FaqItem) {
                 Icon(
                     imageVector = Icons.Default.KeyboardArrowDown,
                     contentDescription = if (isExpanded) "Collapse" else "Expand",
-                    modifier = Modifier.rotate(rotationAngle)
+                    modifier = Modifier.graphicsLayer { rotationZ = rotationAngle }
                 )
             }
 

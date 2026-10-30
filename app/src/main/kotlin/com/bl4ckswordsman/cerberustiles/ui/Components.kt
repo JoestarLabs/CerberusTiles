@@ -3,17 +3,19 @@ package com.bl4ckswordsman.cerberustiles.ui
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.provider.Settings
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -29,7 +31,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.ToggleButton
 import androidx.compose.material3.ToggleButtonDefaults
 import androidx.compose.runtime.Composable
@@ -247,32 +248,19 @@ fun BrightnessPresetButtonGroup(
             }
         }
 
-        if (isAdaptiveBrightnessOn) {
-            Spacer(modifier = Modifier.height(4.dp))
-            Row(
+        AnimatedVisibility(
+            visible = isAdaptiveBrightnessOn,
+            enter = fadeIn() + expandVertically(),
+            exit = fadeOut() + shrinkVertically()
+        ) {
+            Text(
+                text = "Adaptive brightness is active",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 4.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Adaptive brightness is active",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                if (onTurnOffAdaptiveBrightness != null) {
-                    TextButton(
-                        onClick = onTurnOffAdaptiveBrightness,
-                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
-                    ) {
-                        Text(
-                            text = "Turn off",
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                    }
-                }
-            }
+                    .padding(top = 6.dp, start = 4.dp)
+            )
         }
     }
 }
@@ -284,17 +272,6 @@ fun BrightnessPresetButtonGroup(
 fun BrightnessSlider(context: Context) {
     BrightnessPresetButtonGroup(
         context = context,
-        isAdaptiveBrightnessOn = SettingsUtils.Brightness.isAdaptiveBrightnessEnabled(context),
-        onTurnOffAdaptiveBrightness = {
-            if (Settings.System.canWrite(context)) {
-                Settings.System.putInt(
-                    context.contentResolver,
-                    Settings.System.SCREEN_BRIGHTNESS_MODE,
-                    0
-                )
-            } else {
-                SettingsUtils.openPermissionSettings(context)
-            }
-        }
+        isAdaptiveBrightnessOn = SettingsUtils.Brightness.isAdaptiveBrightnessEnabled(context)
     )
 }

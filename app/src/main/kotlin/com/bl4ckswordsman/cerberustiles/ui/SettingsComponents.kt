@@ -101,17 +101,6 @@ fun SettingsComponents(params: SettingsComponentsParams) {
             isOverlayContext = params.isOverlayContext,
             canWriteState = params.canWriteState,
             isAdaptiveBrightnessOn = params.isSwitchedOn,
-            onTurnOffAdaptiveBrightness = if (params.canWriteState) {
-                {
-                    val writeSucceeded =
-                        SettingsUtils.Brightness.setAdaptiveBrightness(context, false)
-                    if (writeSucceeded) {
-                        params.setSwitchedOn(false)
-                    }
-                }
-            } else {
-                params.openPermissionSettings
-            },
             openPermissionSettings = params.openPermissionSettings
         )
     }
