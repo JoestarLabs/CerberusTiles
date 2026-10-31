@@ -7,9 +7,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,6 +24,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -97,7 +101,15 @@ fun SmartPixelsDialog(
                             SettingsUtils.SmartPixels.setSmartPixelsEnabled(context, checked)
                         }
                     },
-                    label = if (isEnabled.value) "Smart Pixels is ON" else "Smart Pixels is OFF"
+                    label = if (isEnabled.value) "Smart Pixels is ON" else "Smart Pixels is OFF",
+                    icon = {
+                        Icon(
+                            painter = painterResource(R.drawable.rounded_grain_24),
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp),
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
                 )
 
                 Text("Intensity: ${intensity.floatValue.toInt()}%")

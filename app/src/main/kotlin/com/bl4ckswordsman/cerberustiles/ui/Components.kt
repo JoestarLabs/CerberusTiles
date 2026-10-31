@@ -11,13 +11,13 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -51,20 +51,22 @@ import com.bl4ckswordsman.cerberustiles.SettingsUtils
 import com.bl4ckswordsman.cerberustiles.models.BrightnessPreset
 
 /**
- * A switch with a label. The label is clickable and toggles the switch.
+ * A switch with a label and optional leading icon. The label and icon row is clickable and toggles the switch.
  *
  * @param isSwitchedOn Whether the switch is currently in the on (checked) state.
  * @param onCheckedChange Callback invoked with the new checked state when the user
  *   taps the row or the switch directly.
  * @param label The text displayed next to the switch describing the setting.
  * @param modifier Optional [Modifier] applied to the outer [Card].
+ * @param icon Optional leading icon composable displayed before the label.
  */
 @Composable
 fun SwitchWithLabel(
     isSwitchedOn: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     label: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    icon: (@Composable () -> Unit)? = null
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -79,12 +81,20 @@ fun SwitchWithLabel(
                 .clickable { onCheckedChange(!isSwitchedOn) }
                 .padding(start = 22.dp, end = 22.dp, top = 14.dp, bottom = 14.dp), // Inside padding
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically) {
-            Box(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(end = 8.dp) // Space between label and switch
-            ) { Text(text = label) }
+                    .padding(end = 8.dp), // Space between label and switch
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (icon != null) {
+                    icon()
+                    Spacer(modifier = Modifier.width(16.dp))
+                }
+                Text(text = label)
+            }
             Switch(
                 checked = isSwitchedOn,
                 onCheckedChange = { onCheckedChange(it) },

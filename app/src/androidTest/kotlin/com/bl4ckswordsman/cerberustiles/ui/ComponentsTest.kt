@@ -50,6 +50,25 @@ class ComponentsTest {
     }
 
     @Test
+    fun switchWithLabel_displaysLeadingIconWhenProvided() {
+        composeTestRule.setContent {
+            CerberusTilesTheme {
+                SwitchWithLabel(
+                    isSwitchedOn = false,
+                    onCheckedChange = {},
+                    label = "Icon Setting",
+                    icon = {
+                        androidx.compose.material3.Text("LeadingIcon")
+                    }
+                )
+            }
+        }
+
+        composeTestRule.onNodeWithText("Icon Setting").assertIsDisplayed()
+        composeTestRule.onNodeWithText("LeadingIcon").assertIsDisplayed()
+    }
+
+    @Test
     fun adbPermissionDialog_displaysTitleAndInvokesDismissOnOk() {
         var dismissed = false
 
