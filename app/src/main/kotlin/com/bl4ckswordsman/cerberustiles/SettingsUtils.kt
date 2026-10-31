@@ -4,13 +4,16 @@ import android.accessibilityservice.AccessibilityServiceInfo
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.media.AudioManager
 import android.provider.Settings
 import android.view.accessibility.AccessibilityManager
 import android.widget.Toast
 import androidx.core.net.toUri
 import com.bl4ckswordsman.cerberustiles.SettingsUtils.Charging.CHARGE_OPTIMIZATION_MODE
+import com.bl4ckswordsman.cerberustiles.models.NetworkSpeedLimit
 import com.bl4ckswordsman.cerberustiles.smartpixels.SmartPixelsAccessibilityService
+import com.bl4ckswordsman.cerberustiles.util.NetworkSpeedLimitRepository
 import kotlin.math.pow
 
 /** Utilities for different settings. */
@@ -253,6 +256,117 @@ object SettingsUtils {
             } catch (_: SecurityException) {
                 params.onPermissionDenied?.invoke()
             }
+        }
+    }
+
+    /**
+     * Utilities for Network Download Rate Limit (Developer Options).
+     */
+    object NetworkSpeed {
+        const val INGRESS_RATE_LIMIT_BYTES_PER_SECOND = "ingress_rate_limit_bytes_per_second"
+
+        /**
+         * Checks whether the network speed limitation feature is supported on this device.
+         * The feature was introduced in Android 13 (API level 33).
+         */
+        fun isSupported(): Boolean {
+            return android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU
+        }
+
+        /**
+         * Checks if the app has permission to modify secure settings.
+         */
+        fun canWriteSecureSettings(context: Context): Boolean {
+            return context.checkSelfPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) ==
+                    PackageManager.PERMISSION_GRANTED
+        }
+
+        /**
+         * Gets the raw rate limit in bytes per second from [Settings.Global].
+         * Returns -1L if absent or if reading throws an exception.
+         */
+        fun getRateLimitBytes(context: Context): Long {
+            return try {
+                Settings.Global.getLong(
+                    context.contentResolver,
+                    INGRESS_RATE_LIMIT_BYTES_PER_SECOND,
+                    -1L
+                )
+            } catch (_: Exception) {
+                -1L
+            }
+        }
+
+        /**
+         * Gets the current [NetworkSpeedLimit] configured on the device.
+         */
+        fun getCurrentSpeedLimit(context: Context): NetworkSpeedLimit {
+            val bytes = getRateLimitBytes(context)
+            val available = NetworkSpeedLimitRepository.getAvailableLimits(context)
+            return NetworkSpeedLimit.fromBytesPerSecond(bytes, available)
+        }
+
+        /**
+         * Sets the network download speed limit.
+         *
+         * @return True if successfully written, false otherwise.
+         */
+        fun setSpeedLimit(
+            context: Context,
+            limit: NetworkSpeedLimit,
+            onPermissionDenied: (() -> Unit)? = null
+        ): Boolean {
+            return try {
+                val success = Settings.Global.putLong(
+                    context.contentResolver,
+                    INGRESS_RATE_LIMIT_BYTES_PER_SECOND,
+                    limit.bytesPerSecond
+                )
+                if (success) {
+                    val message = if (limit.isUnlimited) {
+                        "Network speed limit disabled"
+                    } else {
+                        "Network speed limit: ${limit.label}"
+                    }
+                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(
+                        context,
+                        "Failed to change network speed limit. It may be restricted.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                success
+            } catch (_: SecurityException) {
+                onPermissionDenied?.invoke()
+                false
+            } catch (_: Exception) {
+                false
+            }
+        }
+
+        /**
+         * Cycles to the next available speed limit in the options list.
+         * e.g., No limit -> 128 kbps -> 256 kbps -> 1 Mbps -> 5 Mbps -> 15 Mbps -> No limit.
+         */
+        fun cycleNextSpeedLimit(
+            context: Context,
+            onPermissionDenied: (() -> Unit)? = null
+        ): NetworkSpeedLimit? {
+            val available = NetworkSpeedLimitRepository.getAvailableLimits(context)
+            if (available.isEmpty()) return null
+
+            val current = getCurrentSpeedLimit(context)
+            val currentIndex = available.indexOfFirst {
+                if (current.isUnlimited) it.isUnlimited else it.bytesPerSecond == current.bytesPerSecond
+            }
+
+            val nextIndex =
+                if (currentIndex == -1 || currentIndex >= available.lastIndex) 0 else currentIndex + 1
+            val nextLimit = available[nextIndex]
+
+            val success = setSpeedLimit(context, nextLimit, onPermissionDenied)
+            return if (success) nextLimit else null
         }
     }
 

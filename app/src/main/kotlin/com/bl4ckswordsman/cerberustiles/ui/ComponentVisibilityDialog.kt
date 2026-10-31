@@ -89,6 +89,18 @@ fun ComponentVisibilityDialog(
                         }
                     }
                 )
+                SettingsCheckbox(
+                    initialValue = sharedPreferences.getBoolean(
+                        ComponentVisibility.KEY_NETWORK_SPEED_LIMIT,
+                        true
+                    ),
+                    text = "6. Network Speed Limitation",
+                    onCheckedChange = { newValue ->
+                        sharedPreferences.edit {
+                            putBoolean(ComponentVisibility.KEY_NETWORK_SPEED_LIMIT, newValue)
+                        }
+                    }
+                )
             }
         },
         confirmButton = {

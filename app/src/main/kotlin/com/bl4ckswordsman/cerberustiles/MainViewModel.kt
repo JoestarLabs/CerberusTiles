@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.bl4ckswordsman.cerberustiles.SettingsUtils.canWriteSettings
+import com.bl4ckswordsman.cerberustiles.models.NetworkSpeedLimit
 import com.bl4ckswordsman.cerberustiles.models.RingerMode
 import com.bl4ckswordsman.cerberustiles.util.Ringer
 
@@ -47,6 +48,12 @@ class MainViewModel : ViewModel() {
 
     /** Whether Smart Pixels should pause during screen recording / casting. */
     val isSmartPixelsDisableOnCast = mutableStateOf(true)
+
+    /** Whether network download rate limiting is supported on this device (Android 13+). */
+    val isNetworkSpeedLimitSupported = mutableStateOf(false)
+
+    /** Currently active network download speed limit. */
+    val currentNetworkSpeedLimit = mutableStateOf(NetworkSpeedLimit.NO_LIMIT)
 
     /**
      * Updates the state of the canWrite setting.
@@ -97,5 +104,17 @@ class MainViewModel : ViewModel() {
         isSmartPixelsOn.value = SettingsUtils.SmartPixels.isSmartPixelsEnabled(context)
         smartPixelsIntensity.value = SettingsUtils.SmartPixels.getSmartPixelsIntensity(context)
         isSmartPixelsDisableOnCast.value = SettingsUtils.SmartPixels.isDisableOnCastEnabled(context)
+    }
+
+    /**
+     * Updates the network speed limitation state.
+     */
+    fun updateNetworkSpeedLimitState(context: Context) {
+        val supported = SettingsUtils.NetworkSpeed.isSupported()
+        isNetworkSpeedLimitSupported.value = supported
+        if (supported) {
+            currentNetworkSpeedLimit.value =
+                SettingsUtils.NetworkSpeed.getCurrentSpeedLimit(context)
+        }
     }
 }

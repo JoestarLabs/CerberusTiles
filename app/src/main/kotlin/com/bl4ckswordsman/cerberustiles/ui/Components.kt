@@ -57,13 +57,17 @@ import com.bl4ckswordsman.cerberustiles.models.BrightnessPreset
  * @param onCheckedChange Callback invoked with the new checked state when the user
  *   taps the row or the switch directly.
  * @param label The text displayed next to the switch describing the setting.
+ * @param modifier Optional [Modifier] applied to the outer [Card].
  */
 @Composable
-fun SwitchWithLabel(isSwitchedOn: Boolean, onCheckedChange: (Boolean) -> Unit, label: String) {
+fun SwitchWithLabel(
+    isSwitchedOn: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    label: String,
+    modifier: Modifier = Modifier
+) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp, top = 12.dp), // Outside padding
+        modifier = modifier.fillMaxWidth(),
         shape = CircleShape,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -145,6 +149,7 @@ fun AdbPermissionDialog(context: Context, onDismiss: () -> Unit) {
  * [SettingsUtils.Brightness.setScreenBrightness] and updates the selection state.
  *
  * @param context Application context used to read and set screen brightness.
+ * @param modifier Optional [Modifier] applied to the root [Column].
  * @param isOverlayContext Whether this component is rendered inside an overlay
  *   (compact view with smaller icons and no labels).
  * @param initialPreset Optional initial preset to override system brightness lookup.
@@ -158,6 +163,7 @@ fun AdbPermissionDialog(context: Context, onDismiss: () -> Unit) {
 @Composable
 fun BrightnessPresetButtonGroup(
     context: Context,
+    modifier: Modifier = Modifier,
     isOverlayContext: Boolean = false,
     initialPreset: BrightnessPreset? = null,
     canWriteState: Boolean = true,
@@ -185,12 +191,7 @@ fun BrightnessPresetButtonGroup(
     val presets = BrightnessPreset.entries
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                horizontal = 16.dp,
-                vertical = 12.dp
-            )
+        modifier = modifier.fillMaxWidth()
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -269,9 +270,10 @@ fun BrightnessPresetButtonGroup(
  * Backwards-compatible composable for adjusting screen brightness using [BrightnessPresetButtonGroup].
  */
 @Composable
-fun BrightnessSlider(context: Context) {
+fun BrightnessSlider(context: Context, modifier: Modifier = Modifier) {
     BrightnessPresetButtonGroup(
         context = context,
+        modifier = modifier,
         isAdaptiveBrightnessOn = SettingsUtils.Brightness.isAdaptiveBrightnessEnabled(context)
     )
 }

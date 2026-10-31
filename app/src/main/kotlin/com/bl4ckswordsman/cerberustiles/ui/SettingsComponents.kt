@@ -1,6 +1,7 @@
 package com.bl4ckswordsman.cerberustiles.ui
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,6 +22,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.bl4ckswordsman.cerberustiles.R
 import com.bl4ckswordsman.cerberustiles.SettingsUtils
+import com.bl4ckswordsman.cerberustiles.models.NetworkSpeedLimit
 import com.bl4ckswordsman.cerberustiles.models.RingerMode
 import com.bl4ckswordsman.cerberustiles.util.Ringer
 
@@ -45,75 +47,105 @@ data class SettingsComponentsParams(
     val onRingerModeChange: (RingerMode) -> Unit,
     val isOverlayContext: Boolean = false,
     val isSmartPixelsOn: Boolean = false,
-    val toggleSmartPixels: ((Boolean) -> Unit)? = null
+    val toggleSmartPixels: ((Boolean) -> Unit)? = null,
+    val currentNetworkSpeedLimit: NetworkSpeedLimit = NetworkSpeedLimit.NO_LIMIT,
+    val onNetworkSpeedLimitChange: ((NetworkSpeedLimit) -> Unit)? = null,
+    val isNetworkSpeedLimitSupported: Boolean = false,
+    val onOpenAdbDialog: (() -> Unit)? = null
 )
 
 /**
  * A composable that shows settings components.
  */
 @Composable
-fun SettingsComponents(params: SettingsComponentsParams) {
-    if (params.componentVisibilityParams.adaptBrightnessSwitch) {
-        SwitchWithLabel(
-            isSwitchedOn = params.isSwitchedOn,
-            onCheckedChange = {
-                params.setSwitchedOn(it)
-                if (params.canWriteState) {
-                    params.toggleAdaptiveBrightness()
-                } else {
-                    params.openPermissionSettings()
+fun SettingsComponents(
+    params: SettingsComponentsParams,
+    modifier: Modifier = Modifier
+) {
+    val horizontalPadding = if (params.isOverlayContext) 0.dp else 16.dp
+    val verticalPadding = if (params.isOverlayContext) 0.dp else 12.dp
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = horizontalPadding, vertical = verticalPadding),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        if (params.componentVisibilityParams.adaptBrightnessSwitch) {
+            SwitchWithLabel(
+                isSwitchedOn = params.isSwitchedOn,
+                onCheckedChange = {
+                    params.setSwitchedOn(it)
+                    if (params.canWriteState) {
+                        params.toggleAdaptiveBrightness()
+                    } else {
+                        params.openPermissionSettings()
+                    }
+                },
+                label = if (params.isSwitchedOn) "Adaptive Brightness is ON" else "Adaptive Brightness is OFF"
+            )
+        }
+
+        if (params.componentVisibilityParams.chargingOptimizationSwitch) {
+            SwitchWithLabel(
+                isSwitchedOn = params.isChargingOptimizationOn,
+                onCheckedChange = {
+                    params.toggleChargingOptimization(it)
+                },
+                label = if (params.isChargingOptimizationOn) "Charging Optimization is ON" else "Charging Optimization is OFF"
+            )
+        }
+
+        if (params.componentVisibilityParams.smartPixelsSwitch) {
+            val context = LocalContext.current
+            SwitchWithLabel(
+                isSwitchedOn = params.isSmartPixelsOn,
+                onCheckedChange = { checked ->
+                    val hasPerm = SettingsUtils.SmartPixels.isAccessibilityServiceEnabled(context)
+                    if (!hasPerm) {
+                        SettingsUtils.SmartPixels.openAccessibilitySettings(context)
+                    } else {
+                        params.toggleSmartPixels?.invoke(checked)
+                    }
+                },
+                label = if (params.isSmartPixelsOn) "Smart Pixels is ON" else "Smart Pixels is OFF"
+            )
+        }
+
+        if (params.componentVisibilityParams.brightnessSlider) {
+            val context = LocalContext.current
+            BrightnessPresetButtonGroup(
+                context = context,
+                isOverlayContext = params.isOverlayContext,
+                canWriteState = params.canWriteState,
+                isAdaptiveBrightnessOn = params.isSwitchedOn,
+                openPermissionSettings = params.openPermissionSettings
+            )
+        }
+
+        if (params.componentVisibilityParams.ringerModeSelector) {
+            val context = LocalContext.current
+            RingerModeSelectionButtonGroup(
+                currentMode = params.currentRingerMode,
+                isOverlayContext = params.isOverlayContext,
+                onModeSelected = { newMode ->
+                    RingerModeHandler(params, newMode, context).handleModeSelection()
                 }
-            },
-            label = if (params.isSwitchedOn) "Adaptive Brightness is ON" else "Adaptive Brightness is OFF"
-        )
-    }
+            )
+        }
 
-    if (params.componentVisibilityParams.chargingOptimizationSwitch) {
-        SwitchWithLabel(
-            isSwitchedOn = params.isChargingOptimizationOn,
-            onCheckedChange = {
-                params.toggleChargingOptimization(it)
-            },
-            label = if (params.isChargingOptimizationOn) "Charging Optimization is ON" else "Charging Optimization is OFF"
-        )
-    }
-
-    if (params.componentVisibilityParams.smartPixelsSwitch) {
-        val context = LocalContext.current
-        SwitchWithLabel(
-            isSwitchedOn = params.isSmartPixelsOn,
-            onCheckedChange = { checked ->
-                val hasPerm = SettingsUtils.SmartPixels.isAccessibilityServiceEnabled(context)
-                if (!hasPerm) {
-                    SettingsUtils.SmartPixels.openAccessibilitySettings(context)
-                } else {
-                    params.toggleSmartPixels?.invoke(checked)
-                }
-            },
-            label = if (params.isSmartPixelsOn) "Smart Pixels is ON" else "Smart Pixels is OFF"
-        )
-    }
-
-    if (params.componentVisibilityParams.brightnessSlider) {
-        val context = LocalContext.current
-        BrightnessPresetButtonGroup(
-            context = context,
-            isOverlayContext = params.isOverlayContext,
-            canWriteState = params.canWriteState,
-            isAdaptiveBrightnessOn = params.isSwitchedOn,
-            openPermissionSettings = params.openPermissionSettings
-        )
-    }
-
-    if (params.componentVisibilityParams.ringerModeSelector) {
-        val context = LocalContext.current
-        RingerModeSelectionButtonGroup(
-            currentMode = params.currentRingerMode,
-            isOverlayContext = params.isOverlayContext,
-            onModeSelected = { newMode ->
-                RingerModeHandler(params, newMode, context).handleModeSelection()
-            }
-        )
+        if (params.componentVisibilityParams.networkSpeedLimitSelector && params.isNetworkSpeedLimitSupported) {
+            NetworkSpeedLimitCard(
+                currentLimit = params.currentNetworkSpeedLimit,
+                onLimitSelected = { newLimit ->
+                    params.onNetworkSpeedLimitChange?.invoke(newLimit)
+                },
+                onPermissionRequired = {
+                    params.onOpenAdbDialog?.invoke()
+                },
+                isOverlayContext = params.isOverlayContext
+            )
+        }
     }
 }
 
@@ -122,6 +154,7 @@ fun SettingsComponents(params: SettingsComponentsParams) {
  * Each button represents one [RingerMode] and is sized proportionally based on [isOverlayContext].
  *
  * @param currentMode The currently active [RingerMode], used to highlight the selected button.
+ * @param modifier Optional [Modifier] applied to the outer [Row].
  * @param isOverlayContext When true, all buttons are equal width and icons are rendered smaller
  *   to fit the compact overlay layout.
  * @param onModeSelected Callback invoked with the newly selected [RingerMode] when the user
@@ -130,18 +163,14 @@ fun SettingsComponents(params: SettingsComponentsParams) {
 @Composable
 private fun RingerModeSelectionButtonGroup(
     currentMode: RingerMode,
+    modifier: Modifier = Modifier,
     isOverlayContext: Boolean = false,
     onModeSelected: (RingerMode) -> Unit
 ) {
     val modes = RingerMode.entries
 
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                horizontal = 16.dp,
-                vertical = 12.dp
-            ),
+        modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween)
     ) {
         modes.forEachIndexed { index, mode ->
