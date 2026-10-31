@@ -69,6 +69,7 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
         viewModel.updateIsChargingOptimizationOn(this)
         viewModel.updateCurrentRingerMode(this)
         viewModel.updateSmartPixelsState(this)
+        viewModel.updateNetworkSpeedLimitState(this)
     }
 
     /**
@@ -140,7 +141,13 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
                                 viewModel.isVibrationModeOn.value = newMode == RingerMode.VIBRATE
                             },
                             isSmartPixelsOn = viewModel.isSmartPixelsOn.value,
-                            toggleSmartPixels = ::toggleSmartPixels
+                            toggleSmartPixels = ::toggleSmartPixels,
+                            currentNetworkSpeedLimit = viewModel.currentNetworkSpeedLimit.value,
+                            onNetworkSpeedLimitChange = { newLimit ->
+                                viewModel.currentNetworkSpeedLimit.value = newLimit
+                            },
+                            isNetworkSpeedLimitSupported = viewModel.isNetworkSpeedLimitSupported.value,
+                            onOpenAdbDialog = { viewModel.showAdbDialog.value = true }
                         )
                     )
                 }

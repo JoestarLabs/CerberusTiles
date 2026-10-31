@@ -16,13 +16,15 @@ import androidx.compose.runtime.setValue
  * @property ringerModeSelector Whether the ringer mode segmented control is visible.
  * @property chargingOptimizationSwitch Whether the charging optimization switch is visible.
  * @property smartPixelsSwitch Whether the Smart Pixels switch is visible.
+ * @property networkSpeedLimitSelector Whether the network speed limit selector is visible.
  */
 data class ComponentVisibility(
     val adaptBrightnessSwitch: Boolean = true,
     val brightnessSlider: Boolean = true,
     val ringerModeSelector: Boolean = true,
     val chargingOptimizationSwitch: Boolean = true,
-    val smartPixelsSwitch: Boolean = true
+    val smartPixelsSwitch: Boolean = true,
+    val networkSpeedLimitSelector: Boolean = true
 ) {
     companion object {
         const val KEY_ADAPTIVE_BRIGHTNESS = "adaptBrightnessSwitch"
@@ -30,6 +32,7 @@ data class ComponentVisibility(
         const val KEY_RINGER_MODE = "ringerModeSelector"
         const val KEY_CHARGING_OPTIMIZATION = "chargingOptimizationSwitch"
         const val KEY_SMART_PIXELS = "smartPixelsSwitch"
+        const val KEY_NETWORK_SPEED_LIMIT = "networkSpeedLimitSelector"
 
         /**
          * Reads the current visibility state from the provided [SharedPreferences].
@@ -43,7 +46,11 @@ data class ComponentVisibility(
                     KEY_CHARGING_OPTIMIZATION,
                     true
                 ),
-                smartPixelsSwitch = preferences.getBoolean(KEY_SMART_PIXELS, true)
+                smartPixelsSwitch = preferences.getBoolean(KEY_SMART_PIXELS, true),
+                networkSpeedLimitSelector = preferences.getBoolean(
+                    KEY_NETWORK_SPEED_LIMIT,
+                    true
+                )
             )
     }
 }
@@ -68,7 +75,8 @@ fun rememberComponentVisibility(sharedPreferences: SharedPreferences): Component
                     ComponentVisibility.KEY_BRIGHTNESS_SLIDER,
                     ComponentVisibility.KEY_RINGER_MODE,
                     ComponentVisibility.KEY_CHARGING_OPTIMIZATION,
-                    ComponentVisibility.KEY_SMART_PIXELS
+                    ComponentVisibility.KEY_SMART_PIXELS,
+                    ComponentVisibility.KEY_NETWORK_SPEED_LIMIT
                 )
             ) {
                 visibility = ComponentVisibility.fromPreferences(prefs)

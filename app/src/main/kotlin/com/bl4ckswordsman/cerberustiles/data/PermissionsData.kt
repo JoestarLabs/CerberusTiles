@@ -51,8 +51,8 @@ object PermissionsData {
         ),
         PermissionItem(
             title = "Write Secure Settings",
-            feature = "Limit Charge to 80%",
-            why = "Modifies the system charge_optimization_mode setting on Pixel devices.",
+            feature = "Limit Charge to 80%, Network Speed Limit",
+            why = "Modifies secure system settings (charge_optimization_mode on Pixel devices, ingress_rate_limit_bytes_per_second for download rate limiting).",
             howToGrant = "One-time ADB command",
             isGranted = { context ->
                 context.checkSelfPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) ==

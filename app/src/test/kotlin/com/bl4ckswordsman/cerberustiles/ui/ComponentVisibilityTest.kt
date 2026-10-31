@@ -18,6 +18,7 @@ class ComponentVisibilityTest {
         assertTrue(visibility.ringerModeSelector)
         assertTrue(visibility.chargingOptimizationSwitch)
         assertTrue(visibility.smartPixelsSwitch)
+        assertTrue(visibility.networkSpeedLimitSelector)
     }
 
     @Test
@@ -33,6 +34,12 @@ class ComponentVisibilityTest {
             )
         } returns false
         every { prefs.getBoolean(ComponentVisibility.KEY_SMART_PIXELS, true) } returns true
+        every {
+            prefs.getBoolean(
+                ComponentVisibility.KEY_NETWORK_SPEED_LIMIT,
+                true
+            )
+        } returns false
 
         val visibility = ComponentVisibility.fromPreferences(prefs)
 
@@ -41,6 +48,7 @@ class ComponentVisibilityTest {
         assertTrue(visibility.ringerModeSelector)
         assertFalse(visibility.chargingOptimizationSwitch)
         assertTrue(visibility.smartPixelsSwitch)
+        assertFalse(visibility.networkSpeedLimitSelector)
     }
 
     @Test
@@ -50,5 +58,6 @@ class ComponentVisibilityTest {
         assertEquals("ringerModeSelector", ComponentVisibility.KEY_RINGER_MODE)
         assertEquals("chargingOptimizationSwitch", ComponentVisibility.KEY_CHARGING_OPTIMIZATION)
         assertEquals("smartPixelsSwitch", ComponentVisibility.KEY_SMART_PIXELS)
+        assertEquals("networkSpeedLimitSelector", ComponentVisibility.KEY_NETWORK_SPEED_LIMIT)
     }
 }

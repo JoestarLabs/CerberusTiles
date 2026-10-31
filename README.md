@@ -47,6 +47,7 @@ Tested in a Pixel 8 Pro.
 |            Vibration Ringer Mode             |       ✅       |      ✅       |          -          |
 |                Overlay dialog                |       -       |      ✅       |          -          |
 | Limit Charge to 80%<br>*(requires adb perm)* |       ✅       |      -       |          -          |
+|  Network Speed Limit<br>*(requires adb perm)* |       ✅       |      -       |          ✅          |
 |                 Smart Pixels                 |       ✅       |      -       |          ✅          |
 
 > [!NOTE]
@@ -61,7 +62,7 @@ Cerberus Tiles operates with **zero internet access**, **zero analytics**, and *
 | :--- | :--- | :--- | :--- |
 | **Write System Settings** | Adaptive Brightness, Ringer Mode | Toggles device brightness mode and ringer/vibration states. | Standard system settings screen |
 | **Notification Policy (DND)** | Vibration Ringer Mode | Prevents system crashes when switching ringer mode while Do Not Disturb is active. | Standard system settings screen |
-| **Write Secure Settings** | Limit Charge to 80% | Modifies the system charge_optimization_mode setting on Pixel devices. | One-time ADB command |
+| **Write Secure Settings** | Limit Charge to 80%, Network Speed Limit | Modifies secure system settings (charge_optimization_mode on Pixel devices, ingress_rate_limit_bytes_per_second for download rate limiting). | One-time ADB command |
 | **Accessibility Service** | Smart Pixels | Draws a hardware-accelerated true-black pixel grid over the display without blocking touch interaction. | Accessibility Settings |
 
 ### Frequently Asked Questions

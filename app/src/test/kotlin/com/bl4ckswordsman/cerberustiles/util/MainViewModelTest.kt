@@ -6,6 +6,7 @@ import android.provider.Settings
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.bl4ckswordsman.cerberustiles.MainViewModel
 import com.bl4ckswordsman.cerberustiles.SettingsUtils
+import com.bl4ckswordsman.cerberustiles.models.NetworkSpeedLimit
 import com.bl4ckswordsman.cerberustiles.models.RingerMode
 import io.mockk.MockKAnnotations
 import io.mockk.every
@@ -46,6 +47,7 @@ class MainViewModelTest {
         mockkObject(SettingsUtils.Brightness)
         mockkObject(SettingsUtils.Vibration)
         mockkObject(SettingsUtils.SmartPixels)
+        mockkObject(SettingsUtils.NetworkSpeed)
         mockkObject(Ringer)
         viewModel = MainViewModel()
     }
@@ -283,5 +285,37 @@ class MainViewModelTest {
         assertTrue(viewModel.isSmartPixelsOn.value)
         assertEquals(70f, viewModel.smartPixelsIntensity.value, 0.01f)
         assertFalse(viewModel.isSmartPixelsDisableOnCast.value)
+    }
+
+    @Test
+    fun `initial isNetworkSpeedLimitSupported state is false`() {
+        assertFalse(viewModel.isNetworkSpeedLimitSupported.value)
+    }
+
+    @Test
+    fun `initial currentNetworkSpeedLimit is NO_LIMIT`() {
+        assertEquals(NetworkSpeedLimit.NO_LIMIT, viewModel.currentNetworkSpeedLimit.value)
+    }
+
+    @Test
+    fun `updateNetworkSpeedLimitState sets supported to false when not supported and does not query speed limit`() {
+        every { SettingsUtils.NetworkSpeed.isSupported() } returns false
+
+        viewModel.updateNetworkSpeedLimitState(context)
+
+        assertFalse(viewModel.isNetworkSpeedLimitSupported.value)
+        verify(exactly = 0) { SettingsUtils.NetworkSpeed.getCurrentSpeedLimit(any()) }
+    }
+
+    @Test
+    fun `updateNetworkSpeedLimitState updates currentNetworkSpeedLimit when supported`() {
+        val testLimit = NetworkSpeedLimit.LIMIT_1M
+        every { SettingsUtils.NetworkSpeed.isSupported() } returns true
+        every { SettingsUtils.NetworkSpeed.getCurrentSpeedLimit(context) } returns testLimit
+
+        viewModel.updateNetworkSpeedLimitState(context)
+
+        assertTrue(viewModel.isNetworkSpeedLimitSupported.value)
+        assertEquals(testLimit, viewModel.currentNetworkSpeedLimit.value)
     }
 }

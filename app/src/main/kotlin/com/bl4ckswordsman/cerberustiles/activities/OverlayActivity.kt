@@ -53,6 +53,7 @@ class OverlayActivity : ComponentActivity() {
         viewModel.updateIsChargingOptimizationOn(this)
         viewModel.updateCurrentRingerMode(this)
         viewModel.updateSmartPixelsState(this)
+        viewModel.updateNetworkSpeedLimitState(this)
     }
 
     /**
@@ -133,7 +134,13 @@ class OverlayActivity : ComponentActivity() {
                 toggleSmartPixels = { enabled ->
                     SettingsUtils.SmartPixels.setSmartPixelsEnabled(this, enabled)
                     viewModel.isSmartPixelsOn.value = enabled
-                }
+                },
+                currentNetworkSpeedLimit = viewModel.currentNetworkSpeedLimit.value,
+                onNetworkSpeedLimitChange = { newLimit ->
+                    viewModel.currentNetworkSpeedLimit.value = newLimit
+                },
+                isNetworkSpeedLimitSupported = viewModel.isNetworkSpeedLimitSupported.value,
+                onOpenAdbDialog = { viewModel.showAdbDialog.value = true }
             )
             OverlayDialog(params)
         }
