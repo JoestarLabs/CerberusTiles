@@ -52,16 +52,19 @@ data class NetworkSpeedLimit(
                     if (gbps == gbps.toLong().toDouble()) "${gbps.toLong()} Gbps"
                     else String.format(Locale.US, "%.1f Gbps", gbps)
                 }
+
                 bitsPerSec >= 1_000_000 -> {
                     val mbps = bitsPerSec / 1_000_000.0
                     if (mbps == mbps.toLong().toDouble()) "${mbps.toLong()} Mbps"
                     else String.format(Locale.US, "%.1f Mbps", mbps)
                 }
+
                 bitsPerSec >= 1_000 -> {
                     val kbps = bitsPerSec / 1_000.0
                     if (kbps == kbps.toLong().toDouble()) "${kbps.toLong()} kbps"
                     else String.format(Locale.US, "%.1f kbps", kbps)
                 }
+
                 else -> "$bitsPerSec bps"
             }
         }

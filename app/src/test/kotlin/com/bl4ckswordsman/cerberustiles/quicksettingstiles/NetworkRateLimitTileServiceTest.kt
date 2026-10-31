@@ -94,7 +94,11 @@ class NetworkRateLimitTileServiceTest {
         tileService.onClick()
 
         verify {
-            Toast.makeText(tileService, "Network speed limit requires Android 13+", Toast.LENGTH_SHORT)
+            Toast.makeText(
+                tileService,
+                "Network speed limit requires Android 13+",
+                Toast.LENGTH_SHORT
+            )
         }
         verify(exactly = 0) { SettingsUtils.NetworkSpeed.cycleNextSpeedLimit(any()) }
     }
@@ -107,7 +111,11 @@ class NetworkRateLimitTileServiceTest {
         tileService.onClick()
 
         verify {
-            Toast.makeText(tileService, "Permission required: Grant WRITE_SECURE_SETTINGS via ADB", Toast.LENGTH_LONG)
+            Toast.makeText(
+                tileService,
+                "Permission required: Grant WRITE_SECURE_SETTINGS via ADB",
+                Toast.LENGTH_LONG
+            )
         }
         verify(exactly = 0) { SettingsUtils.NetworkSpeed.cycleNextSpeedLimit(any()) }
     }
