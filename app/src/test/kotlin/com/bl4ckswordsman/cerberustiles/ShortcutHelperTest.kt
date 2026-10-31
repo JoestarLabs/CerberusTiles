@@ -64,7 +64,7 @@ class ShortcutHelperTest {
             id = "test_id",
             shortLabel = "Short",
             longLabel = "Long",
-            icon = R.drawable.baseline_brightness_auto_24,
+            icon = R.drawable.rounded_brightness_auto_24,
             action = Constants.TOGGLE_ADAPTIVE_BRIGHTNESS_ACTION,
             activityClass = ToggleAdaptiveBrightnessActivity::class.java
         )

@@ -83,7 +83,7 @@ class NetworkRateLimitTileServiceTest {
 
         verify { mockQsTile.state = Tile.STATE_ACTIVE }
         verify { mockQsTile.label = "Speed Limit" }
-        verify { Icon.createWithResource(tileService, R.drawable.outline_network_check_24) }
+        verify { Icon.createWithResource(tileService, R.drawable.rounded_network_check_24) }
         verify { mockQsTile.updateTile() }
     }
 
