@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleButton
 import androidx.compose.material3.ToggleButtonDefaults
@@ -82,7 +83,18 @@ fun SettingsComponents(
                         params.openPermissionSettings()
                     }
                 },
-                label = if (params.isSwitchedOn) "Adaptive Brightness is ON" else "Adaptive Brightness is OFF"
+                label = if (params.isSwitchedOn) "Adaptive Brightness is ON" else "Adaptive Brightness is OFF",
+                icon = {
+                    Icon(
+                        painter = painterResource(
+                            if (params.isSwitchedOn) R.drawable.baseline_brightness_auto_24
+                            else R.drawable.outline_brightness_auto_24
+                        ),
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp),
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
             )
         }
 
@@ -92,7 +104,15 @@ fun SettingsComponents(
                 onCheckedChange = {
                     params.toggleChargingOptimization(it)
                 },
-                label = if (params.isChargingOptimizationOn) "Charging Optimization is ON" else "Charging Optimization is OFF"
+                label = if (params.isChargingOptimizationOn) "Charging Optimization is ON" else "Charging Optimization is OFF",
+                icon = {
+                    Icon(
+                        painter = painterResource(R.drawable.rounded_battery_charging_full_24),
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp),
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
             )
         }
 
@@ -108,7 +128,15 @@ fun SettingsComponents(
                         params.toggleSmartPixels?.invoke(checked)
                     }
                 },
-                label = if (params.isSmartPixelsOn) "Smart Pixels is ON" else "Smart Pixels is OFF"
+                label = if (params.isSmartPixelsOn) "Smart Pixels is ON" else "Smart Pixels is OFF",
+                icon = {
+                    Icon(
+                        painter = painterResource(R.drawable.rounded_grain_24),
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp),
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
             )
         }
 
