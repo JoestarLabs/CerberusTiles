@@ -46,8 +46,20 @@ class NetworkSpeedLimitRepositoryTest {
     @Test
     fun `resolveFromSystemSettings returns null when resource IDs are 0`() {
         every { packageManager.getResourcesForApplication("com.android.settings") } returns resources
-        every { resources.getIdentifier("ingress_rate_limit_entries", "array", "com.android.settings") } returns 0
-        every { resources.getIdentifier("ingress_rate_limit_values", "array", "com.android.settings") } returns 0
+        every {
+            resources.getIdentifier(
+                "ingress_rate_limit_entries",
+                "array",
+                "com.android.settings"
+            )
+        } returns 0
+        every {
+            resources.getIdentifier(
+                "ingress_rate_limit_values",
+                "array",
+                "com.android.settings"
+            )
+        } returns 0
 
         val resolved = NetworkSpeedLimitRepository.resolveFromSystemSettings(context)
 
@@ -57,8 +69,20 @@ class NetworkSpeedLimitRepositoryTest {
     @Test
     fun `resolveFromSystemSettings returns parsed limits when valid arrays exist`() {
         every { packageManager.getResourcesForApplication("com.android.settings") } returns resources
-        every { resources.getIdentifier("ingress_rate_limit_entries", "array", "com.android.settings") } returns 101
-        every { resources.getIdentifier("ingress_rate_limit_values", "array", "com.android.settings") } returns 102
+        every {
+            resources.getIdentifier(
+                "ingress_rate_limit_entries",
+                "array",
+                "com.android.settings"
+            )
+        } returns 101
+        every {
+            resources.getIdentifier(
+                "ingress_rate_limit_values",
+                "array",
+                "com.android.settings"
+            )
+        } returns 102
 
         val entryStrings = arrayOf<CharSequence>("No limit", "128kbps", "1Mbps")
         val valueStrings = arrayOf("-1", "16000", "125000")
