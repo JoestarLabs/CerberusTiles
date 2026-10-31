@@ -11,6 +11,10 @@
 
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
 
+    <queries>
+        <package android:name="com.android.settings" />
+    </queries>
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
