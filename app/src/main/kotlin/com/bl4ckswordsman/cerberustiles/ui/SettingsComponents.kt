@@ -107,7 +107,10 @@ fun SettingsComponents(
                 label = if (params.isChargingOptimizationOn) "Charging Optimization is ON" else "Charging Optimization is OFF",
                 icon = {
                     Icon(
-                        painter = painterResource(R.drawable.rounded_battery_charging_full_24),
+                        painter = painterResource(
+                            if (params.isChargingOptimizationOn) R.drawable.outline_battery_android_frame_shield_24
+                            else R.drawable.outline_battery_android_shield_24
+                        ),
                         contentDescription = null,
                         modifier = Modifier.size(24.dp),
                         tint = MaterialTheme.colorScheme.onPrimaryContainer
