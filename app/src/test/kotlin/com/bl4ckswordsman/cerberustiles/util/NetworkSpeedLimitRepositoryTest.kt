@@ -100,4 +100,66 @@ class NetworkSpeedLimitRepositoryTest {
         assertEquals("1Mbps", resolved?.get(2)?.label)
         assertEquals(125_000L, resolved?.get(2)?.bytesPerSecond)
     }
+
+    @Test
+    fun `resolveFromSystemSettings skips entries with unparseable long values`() {
+        every { packageManager.getResourcesForApplication("com.android.settings") } returns resources
+        every {
+            resources.getIdentifier(
+                "ingress_rate_limit_entries",
+                "array",
+                "com.android.settings"
+            )
+        } returns 101
+        every {
+            resources.getIdentifier(
+                "ingress_rate_limit_values",
+                "array",
+                "com.android.settings"
+            )
+        } returns 102
+
+        val entryStrings = arrayOf<CharSequence>("No limit", "Corrupted", "1Mbps")
+        val valueStrings = arrayOf("-1", "not_a_number", "125000")
+
+        every { resources.getTextArray(101) } returns entryStrings
+        every { resources.getStringArray(102) } returns valueStrings
+
+        val resolved = NetworkSpeedLimitRepository.resolveFromSystemSettings(context)
+
+        assertEquals(2, resolved?.size)
+        assertEquals("No limit", resolved?.get(0)?.label)
+        assertEquals(-1L, resolved?.get(0)?.bytesPerSecond)
+        assertEquals("1Mbps", resolved?.get(1)?.label)
+        assertEquals(125_000L, resolved?.get(1)?.bytesPerSecond)
+    }
+
+    @Test
+    fun `resolveFromSystemSettings returns null when all values fail long parsing`() {
+        every { packageManager.getResourcesForApplication("com.android.settings") } returns resources
+        every {
+            resources.getIdentifier(
+                "ingress_rate_limit_entries",
+                "array",
+                "com.android.settings"
+            )
+        } returns 101
+        every {
+            resources.getIdentifier(
+                "ingress_rate_limit_values",
+                "array",
+                "com.android.settings"
+            )
+        } returns 102
+
+        val entryStrings = arrayOf<CharSequence>("Corrupted1", "Corrupted2")
+        val valueStrings = arrayOf("abc", "xyz")
+
+        every { resources.getTextArray(101) } returns entryStrings
+        every { resources.getStringArray(102) } returns valueStrings
+
+        val resolved = NetworkSpeedLimitRepository.resolveFromSystemSettings(context)
+
+        assertNull(resolved)
+    }
 }

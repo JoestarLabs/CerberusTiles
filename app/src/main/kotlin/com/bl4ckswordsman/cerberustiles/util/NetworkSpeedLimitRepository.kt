@@ -55,11 +55,11 @@ object NetworkSpeedLimitRepository {
 
             if (entries.isEmpty() || entries.size != values.size) return null
 
-            entries.indices.map { i ->
-                val label = entries[i].toString()
-                val bytes = values[i].toLongOrNull() ?: -1L
-                NetworkSpeedLimit(label = label, bytesPerSecond = bytes)
+            val limits = entries.indices.mapNotNull { i ->
+                val bytes = values[i].toLongOrNull() ?: return@mapNotNull null
+                NetworkSpeedLimit(label = entries[i].toString(), bytesPerSecond = bytes)
             }
+            if (limits.isEmpty()) null else limits
         } catch (_: Exception) {
             null
         }
