@@ -65,7 +65,7 @@ class AdaptiveBrightnessTileServiceTest {
     }
 
     @Test
-    fun `onClick toggles brightness from enabled to disabled and updates tile to INACTIVE with outline icon`() {
+    fun `onClick toggles brightness from enabled to disabled and updates tile to INACTIVE with rounded icon`() {
         every { SettingsUtils.Brightness.isAdaptiveBrightnessEnabled(tileService) } returns true
         every { mockQsTile.state } returns Tile.STATE_INACTIVE
 
@@ -73,12 +73,12 @@ class AdaptiveBrightnessTileServiceTest {
 
         verify { SettingsUtils.Brightness.toggleAdaptiveBrightness(any()) }
         verify { mockQsTile.state = Tile.STATE_INACTIVE }
-        verify { Icon.createWithResource(tileService, R.drawable.outline_brightness_auto_24) }
+        verify { Icon.createWithResource(tileService, R.drawable.rounded_brightness_auto_24) }
         verify { mockQsTile.updateTile() }
     }
 
     @Test
-    fun `onClick toggles brightness from disabled to enabled and updates tile to ACTIVE with baseline icon`() {
+    fun `onClick toggles brightness from disabled to enabled and updates tile to ACTIVE with rounded icon`() {
         every { SettingsUtils.Brightness.isAdaptiveBrightnessEnabled(tileService) } returns false
         every { mockQsTile.state } returns Tile.STATE_ACTIVE
 
@@ -86,7 +86,7 @@ class AdaptiveBrightnessTileServiceTest {
 
         verify { SettingsUtils.Brightness.toggleAdaptiveBrightness(any()) }
         verify { mockQsTile.state = Tile.STATE_ACTIVE }
-        verify { Icon.createWithResource(tileService, R.drawable.baseline_brightness_auto_24) }
+        verify { Icon.createWithResource(tileService, R.drawable.rounded_brightness_auto_24) }
         verify { mockQsTile.updateTile() }
     }
 }

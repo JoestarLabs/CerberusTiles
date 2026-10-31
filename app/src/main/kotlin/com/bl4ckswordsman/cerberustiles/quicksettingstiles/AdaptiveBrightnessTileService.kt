@@ -39,9 +39,7 @@ class AdaptiveBrightnessTileService : TileService() {
         SettingsUtils.Brightness.toggleAdaptiveBrightness(params)
 
         qsTile.state = if (isAdaptive) Tile.STATE_INACTIVE else Tile.STATE_ACTIVE
-        val iconRes =
-            if (qsTile.state == Tile.STATE_ACTIVE) R.drawable.baseline_brightness_auto_24 else R.drawable.outline_brightness_auto_24
-        qsTile.icon = Icon.createWithResource(this, iconRes)
+        qsTile.icon = Icon.createWithResource(this, R.drawable.rounded_brightness_auto_24)
         qsTile.updateTile()
     }
     // on hold, open the app

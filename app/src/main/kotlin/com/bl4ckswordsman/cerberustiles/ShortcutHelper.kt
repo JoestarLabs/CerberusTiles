@@ -44,7 +44,7 @@ class ShortcutHelper(private val context: Context) {
                     id = ID_ADAPTIVE_BRIGHTNESS,
                     shortLabel = "Toggle Adaptive Brightness",
                     longLabel = "Toggle Adaptive Brightness",
-                    icon = R.drawable.baseline_brightness_auto_24,
+                    icon = R.drawable.rounded_brightness_auto_24,
                     action = Constants.TOGGLE_ADAPTIVE_BRIGHTNESS_ACTION,
                     activityClass = ToggleAdaptiveBrightnessActivity::class.java
                 )
@@ -66,7 +66,7 @@ class ShortcutHelper(private val context: Context) {
                     id = ID_OVERLAY,
                     shortLabel = "Toolbox Overlay",
                     longLabel = "Toolbox Overlay",
-                    icon = R.drawable.round_open_in_new_24,
+                    icon = R.drawable.rounded_open_in_new_24,
                     action = "com.bl4ckswordsman.cerberustiles.OPEN_OVERLAY",
                     activityClass = OverlayActivity::class.java
                 )

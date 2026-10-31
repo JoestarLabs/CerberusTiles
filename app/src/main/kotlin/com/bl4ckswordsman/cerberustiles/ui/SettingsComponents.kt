@@ -86,10 +86,7 @@ fun SettingsComponents(
                 label = if (params.isSwitchedOn) "Adaptive Brightness is ON" else "Adaptive Brightness is OFF",
                 icon = {
                     Icon(
-                        painter = painterResource(
-                            if (params.isSwitchedOn) R.drawable.baseline_brightness_auto_24
-                            else R.drawable.outline_brightness_auto_24
-                        ),
+                        painter = painterResource(R.drawable.rounded_brightness_auto_24),
                         contentDescription = null,
                         modifier = Modifier.size(24.dp),
                         tint = MaterialTheme.colorScheme.onPrimaryContainer
@@ -108,8 +105,8 @@ fun SettingsComponents(
                 icon = {
                     Icon(
                         painter = painterResource(
-                            if (params.isChargingOptimizationOn) R.drawable.outline_battery_android_frame_shield_24
-                            else R.drawable.outline_battery_android_shield_24
+                            if (params.isChargingOptimizationOn) R.drawable.rounded_battery_android_frame_shield_24
+                            else R.drawable.rounded_battery_android_shield_24
                         ),
                         contentDescription = null,
                         modifier = Modifier.size(24.dp),
@@ -334,15 +331,9 @@ private class RingerModeHandler(
  */
 @Composable
 private fun getIconForMode(mode: RingerMode, currentMode: RingerMode) = when (mode) {
-    RingerMode.NORMAL -> if (currentMode == mode)
-        painterResource(R.drawable.baseline_volume_up_24)
-    else
-        painterResource(R.drawable.outline_volume_up_24)
+    RingerMode.NORMAL -> painterResource(R.drawable.rounded_volume_up_24)
 
-    RingerMode.SILENT -> if (currentMode == mode)
-        painterResource(R.drawable.baseline_volume_off_24)
-    else
-        painterResource(R.drawable.outline_volume_off_24)
+    RingerMode.SILENT -> painterResource(R.drawable.rounded_volume_off_24)
 
     RingerMode.VIBRATE -> if (currentMode == mode)
         painterResource(R.drawable.twotone_vibration_24)

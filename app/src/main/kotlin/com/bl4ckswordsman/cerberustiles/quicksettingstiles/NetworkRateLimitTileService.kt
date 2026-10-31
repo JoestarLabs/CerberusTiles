@@ -32,7 +32,7 @@ class NetworkRateLimitTileService : TileService() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
             qsTile.subtitle = current.label
         }
-        qsTile.icon = Icon.createWithResource(this, R.drawable.outline_network_check_24)
+        qsTile.icon = Icon.createWithResource(this, R.drawable.rounded_network_check_24)
         qsTile.updateTile()
     }
 

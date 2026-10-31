@@ -84,7 +84,7 @@
         <service
             android:name=".quicksettingstiles.AdaptiveBrightnessTileService"
             android:exported="true"
-            android:icon="@drawable/baseline_brightness_auto_24"
+            android:icon="@drawable/rounded_brightness_auto_24"
             android:label="Adaptive Brightness"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
             <intent-filter>
@@ -98,7 +98,7 @@
         <service
             android:name=".quicksettingstiles.NetworkRateLimitTileService"
             android:exported="true"
-            android:icon="@drawable/outline_network_check_24"
+            android:icon="@drawable/rounded_network_check_24"
             android:label="Speed Limit"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
             <intent-filter>

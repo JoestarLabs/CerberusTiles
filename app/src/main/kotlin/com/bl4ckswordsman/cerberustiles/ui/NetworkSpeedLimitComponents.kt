@@ -89,7 +89,7 @@ fun NetworkSpeedLimitCard(
                     modifier = Modifier.weight(1f)
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.outline_network_check_24),
+                        painter = painterResource(R.drawable.rounded_network_check_24),
                         contentDescription = "Network Speed Limit",
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(if (isOverlayContext) 20.dp else 24.dp)

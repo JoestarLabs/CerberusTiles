@@ -241,8 +241,8 @@ fun BrightnessPresetButtonGroup(
                         painter = painterResource(
                             id = when (preset) {
                                 BrightnessPreset.MIN -> R.drawable.rounded_brightness_empty_24
-                                BrightnessPreset.BALANCED -> R.drawable.rounded_brightness_medium_24
-                                BrightnessPreset.MAX -> R.drawable.rounded_brightness_high_24
+                                BrightnessPreset.BALANCED -> R.drawable.rounded_brightness_6_24
+                                BrightnessPreset.MAX -> R.drawable.rounded_brightness_7_24
                             }
                         ),
                         contentDescription = preset.contentDescription,

@@ -147,7 +147,7 @@ fun CreateSettingsListItem(params: SettingsListItemParams) {
             supportingText = "View required permissions, security details, and privacy FAQ",
             trailingContent = {
                 Icon(
-                    painter = painterResource(id = R.drawable.round_open_in_new_24),
+                    painter = painterResource(id = R.drawable.rounded_open_in_new_24),
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -162,7 +162,7 @@ fun CreateSettingsListItem(params: SettingsListItemParams) {
             supportingText = "View licenses of the libraries that made this app possible",
             trailingContent = {
                 Icon(
-                    painter = painterResource(id = R.drawable.round_open_in_new_24),
+                    painter = painterResource(id = R.drawable.rounded_open_in_new_24),
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
