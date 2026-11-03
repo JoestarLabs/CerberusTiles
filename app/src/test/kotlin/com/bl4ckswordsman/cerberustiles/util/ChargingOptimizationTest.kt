@@ -225,14 +225,14 @@ class ChargingOptimizationTest {
     }
 
     @Test
-    fun `isChargingOptimizationEnabled returns false when value is non-standard (e g 2)`() {
+    fun `isChargingOptimizationEnabled returns true when setting is 2 (adaptive charging)`() {
         every {
             Settings.Secure.getInt(contentResolver, CHARGE_OPTIMIZATION_KEY, 0)
         } returns 2
 
         val result = SettingsUtils.Charging.isChargingOptimizationEnabled(context)
-        assertFalse(
-            "Expected isChargingOptimizationEnabled to return false for non-standard value 2",
+        assertTrue(
+            "Expected isChargingOptimizationEnabled to return true for adaptive charging value 2",
             result
         )
     }
