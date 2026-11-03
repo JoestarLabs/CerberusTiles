@@ -110,7 +110,7 @@ Download a GitHub Actions build (scanned by 🛡VirusTotal) here:
   <a href="https://github.com/JoestarLabs/CerberusTiles/releases/latest"><img src="https://img.shields.io/github/v/release/JoestarLabs/CerberusTiles" alt="GitHub release (latest by date)"></a>
 </p>
 
-Or install via Obtainium or IzzyOnDroid:
+Or install via Obtainium or IzzyOnDroid (F-Droid):
 <p>
   <a href="https://apps.obtainium.page/redirect?r=obtainium://add/https://github.com/JoestarLabs/CerberusTiles/releases">
     <img src="assets/badge_obtainium.png" height="55" alt="Get it on Obtainium" />
