@@ -211,7 +211,7 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
                 viewModel.isChargingOptimizationOn.value = newValue
             },
             onPermissionDenied = {
-                viewModel.isChargingOptimizationOn.value = !enabled
+                viewModel.updateIsChargingOptimizationOn(this)
                 viewModel.showAdbDialog.value = true
             }
         )
