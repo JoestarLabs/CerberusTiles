@@ -99,6 +99,7 @@ fun SettingsComponents(
             SwitchWithLabel(
                 isSwitchedOn = params.isChargingOptimizationOn,
                 onCheckedChange = {
+                    params.setChargingOptimization(it)
                     params.toggleChargingOptimization(it)
                 },
                 label = if (params.isChargingOptimizationOn) "Charging Optimization is ON" else "Charging Optimization is OFF",

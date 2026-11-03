@@ -220,15 +220,18 @@ object SettingsUtils {
         }
 
         /**
-         * Checks if charging optimization (80% limit) is enabled.
+         * Checks if charging optimization (80% limit or adaptive charging) is enabled.
          *
          * Returns false if the setting is 0, absent, or if reading it throws any exception.
+         * Values greater than 0 indicate active charging optimization (e.g. 1 for Limit to 80%,
+         * 2 for Adaptive Charging on Google Pixel devices).
          */
         fun isChargingOptimizationEnabled(context: Context): Boolean {
             return try {
-                Settings.Secure.getInt(
+                val mode = Settings.Secure.getInt(
                     context.contentResolver, CHARGE_OPTIMIZATION_MODE, 0
-                ) == 1
+                )
+                mode > 0
             } catch (_: Exception) {
                 false
             }

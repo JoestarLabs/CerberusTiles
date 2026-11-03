@@ -133,7 +133,7 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
                             setVibrationMode = { viewModel.isVibrationModeOn.value = it },
                             toggleVibrationMode = ::toggleVibrationMode,
                             isChargingOptimizationOn = viewModel.isChargingOptimizationOn.value,
-                            setChargingOptimization = {},
+                            setChargingOptimization = { viewModel.isChargingOptimizationOn.value = it },
                             toggleChargingOptimization = ::toggleChargingOptimization,
                             currentRingerMode = currentRingerMode,
                             onRingerModeChange = { newMode ->
@@ -211,6 +211,7 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
                 viewModel.isChargingOptimizationOn.value = newValue
             },
             onPermissionDenied = {
+                viewModel.isChargingOptimizationOn.value = !enabled
                 viewModel.showAdbDialog.value = true
             }
         )
