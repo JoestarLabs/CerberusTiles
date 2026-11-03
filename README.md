@@ -112,12 +112,8 @@ Download a GitHub Actions build (scanned by 🛡VirusTotal) here:
 
 Or install via Obtainium or IzzyOnDroid (F-Droid):
 <p>
-  <a href="https://apps.obtainium.page/redirect?r=obtainium://add/https://github.com/JoestarLabs/CerberusTiles/releases">
-    <img src="assets/badge_obtainium.png" height="55" alt="Get it on Obtainium" />
-  </a>
-  <a href="https://apt.izzysoft.de/packages/com.bl4ckswordsman.cerberustiles">
-    <img src="assets/IzzyOnDroidButtonGreyBorder_nofont.png" height="55" alt="IzzyOnDroid button" />
-  </a>
+  <a href="https://apps.obtainium.page/redirect?r=obtainium://add/https://github.com/JoestarLabs/CerberusTiles/releases"><img src="assets/badge_obtainium.png?v=2" height="55" alt="Get it on Obtainium" /></a>
+  <a href="https://apt.izzysoft.de/packages/com.bl4ckswordsman.cerberustiles"><img src="assets/IzzyOnDroidButtonGreyBorder_nofont.png" height="55" alt="IzzyOnDroid button" /></a>
 </p>
 
 ### Kudos to
