@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.3](https://github.com/JoestarLabs/CerberusTiles/compare/v0.5.2...v0.5.3) (2026-11-03)
+
+
+### Bug Fixes
+
+* **charging:** refresh state from device settings on permission denial and qualify Smart Pixels description ([2f0be15](https://github.com/JoestarLabs/CerberusTiles/commit/2f0be1590d93e0396df9652bf7b0751b7d1ab026))
+* **ui:** fix Smart Pixels slider dragging and charging optimization toggle detection ([2eebb3f](https://github.com/JoestarLabs/CerberusTiles/commit/2eebb3f858dc5128e325c46a8da0dc14dd5f8db6)), closes [#285](https://github.com/JoestarLabs/CerberusTiles/issues/285)
+
 ## [0.5.2](https://github.com/JoestarLabs/CerberusTiles/compare/v0.5.1...v0.5.2) (2026-10-31)
 
 
