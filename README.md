@@ -32,9 +32,9 @@ Tested in a Pixel 8 Pro.
   <summary> Screenshots (Click to expand)</summary>
 
 <p>
-  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_1.png" width="150"  alt="Screenshot"/>
-  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_1_dark.png" width="150"  alt="Screenshot Dark"/>
-  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_2_settings.png" width="150"  alt="Screenshot Settings"/>
+  <img src="assets/screenshots/screenshot_1.png" width="150"  alt="Screenshot"/>
+  <img src="assets/screenshots/screenshot_1_dark.png" width="150"  alt="Screenshot Dark"/>
+  <img src="assets/screenshots/screenshot_2_settings.png" width="150"  alt="Screenshot Settings"/>
   <img src="assets/recording_1.gif" width="156"  alt="Animated GIF"/>
 
 </p>
