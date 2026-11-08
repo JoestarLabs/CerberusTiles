@@ -68,6 +68,9 @@ class OverlayActivity : ComponentActivity() {
         }
         WindowCompat.setDecorFitsSystemWindows(window, false)
         window.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
+
+        updateViewModelState()
+
         setContent {
             val showOverlayDialog = rememberSaveable { mutableStateOf(true) }
             val currentRingerMode by viewModel.currentRingerMode.observeAsState(RingerMode.NORMAL)

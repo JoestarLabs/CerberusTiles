@@ -58,11 +58,9 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
     }
 
     /**
-     * Refreshes all ViewModel state values from the device settings each time the activity
-     * resumes, ensuring the UI reflects any changes made while the app was in the background.
+     * Refreshes all ViewModel state values from the device settings.
      */
-    override fun onResume() {
-        super.onResume()
+    private fun updateViewModelState() {
         viewModel.updateCanWrite(this)
         viewModel.updateIsAdaptiveBrightnessOn(this)
         viewModel.updateIsVibrationModeOn(this)
@@ -70,6 +68,15 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
         viewModel.updateCurrentRingerMode(this)
         viewModel.updateSmartPixelsState(this)
         viewModel.updateNetworkSpeedLimitState(this)
+    }
+
+    /**
+     * Refreshes all ViewModel state values from the device settings each time the activity
+     * resumes, ensuring the UI reflects any changes made while the app was in the background.
+     */
+    override fun onResume() {
+        super.onResume()
+        updateViewModelState()
     }
 
     /**
@@ -85,6 +92,8 @@ class MainActivity : ComponentActivity(), LifecycleObserver {
         if (savedInstanceState == null && intent?.action == "android.service.quicksettings.action.QS_TILE_PREFERENCES") {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
+
+        updateViewModelState()
 
         setContent {
             val canWrite by viewModel.canWrite.observeAsState(initial = false)

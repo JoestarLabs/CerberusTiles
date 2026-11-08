@@ -10,7 +10,6 @@ import android.provider.Settings
 import android.view.accessibility.AccessibilityManager
 import android.widget.Toast
 import androidx.core.net.toUri
-import com.bl4ckswordsman.cerberustiles.SettingsUtils.Charging.CHARGE_OPTIMIZATION_MODE
 import com.bl4ckswordsman.cerberustiles.models.NetworkSpeedLimit
 import com.bl4ckswordsman.cerberustiles.smartpixels.SmartPixelsAccessibilityService
 import com.bl4ckswordsman.cerberustiles.util.NetworkSpeedLimitRepository
@@ -202,18 +201,23 @@ object SettingsUtils {
      */
     object Charging {
         private const val CHARGE_OPTIMIZATION_MODE = "charge_optimization_mode"
+        private const val ADAPTIVE_CHARGING_ENABLED = "adaptive_charging_enabled"
 
         /**
-         * Checks if charging optimization (80% limit) is supported on this device.
+         * Checks if charging optimization (80% limit or adaptive charging) is supported on this device.
          *
-         * Returns false if the [CHARGE_OPTIMIZATION_MODE] secure setting does not exist
-         * (default value of -1 is returned) or if reading it throws any exception.
+         * Returns false if neither the [CHARGE_OPTIMIZATION_MODE] nor [ADAPTIVE_CHARGING_ENABLED]
+         * secure setting exists (default value of -1 is returned) or if reading them throws any exception.
          */
         fun isChargingOptimizationSupported(context: Context): Boolean {
             return try {
-                Settings.Secure.getInt(
+                val hasChargeOptimization = Settings.Secure.getInt(
                     context.contentResolver, CHARGE_OPTIMIZATION_MODE, -1
                 ) != -1
+                val hasAdaptiveCharging = Settings.Secure.getInt(
+                    context.contentResolver, ADAPTIVE_CHARGING_ENABLED, -1
+                ) != -1
+                hasChargeOptimization || hasAdaptiveCharging
             } catch (_: Exception) {
                 false
             }
@@ -223,22 +227,29 @@ object SettingsUtils {
          * Checks if charging optimization (80% limit or adaptive charging) is enabled.
          *
          * Returns false if the setting is 0, absent, or if reading it throws any exception.
-         * Values greater than 0 indicate active charging optimization (e.g. 1 for Limit to 80%,
-         * 2 for Adaptive Charging on Google Pixel devices).
+         * On Google Pixel devices:
+         * - Limit to 80%: charge_optimization_mode = 1, adaptive_charging_enabled = 0
+         * - Adaptive Charging: charge_optimization_mode = 0, adaptive_charging_enabled = 1
          */
         fun isChargingOptimizationEnabled(context: Context): Boolean {
             return try {
                 val mode = Settings.Secure.getInt(
                     context.contentResolver, CHARGE_OPTIMIZATION_MODE, 0
                 )
-                mode > 0
+                val adaptive = Settings.Secure.getInt(
+                    context.contentResolver, ADAPTIVE_CHARGING_ENABLED, 0
+                )
+                mode > 0 || adaptive > 0
             } catch (_: Exception) {
                 false
             }
         }
 
         /**
-         * Sets the charging optimization (80% limit).
+         * Sets charging optimization state.
+         * When [enabled] is true, enables the 80% charge limit (and disables adaptive charging
+         * to match Google Pixel settings behavior).
+         * When [enabled] is false, disables both the 80% charge limit and adaptive charging.
          */
         fun setChargingOptimization(enabled: Boolean, params: SettingsToggleParams) {
             val newState = if (enabled) 1 else 0
@@ -247,6 +258,13 @@ object SettingsUtils {
                     params.context.contentResolver, CHARGE_OPTIMIZATION_MODE, newState
                 )
                 if (success) {
+                    try {
+                        Settings.Secure.putInt(
+                            params.context.contentResolver, ADAPTIVE_CHARGING_ENABLED, 0
+                        )
+                    } catch (_: Exception) {
+                        // Adaptive charging may not be present on all devices
+                    }
                     showToast(params.context, "Charging optimization", enabled)
                     params.onSettingChanged(enabled)
                 } else {

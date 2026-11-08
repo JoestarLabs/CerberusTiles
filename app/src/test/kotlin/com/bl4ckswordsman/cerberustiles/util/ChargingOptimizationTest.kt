@@ -29,6 +29,7 @@ class ChargingOptimizationTest {
 
     companion object {
         private const val CHARGE_OPTIMIZATION_KEY = "charge_optimization_mode"
+        private const val ADAPTIVE_CHARGING_KEY = "adaptive_charging_enabled"
     }
 
     @Before
@@ -43,6 +44,16 @@ class ChargingOptimizationTest {
         every { Toast.makeText(any(), any<CharSequence>(), any()) } returns mockToast
 
         mockkStatic(Settings.Secure::class)
+
+        every {
+            Settings.Secure.getInt(contentResolver, ADAPTIVE_CHARGING_KEY, -1)
+        } returns -1
+        every {
+            Settings.Secure.getInt(contentResolver, ADAPTIVE_CHARGING_KEY, 0)
+        } returns 0
+        every {
+            Settings.Secure.putInt(contentResolver, ADAPTIVE_CHARGING_KEY, any())
+        } returns true
     }
 
     @After
@@ -282,5 +293,77 @@ class ChargingOptimizationTest {
             "Expected onPermissionDenied to not be called when putInt returns false",
             deniedCalled
         )
+    }
+
+    @Test
+    fun `isChargingOptimizationSupported returns true when adaptive charging setting exists`() {
+        every {
+            Settings.Secure.getInt(contentResolver, CHARGE_OPTIMIZATION_KEY, -1)
+        } returns -1
+        every {
+            Settings.Secure.getInt(contentResolver, ADAPTIVE_CHARGING_KEY, -1)
+        } returns 1
+
+        val result = SettingsUtils.Charging.isChargingOptimizationSupported(context)
+        assertTrue(
+            "Expected isChargingOptimizationSupported to return true when adaptive charging setting exists",
+            result
+        )
+    }
+
+    @Test
+    fun `isChargingOptimizationEnabled returns true when adaptive charging is enabled`() {
+        every {
+            Settings.Secure.getInt(contentResolver, CHARGE_OPTIMIZATION_KEY, 0)
+        } returns 0
+        every {
+            Settings.Secure.getInt(contentResolver, ADAPTIVE_CHARGING_KEY, 0)
+        } returns 1
+
+        val result = SettingsUtils.Charging.isChargingOptimizationEnabled(context)
+        assertTrue(
+            "Expected isChargingOptimizationEnabled to return true when adaptive charging is enabled",
+            result
+        )
+    }
+
+    @Test
+    fun `setChargingOptimization disables both mode and adaptive charging when enabled is false`() {
+        every {
+            Settings.Secure.putInt(contentResolver, CHARGE_OPTIMIZATION_KEY, 0)
+        } returns true
+        every {
+            Settings.Secure.putInt(contentResolver, ADAPTIVE_CHARGING_KEY, 0)
+        } returns true
+
+        val params = SettingsUtils.SettingsToggleParams(
+            context = context,
+            onSettingChanged = { }
+        )
+
+        SettingsUtils.Charging.setChargingOptimization(false, params)
+
+        verify { Settings.Secure.putInt(contentResolver, CHARGE_OPTIMIZATION_KEY, 0) }
+        verify { Settings.Secure.putInt(contentResolver, ADAPTIVE_CHARGING_KEY, 0) }
+    }
+
+    @Test
+    fun `setChargingOptimization disables adaptive charging when enabled is true`() {
+        every {
+            Settings.Secure.putInt(contentResolver, CHARGE_OPTIMIZATION_KEY, 1)
+        } returns true
+        every {
+            Settings.Secure.putInt(contentResolver, ADAPTIVE_CHARGING_KEY, 0)
+        } returns true
+
+        val params = SettingsUtils.SettingsToggleParams(
+            context = context,
+            onSettingChanged = { }
+        )
+
+        SettingsUtils.Charging.setChargingOptimization(true, params)
+
+        verify { Settings.Secure.putInt(contentResolver, CHARGE_OPTIMIZATION_KEY, 1) }
+        verify { Settings.Secure.putInt(contentResolver, ADAPTIVE_CHARGING_KEY, 0) }
     }
 }
