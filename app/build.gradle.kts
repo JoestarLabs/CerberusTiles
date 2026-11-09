@@ -96,11 +96,11 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.8.0")
     implementation("androidx.lifecycle:lifecycle-process:2.11.0")
     implementation("androidx.compose.material:material-icons-core")
-    implementation("androidx.compose.material3:material3:1.5.0-beta02") // TODO: Don't rely on alpha version
+    implementation("androidx.compose.material3:material3:1.5.0-rc01") // TODO: Don't rely on alpha version
     implementation("com.mikepenz:aboutlibraries-compose-m3:15.3.0")
     implementation("com.mikepenz:aboutlibraries-core:15.3.0")
     testImplementation("junit:junit:4.13.2")
-    testImplementation("io.mockk:mockk:1.14.11")
+    testImplementation("io.mockk:mockk:1.14.12")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0")
     testImplementation("androidx.arch.core:core-testing:2.2.0")
     androidTestImplementation(platform("androidx.compose:compose-bom:2026.09.00"))
