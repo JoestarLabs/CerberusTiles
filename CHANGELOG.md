@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.4](https://github.com/JoestarLabs/CerberusTiles/compare/v0.5.3...v0.5.4) (2026-11-10)
+
+
+### Bug Fixes
+
+* **charging:** detect adaptive charging and refresh state on app start ([2fd4e3b](https://github.com/JoestarLabs/CerberusTiles/commit/2fd4e3b37fabb7edfb24e1e904d5f671509d8257))
+* **deps:** update gradle dependencies ([03dba10](https://github.com/JoestarLabs/CerberusTiles/commit/03dba10b7448443b3f6c5a24f9fbf16ff3df0ff5))
+
 ## [0.5.3](https://github.com/JoestarLabs/CerberusTiles/compare/v0.5.2...v0.5.3) (2026-11-03)
 
 
