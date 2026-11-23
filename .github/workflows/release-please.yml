@@ -64,14 +64,18 @@ jobs:
           keyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
 
       - name: Rename APK
+        env:
+          SIGNED_FILE: ${{ steps.sign_apk.outputs.signedFile }}
+          TAG: ${{ needs.release-please.outputs.tag_name }}
         run: |
-          mv ${{ steps.sign_apk.outputs.signedFile }} ${{ env.APP_NAME }}-release-${{ needs.release-please.outputs.tag_name }}.apk
+          mv "$SIGNED_FILE" "${APP_NAME}-release-${TAG}.apk"
 
       - name: Upload Release Asset
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.release-please.outputs.tag_name }}
         run: |
-          gh release upload ${{ needs.release-please.outputs.tag_name }} ${{ env.APP_NAME }}-release-${{ needs.release-please.outputs.tag_name }}.apk --clobber
+          gh release upload "$TAG" "${APP_NAME}-release-${TAG}.apk" --clobber
 
       - name: VirusTotal Scan
         id: vt
@@ -88,12 +92,11 @@ jobs:
         if: env.VT_API_KEY != '' && steps.vt.outputs.analysis != ''
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VT_API_KEY: ${{ secrets.VT_API_KEY }}
+          TAG: ${{ needs.release-please.outputs.tag_name }}
+          VT_LINK: ${{ steps.vt.outputs.analysis }}
         run: |
-          TAG="${{ needs.release-please.outputs.tag_name }}"
           CURRENT_BODY=$(gh release view "$TAG" --json body --jq .body)
-          VT_LINK="${{ steps.vt.outputs.analysis }}"
           VT_URL=$(echo "$VT_LINK" | cut -d'=' -f2-)
-          APK_NAME="${{ env.APP_NAME }}-release-${TAG}.apk"
+          APK_NAME="${APP_NAME}-release-${TAG}.apk"
           NEW_BODY=$(printf "%s\n\n## Security Scan\n* [VirusTotal Analysis](%s) for \`%s\`\n" "$CURRENT_BODY" "$VT_URL" "$APK_NAME")
           gh release edit "$TAG" --title "$TAG" --notes "$NEW_BODY"

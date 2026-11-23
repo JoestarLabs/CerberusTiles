@@ -15,7 +15,7 @@ changelog:
       labels:
         - Semver-Minor
         - enhancement
-    - title: Test title 🎉
+    - title: Build & Tooling
       labels:
         - build
     - title: Other Changes

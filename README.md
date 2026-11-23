@@ -12,10 +12,6 @@
   <!-- Started counting 2025-07-28 -->
   <a href="https://hits.sh/github.com/JoestarLabs/CerberusTiles/"><img alt="Hits" src="https://hits.sh/github.com/JoestarLabs/CerberusTiles.svg?color=007ec6"/></a>
   <a href="https://shields.rbtlog.dev/com.bl4ckswordsman.cerberustiles"><img src="https://shields.rbtlog.dev/simple/com.bl4ckswordsman.cerberustiles" alt="RB Status"></a>
-  <!-- <a href="https://github.com/bl4ckswordsman/CerberusTiles/"><img src="https://badges.pufler.dev/visits/bl4ckswordsman/CerberusTiles/" alt="Visits Badge"></a> -->
-  <!-- <a href="https://hits.seeyoufarm.com/api/count/graph/dailyhits.svg?url=https://github.com/bl4ckswordsman/CerberusTiles"> -->
-  <!-- <img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fbl4ckswordsman%2FCerberusTiles&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=Daily+hits&edge_flat=false" alt="views"> -->
-  <!-- Added 2024-02-14. This count views instead of visitors like the previous one did. Removed 2025-06-14 -->
 </p>
 
 ## Introduction
@@ -88,9 +84,9 @@ Cerberus Tiles operates with **zero internet access**, **zero analytics**, and *
 </details>
 
 <details>
-  <summary><strong>How do I grant the Charging Optimization permission?</strong></summary>
+  <summary><strong>How do I grant the Write Secure Settings permission?</strong></summary>
 
-  The 80% charging limit modifies an Android secure system setting, which requires granting permission once via ADB:
+  The 80% charging limit and network speed limit modify secure/global system settings, which requires granting permission once via ADB:
   ```bash
   adb shell pm grant com.bl4ckswordsman.cerberustiles android.permission.WRITE_SECURE_SETTINGS
   ```
@@ -120,5 +116,19 @@ Or install via Obtainium or IzzyOnDroid (F-Droid):
 
 - [This cool Gradient Generator](https://doodad.dev/gradient-generator/) used in the app icon.
 - [sameerasw/essentials](https://github.com/sameerasw/essentials) (Sameera Sandakelum) for the Smart Pixels feature and pattern rendering algorithm, licensed under the MIT License.
+
+## Development & Verification
+
+Build, lint, and run the unit test suite locally with the Gradle wrapper (requires JDK 21+ and Android SDK):
+
+```bash
+./gradlew testDebugUnitTest lintDebug
+```
+
+To run Compose instrumented UI tests on a connected Android device or emulator:
+
+```bash
+./gradlew connectedDebugAndroidTest
+```
 
 [^1]: Name inspired by the multi-headed hound of Hades that guards the underworld.
