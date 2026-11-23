@@ -155,9 +155,10 @@ class SmartPixelsOverlayController(
         val isEnabled = SettingsUtils.SmartPixels.isSmartPixelsEnabled(service)
         val disableOnCast = SettingsUtils.SmartPixels.isDisableOnCastEnabled(service)
         val intensity = SettingsUtils.SmartPixels.getSmartPixelsIntensity(service)
+        val pitchBlack = SettingsUtils.SmartPixels.isPitchBlackEnabled(service)
 
         if (isEnabled && !(disableOnCast && isScreenCastingOrMirroring())) {
-            showOverlay(intensity)
+            showOverlay(intensity, pitchBlack)
         } else {
             hideOverlay()
         }
@@ -172,11 +173,12 @@ class SmartPixelsOverlayController(
         overlayView?.setIntensity(intensity)
     }
 
-    private fun showOverlay(intensity: Float) {
+    private fun showOverlay(intensity: Float, pitchBlack: Boolean) {
         if (overlayView == null) {
             overlayView = SmartPixelsOverlayView(service)
         }
         overlayView?.setIntensity(intensity)
+        overlayView?.setPitchBlack(pitchBlack)
 
         if (!isOverlayAdded && windowManager != null && overlayView != null) {
             val params = WindowManager.LayoutParams(

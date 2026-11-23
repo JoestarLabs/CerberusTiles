@@ -63,6 +63,9 @@ fun SmartPixelsDialog(
     val disableOnCast = rememberSaveable {
         mutableStateOf(SettingsUtils.SmartPixels.isDisableOnCastEnabled(context))
     }
+    val pitchBlack = rememberSaveable {
+        mutableStateOf(SettingsUtils.SmartPixels.isPitchBlackEnabled(context))
+    }
     val hasAccessPerm = remember {
         mutableStateOf(SettingsUtils.SmartPixels.isAccessibilityServiceEnabled(context))
     }
@@ -74,6 +77,7 @@ fun SmartPixelsDialog(
                 val currentPerm = SettingsUtils.SmartPixels.isAccessibilityServiceEnabled(context)
                 hasAccessPerm.value = currentPerm
                 isEnabled.value = SettingsUtils.SmartPixels.isSmartPixelsEnabled(context)
+                pitchBlack.value = SettingsUtils.SmartPixels.isPitchBlackEnabled(context)
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -136,27 +140,23 @@ fun SmartPixelsDialog(
                     enabled = isEnabled.value && hasAccessPerm.value
                 )
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .toggleable(
-                            value = disableOnCast.value,
-                            role = Role.Checkbox,
-                            onValueChange = { checked ->
-                                disableOnCast.value = checked
-                                SettingsUtils.SmartPixels.setDisableOnCastEnabled(context, checked)
-                            }
-                        )
-                        .padding(vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Checkbox(
-                        checked = disableOnCast.value,
-                        onCheckedChange = null
-                    )
-                    Spacer(modifier = Modifier.padding(4.dp))
-                    Text(stringResource(R.string.smart_pixels_disable_on_cast))
-                }
+                SmartPixelsCheckboxOption(
+                    label = stringResource(R.string.smart_pixels_pitch_black),
+                    checked = pitchBlack.value,
+                    onCheckedChange = { checked ->
+                        pitchBlack.value = checked
+                        SettingsUtils.SmartPixels.setPitchBlackEnabled(context, checked)
+                    }
+                )
+
+                SmartPixelsCheckboxOption(
+                    label = stringResource(R.string.smart_pixels_disable_on_cast),
+                    checked = disableOnCast.value,
+                    onCheckedChange = { checked ->
+                        disableOnCast.value = checked
+                        SettingsUtils.SmartPixels.setDisableOnCastEnabled(context, checked)
+                    }
+                )
             }
         },
         confirmButton = {
@@ -165,4 +165,30 @@ fun SmartPixelsDialog(
             }
         }
     )
+}
+
+@Composable
+private fun SmartPixelsCheckboxOption(
+    label: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .toggleable(
+                value = checked,
+                role = Role.Checkbox,
+                onValueChange = onCheckedChange
+            )
+            .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Checkbox(
+            checked = checked,
+            onCheckedChange = null
+        )
+        Spacer(modifier = Modifier.padding(4.dp))
+        Text(label)
+    }
 }
