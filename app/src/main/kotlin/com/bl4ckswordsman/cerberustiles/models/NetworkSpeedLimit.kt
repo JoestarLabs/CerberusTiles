@@ -45,27 +45,27 @@ data class NetworkSpeedLimit(
          */
         fun formatBytesPerSecond(bytes: Long): String {
             if (bytes <= 0L) return "No limit"
-            val bitsPerSec = bytes * 8
+            val bitsPerSec = bytes.toDouble() * 8.0
             return when {
-                bitsPerSec >= 1_000_000_000 -> {
+                bitsPerSec >= 1_000_000_000.0 -> {
                     val gbps = bitsPerSec / 1_000_000_000.0
                     if (gbps == gbps.toLong().toDouble()) "${gbps.toLong()} Gbps"
                     else String.format(Locale.US, "%.1f Gbps", gbps)
                 }
 
-                bitsPerSec >= 1_000_000 -> {
+                bitsPerSec >= 1_000_000.0 -> {
                     val mbps = bitsPerSec / 1_000_000.0
                     if (mbps == mbps.toLong().toDouble()) "${mbps.toLong()} Mbps"
                     else String.format(Locale.US, "%.1f Mbps", mbps)
                 }
 
-                bitsPerSec >= 1_000 -> {
+                bitsPerSec >= 1_000.0 -> {
                     val kbps = bitsPerSec / 1_000.0
                     if (kbps == kbps.toLong().toDouble()) "${kbps.toLong()} kbps"
                     else String.format(Locale.US, "%.1f kbps", kbps)
                 }
 
-                else -> "$bitsPerSec bps"
+                else -> "${bitsPerSec.toLong()} bps"
             }
         }
 

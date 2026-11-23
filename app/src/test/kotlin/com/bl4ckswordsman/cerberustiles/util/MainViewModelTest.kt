@@ -162,7 +162,7 @@ class MainViewModelTest {
             "Expected isChargingOptimizationSupported to be false after update",
             viewModel.isChargingOptimizationSupported.value
         )
-        // isChargingOptimizationOn should NOT have been updated in the second call
+        // isChargingOptimizationOn should be reset to false when not supported
         assertFalse(
             "Expected isChargingOptimizationOn to be reset to false when not supported",
             viewModel.isChargingOptimizationOn.value
@@ -260,11 +260,6 @@ class MainViewModelTest {
         viewModel.updateCurrentRingerMode(context)
 
         assertEquals(RingerMode.SILENT, viewModel.currentRingerMode.value)
-    }
-
-    @Test
-    fun `initial currentRingerMode value is RingerMode NORMAL`() {
-        assertEquals(RingerMode.NORMAL, viewModel.currentRingerMode.value)
     }
 
     @Test

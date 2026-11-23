@@ -17,30 +17,33 @@ class AdaptiveBrightnessTileService : TileService() {
      */
     override fun onStartListening() {
         super.onStartListening()
-
+        val tile = qsTile ?: return
         val isAdaptive = SettingsUtils.Brightness.isAdaptiveBrightnessEnabled(this)
 
-        qsTile.state = if (isAdaptive) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
-        qsTile.updateTile()
+        tile.state = if (isAdaptive) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
+        tile.updateTile()
     }
 
     /**
      * Called when the user taps the tile. Toggles adaptive brightness and updates the tile
-     * state and icon to reflect the new value.
+     * state and icon only when the setting write succeeds.
      */
     override fun onClick() {
         super.onClick()
+        val tile = qsTile ?: return
+        if (!SettingsUtils.canWriteSettings(this)) {
+            SettingsUtils.openPermissionSettings(this)
+            return
+        }
 
-        val isAdaptive = SettingsUtils.Brightness.isAdaptiveBrightnessEnabled(this)
         val params = SettingsUtils.SettingsToggleParams(
             context = this,
-            onSettingChanged = { _ -> }
+            onSettingChanged = { newValue ->
+                tile.state = if (newValue) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
+                tile.icon = Icon.createWithResource(this, R.drawable.rounded_brightness_auto_24)
+                tile.updateTile()
+            }
         )
         SettingsUtils.Brightness.toggleAdaptiveBrightness(params)
-
-        qsTile.state = if (isAdaptive) Tile.STATE_INACTIVE else Tile.STATE_ACTIVE
-        qsTile.icon = Icon.createWithResource(this, R.drawable.rounded_brightness_auto_24)
-        qsTile.updateTile()
     }
-    // on hold, open the app
 }

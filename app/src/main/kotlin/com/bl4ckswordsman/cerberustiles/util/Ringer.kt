@@ -160,9 +160,10 @@ object Ringer {
          * @param message The error detail from the [SecurityException], or null.
          */
         private fun showGeneralError(message: String?) {
+            val detail = message?.takeIf { it.isNotBlank() } ?: "Permission or system restriction"
             Toast.makeText(
                 params.context,
-                "Cannot change ringer mode: $message",
+                "Cannot change ringer mode: $detail",
                 Toast.LENGTH_LONG
             ).show()
         }

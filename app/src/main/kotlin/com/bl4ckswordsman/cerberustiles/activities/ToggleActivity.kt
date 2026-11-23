@@ -2,7 +2,6 @@ package com.bl4ckswordsman.cerberustiles.activities
 
 import android.app.Activity
 import android.os.Bundle
-import android.provider.Settings
 import com.bl4ckswordsman.cerberustiles.SettingsUtils
 import com.bl4ckswordsman.cerberustiles.ShortcutHelper
 
@@ -16,6 +15,8 @@ abstract class BaseToggleActivity : Activity() {
         // Check if the app has the necessary permissions
         if (hasRequiredPermissions()) {
             performAction()
+        } else {
+            onPermissionsMissing()
         }
 
         // Finish the activity without showing any UI
@@ -27,6 +28,9 @@ abstract class BaseToggleActivity : Activity() {
 
     /** Performs the action when the user taps the shortcut. */
     abstract fun performAction()
+
+    /** Called when [hasRequiredPermissions] returns false. */
+    open fun onPermissionsMissing() {}
 }
 
 /**
@@ -36,7 +40,7 @@ abstract class BaseToggleActivity : Activity() {
 class ToggleAdaptiveBrightnessActivity : BaseToggleActivity() {
     /** Checks if the app has the necessary permissions. */
     override fun hasRequiredPermissions(): Boolean {
-        return Settings.System.canWrite(this)
+        return SettingsUtils.canWriteSettings(this)
     }
 
     /** Toggles the adaptive brightness setting. */
@@ -57,9 +61,12 @@ class ToggleAdaptiveBrightnessActivity : BaseToggleActivity() {
 class ToggleVibrationModeActivity : BaseToggleActivity() {
     /** Checks if the app has the necessary permissions. */
     override fun hasRequiredPermissions(): Boolean {
-        return SettingsUtils.canWriteSettings(this) && SettingsUtils.canAccessNotificationPolicy(
-            this
-        )
+        return SettingsUtils.canWriteSettings(this)
+    }
+
+    /** Opens system write-settings permission screen when permission is missing. */
+    override fun onPermissionsMissing() {
+        SettingsUtils.openPermissionSettings(this)
     }
 
     /** Toggles the vibration mode setting. */
