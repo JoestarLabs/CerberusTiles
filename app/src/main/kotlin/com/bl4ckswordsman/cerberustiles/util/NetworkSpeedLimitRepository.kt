@@ -18,29 +18,30 @@ object NetworkSpeedLimitRepository {
     private const val ARRAY_ENTRIES = "ingress_rate_limit_entries"
     private const val ARRAY_VALUES = "ingress_rate_limit_values"
 
-    @Volatile
-    private var cachedLimits: List<NetworkSpeedLimit>? = null
+    private class CachedLimits(
+        val limits: List<NetworkSpeedLimit>,
+        val localeTag: String
+    )
 
     @Volatile
-    private var cachedLocaleTag: String? = null
+    private var cache: CachedLimits? = null
 
     /**
      * Returns the available network speed limits for this device.
      */
     fun getAvailableLimits(context: Context): List<NetworkSpeedLimit> {
         val currentLocale = Locale.getDefault().toLanguageTag()
-        val cached = cachedLimits
-        if (cached != null && cachedLocaleTag == currentLocale) return cached
+        val cached = cache
+        if (cached != null && cached.localeTag == currentLocale) return cached.limits
 
         synchronized(this) {
-            val rechecked = cachedLimits
-            if (rechecked != null && cachedLocaleTag == currentLocale) return rechecked
+            val rechecked = cache
+            if (rechecked != null && rechecked.localeTag == currentLocale) return rechecked.limits
 
             val resolved = resolveFromSystemSettings(context)
             val result =
                 if (!resolved.isNullOrEmpty()) resolved else NetworkSpeedLimit.DEFAULT_PRESETS
-            cachedLimits = result
-            cachedLocaleTag = currentLocale
+            cache = CachedLimits(limits = result, localeTag = currentLocale)
             return result
         }
     }
@@ -49,8 +50,7 @@ object NetworkSpeedLimitRepository {
      * Clears cached limits, forcing re-resolution on next access.
      */
     fun clearCache() {
-        cachedLimits = null
-        cachedLocaleTag = null
+        cache = null
     }
 
     /**

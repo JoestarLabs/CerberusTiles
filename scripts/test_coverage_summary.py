@@ -42,8 +42,11 @@ class CoverageSummaryTest(unittest.TestCase):
     def test_missing_xml_exits_zero(self):
         with tempfile.TemporaryDirectory() as tmp:
             missing = os.path.join(tmp, "missing.xml")
+            env = os.environ.copy()
+            env.pop("GITHUB_STEP_SUMMARY", None)
             proc = subprocess.run(
                 [sys.executable, str(SCRIPT_PATH), "--xml", missing],
+                env=env,
                 capture_output=True,
                 text=True,
                 check=False,

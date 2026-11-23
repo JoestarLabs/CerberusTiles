@@ -4,6 +4,7 @@ import android.accessibilityservice.AccessibilityService
 import android.content.Context
 import android.hardware.display.DisplayManager
 import android.view.Display
+import android.view.View
 import android.view.WindowManager
 import com.bl4ckswordsman.cerberustiles.SettingsUtils
 import io.mockk.MockKAnnotations
@@ -11,9 +12,12 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.slot
 import io.mockk.unmockkAll
 import io.mockk.verify
 import org.junit.After
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -92,13 +96,21 @@ class SmartPixelsOverlayControllerTest {
     }
 
     @Test
-    fun `updateState reads pitchBlack setting when showing overlay`() {
+    fun `updateState reads pitchBlack setting when showing overlay and updates existing view`() {
+        val viewSlot = slot<View>()
         every { SettingsUtils.SmartPixels.isSmartPixelsEnabled(service) } returns true
         every { SettingsUtils.SmartPixels.isPitchBlackEnabled(service) } returns true
 
         controller.updateState()
 
-        verify { SettingsUtils.SmartPixels.isPitchBlackEnabled(service) }
-        verify { windowManager.addView(any(), any()) }
+        verify(exactly = 1) { windowManager.addView(capture(viewSlot), any()) }
+        val overlayView = viewSlot.captured as SmartPixelsOverlayView
+        assertTrue(overlayView.isPitchBlack)
+
+        every { SettingsUtils.SmartPixels.isPitchBlackEnabled(service) } returns false
+        controller.updateState()
+
+        assertFalse(overlayView.isPitchBlack)
+        verify(exactly = 1) { windowManager.addView(any(), any()) }
     }
 }
