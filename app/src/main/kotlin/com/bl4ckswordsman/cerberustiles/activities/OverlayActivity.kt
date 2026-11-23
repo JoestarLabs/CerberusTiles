@@ -12,24 +12,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.WindowCompat
+import com.bl4ckswordsman.cerberustiles.Constants
 import com.bl4ckswordsman.cerberustiles.MainViewModel
-import com.bl4ckswordsman.cerberustiles.SettingsUtils
-import com.bl4ckswordsman.cerberustiles.SettingsUtils.Brightness
-import com.bl4ckswordsman.cerberustiles.SettingsUtils.Vibration.toggleVibrationMode
 import com.bl4ckswordsman.cerberustiles.SettingsUtils.openPermissionSettings
 import com.bl4ckswordsman.cerberustiles.ShortcutHelper
 import com.bl4ckswordsman.cerberustiles.models.RingerMode
 import com.bl4ckswordsman.cerberustiles.ui.AdbPermissionDialog
 import com.bl4ckswordsman.cerberustiles.ui.OverlayDialog
 import com.bl4ckswordsman.cerberustiles.ui.OverlayDialogParams
-import com.bl4ckswordsman.cerberustiles.ui.createSharedParams
 
 /**
  * A [ComponentActivity] that shows an overlay dialog with settings components.
  *
  * State is owned by [MainViewModel], following the same pattern as [MainActivity].
- * The ringer mode is now stored in [MainViewModel.currentRingerMode] instead of a
- * local [androidx.compose.runtime.MutableState] field.
  */
 class OverlayActivity : ComponentActivity() {
     private val viewModel: MainViewModel by viewModels()
@@ -39,21 +34,7 @@ class OverlayActivity : ComponentActivity() {
      */
     override fun onResume() {
         super.onResume()
-        updateViewModelState()
-    }
-
-    /**
-     * Reads all relevant settings values from the device and updates the corresponding
-     * ViewModel fields.
-     */
-    private fun updateViewModelState() {
-        viewModel.updateCanWrite(this)
-        viewModel.updateIsAdaptiveBrightnessOn(this)
-        viewModel.updateIsVibrationModeOn(this)
-        viewModel.updateIsChargingOptimizationOn(this)
-        viewModel.updateCurrentRingerMode(this)
-        viewModel.updateSmartPixelsState(this)
-        viewModel.updateNetworkSpeedLimitState(this)
+        viewModel.refreshAll(this)
     }
 
     /**
@@ -63,13 +44,11 @@ class OverlayActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        if (intent?.action == "com.bl4ckswordsman.cerberustiles.OPEN_OVERLAY") {
+        if (intent?.action == Constants.OPEN_OVERLAY_ACTION) {
             ShortcutHelper.reportUsage(this, ShortcutHelper.ID_OVERLAY)
         }
         WindowCompat.setDecorFitsSystemWindows(window, false)
         window.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
-
-        updateViewModelState()
 
         setContent {
             val showOverlayDialog = rememberSaveable { mutableStateOf(true) }
@@ -89,56 +68,20 @@ class OverlayActivity : ComponentActivity() {
                 canWrite = canWrite,
                 isSwitchedOn = viewModel.isAdaptiveBrightnessOn.value,
                 setSwitchedOn = { viewModel.isAdaptiveBrightnessOn.value = it },
-                toggleAdaptiveBrightness = {
-                    val brightnessParams = SettingsUtils.SettingsToggleParams(
-                        context = this,
-                        onSettingChanged = { newValue ->
-                            viewModel.isAdaptiveBrightnessOn.value = newValue
-                        }
-                    )
-                    Brightness.toggleAdaptiveBrightness(brightnessParams)
-                },
+                toggleAdaptiveBrightness = { viewModel.toggleAdaptiveBrightness(this) },
                 openPermissionSettings = { openPermissionSettings(this) },
-                isVibrationModeOn = viewModel.isVibrationModeOn.value,
-                setVibrationMode = { viewModel.isVibrationModeOn.value = it },
-                toggleVibrationMode = {
-                    val vibrationParams = SettingsUtils.SettingsToggleParams(
-                        context = this,
-                        onSettingChanged = { newValue ->
-                            viewModel.isVibrationModeOn.value = newValue
-                            viewModel.currentRingerMode.value =
-                                if (newValue) RingerMode.VIBRATE else RingerMode.NORMAL
-                        }
-                    )
-                    toggleVibrationMode(vibrationParams)
-                },
                 isChargingOptimizationOn = viewModel.isChargingOptimizationOn.value,
-                isChargingOptimizationSupported = viewModel.isChargingOptimizationSupported.value,
-                setChargingOptimization = { viewModel.isChargingOptimizationOn.value = it },
                 toggleChargingOptimization = { enabled ->
-                    val chargingParams = SettingsUtils.SettingsToggleParams(
-                        context = this,
-                        onSettingChanged = { newValue ->
-                            viewModel.isChargingOptimizationOn.value = newValue
-                        },
-                        onPermissionDenied = {
-                            viewModel.updateIsChargingOptimizationOn(this)
-                            viewModel.showAdbDialog.value = true
-                        }
-                    )
-                    SettingsUtils.Charging.setChargingOptimization(enabled, chargingParams)
+                    viewModel.toggleChargingOptimization(this, enabled)
                 },
-                sharedParams = createSharedParams(),
+                sharedPreferences = getSharedPreferences(Constants.SETTINGS_PREFS_NAME, MODE_PRIVATE),
                 currentRingerMode = currentRingerMode,
                 onRingerModeChange = { newMode ->
                     viewModel.currentRingerMode.value = newMode
                     viewModel.isVibrationModeOn.value = newMode == RingerMode.VIBRATE
                 },
                 isSmartPixelsOn = viewModel.isSmartPixelsOn.value,
-                toggleSmartPixels = { enabled ->
-                    SettingsUtils.SmartPixels.setSmartPixelsEnabled(this, enabled)
-                    viewModel.isSmartPixelsOn.value = enabled
-                },
+                toggleSmartPixels = { enabled -> viewModel.toggleSmartPixels(this, enabled) },
                 currentNetworkSpeedLimit = viewModel.currentNetworkSpeedLimit.value,
                 onNetworkSpeedLimitChange = { newLimit ->
                     viewModel.currentNetworkSpeedLimit.value = newLimit

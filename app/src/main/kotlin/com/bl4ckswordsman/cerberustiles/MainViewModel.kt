@@ -1,6 +1,7 @@
 package com.bl4ckswordsman.cerberustiles
 
 import android.content.Context
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -44,7 +45,7 @@ class MainViewModel : ViewModel() {
     val isSmartPixelsOn = mutableStateOf(false)
 
     /** Current intensity for Smart Pixels (10% to 90%, default 50%). */
-    val smartPixelsIntensity = mutableStateOf(SettingsUtils.SmartPixels.DEFAULT_INTENSITY)
+    val smartPixelsIntensity = mutableFloatStateOf(SettingsUtils.SmartPixels.DEFAULT_INTENSITY)
 
     /** Whether Smart Pixels should pause during screen recording / casting. */
     val isSmartPixelsDisableOnCast = mutableStateOf(true)
@@ -116,5 +117,53 @@ class MainViewModel : ViewModel() {
             currentNetworkSpeedLimit.value =
                 SettingsUtils.NetworkSpeed.getCurrentSpeedLimit(context)
         }
+    }
+
+    /**
+     * Refreshes all settings states from the device.
+     */
+    fun refreshAll(context: Context) {
+        updateCanWrite(context)
+        updateIsAdaptiveBrightnessOn(context)
+        updateIsVibrationModeOn(context)
+        updateIsChargingOptimizationOn(context)
+        updateCurrentRingerMode(context)
+        updateSmartPixelsState(context)
+        updateNetworkSpeedLimitState(context)
+    }
+
+    /**
+     * Toggles adaptive brightness and updates [isAdaptiveBrightnessOn].
+     */
+    fun toggleAdaptiveBrightness(context: Context) {
+        val params = SettingsUtils.SettingsToggleParams(
+            context = context,
+            onSettingChanged = { newValue -> isAdaptiveBrightnessOn.value = newValue }
+        )
+        SettingsUtils.Brightness.toggleAdaptiveBrightness(params)
+    }
+
+    /**
+     * Sets charging optimization to [enabled] and updates [isChargingOptimizationOn],
+     * showing [showAdbDialog] if `WRITE_SECURE_SETTINGS` is missing.
+     */
+    fun toggleChargingOptimization(context: Context, enabled: Boolean) {
+        val params = SettingsUtils.SettingsToggleParams(
+            context = context,
+            onSettingChanged = { newValue -> isChargingOptimizationOn.value = newValue },
+            onPermissionDenied = {
+                updateIsChargingOptimizationOn(context)
+                showAdbDialog.value = true
+            }
+        )
+        SettingsUtils.Charging.setChargingOptimization(enabled, params)
+    }
+
+    /**
+     * Toggles Smart Pixels and updates [isSmartPixelsOn].
+     */
+    fun toggleSmartPixels(context: Context, enabled: Boolean) {
+        SettingsUtils.SmartPixels.setSmartPixelsEnabled(context, enabled)
+        isSmartPixelsOn.value = enabled
     }
 }

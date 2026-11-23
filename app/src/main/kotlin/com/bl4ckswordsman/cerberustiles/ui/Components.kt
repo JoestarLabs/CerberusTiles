@@ -178,7 +178,6 @@ fun BrightnessPresetButtonGroup(
     initialPreset: BrightnessPreset? = null,
     canWriteState: Boolean = true,
     isAdaptiveBrightnessOn: Boolean = false,
-    onTurnOffAdaptiveBrightness: (() -> Unit)? = null,
     openPermissionSettings: (() -> Unit)? = null,
     onPresetSelected: ((BrightnessPreset) -> Unit)? = null
 ) {
@@ -189,13 +188,15 @@ fun BrightnessPresetButtonGroup(
             )
         )
     }
+    var previousAdaptiveState by rememberSaveable { mutableStateOf(isAdaptiveBrightnessOn) }
 
     LaunchedEffect(isAdaptiveBrightnessOn) {
-        if (!isAdaptiveBrightnessOn) {
+        if (previousAdaptiveState && !isAdaptiveBrightnessOn) {
             selectedPreset = BrightnessPreset.fromBrightness(
                 SettingsUtils.Brightness.getScreenBrightness(context)
             )
         }
+        previousAdaptiveState = isAdaptiveBrightnessOn
     }
 
     val presets = BrightnessPreset.entries
@@ -274,16 +275,4 @@ fun BrightnessPresetButtonGroup(
             )
         }
     }
-}
-
-/**
- * Backwards-compatible composable for adjusting screen brightness using [BrightnessPresetButtonGroup].
- */
-@Composable
-fun BrightnessSlider(context: Context, modifier: Modifier = Modifier) {
-    BrightnessPresetButtonGroup(
-        context = context,
-        modifier = modifier,
-        isAdaptiveBrightnessOn = SettingsUtils.Brightness.isAdaptiveBrightnessEnabled(context)
-    )
 }

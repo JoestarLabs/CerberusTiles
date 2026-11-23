@@ -2,7 +2,6 @@ package com.bl4ckswordsman.cerberustiles.ui
 
 import android.content.Context
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createComposeRule
@@ -30,16 +29,7 @@ class OverlayDialogTest {
 
         composeTestRule.setContent {
             val context = LocalContext.current
-            val scope = rememberCoroutineScope()
             val sharedPreferences = context.getSharedPreferences("test_prefs", Context.MODE_PRIVATE)
-
-            val sharedParams = SharedParams(
-                context = context,
-                coroutineScope = scope,
-                showDialog = showDialogState,
-                dialogType = androidx.compose.runtime.remember { mutableStateOf(DialogType.NONE) },
-                sharedPreferences = sharedPreferences
-            )
 
             val params = OverlayDialogParams(
                 showDialog = showDialogState,
@@ -49,14 +39,9 @@ class OverlayDialogTest {
                 setSwitchedOn = {},
                 toggleAdaptiveBrightness = {},
                 openPermissionSettings = {},
-                isVibrationModeOn = false,
-                setVibrationMode = {},
-                toggleVibrationMode = { true },
                 isChargingOptimizationOn = false,
-                isChargingOptimizationSupported = true,
-                setChargingOptimization = {},
                 toggleChargingOptimization = {},
-                sharedParams = sharedParams,
+                sharedPreferences = sharedPreferences,
                 currentRingerMode = RingerMode.NORMAL,
                 onRingerModeChange = {}
             )
@@ -83,16 +68,7 @@ class OverlayDialogTest {
 
         composeTestRule.setContent {
             val context = LocalContext.current
-            val scope = rememberCoroutineScope()
             val sharedPreferences = context.getSharedPreferences("test_prefs", Context.MODE_PRIVATE)
-
-            val sharedParams = SharedParams(
-                context = context,
-                coroutineScope = scope,
-                showDialog = showDialogState,
-                dialogType = androidx.compose.runtime.remember { mutableStateOf(DialogType.NONE) },
-                sharedPreferences = sharedPreferences
-            )
 
             val params = OverlayDialogParams(
                 showDialog = showDialogState,
@@ -102,14 +78,9 @@ class OverlayDialogTest {
                 setSwitchedOn = {},
                 toggleAdaptiveBrightness = {},
                 openPermissionSettings = {},
-                isVibrationModeOn = false,
-                setVibrationMode = {},
-                toggleVibrationMode = { true },
                 isChargingOptimizationOn = false,
-                isChargingOptimizationSupported = true,
-                setChargingOptimization = {},
                 toggleChargingOptimization = {},
-                sharedParams = sharedParams,
+                sharedPreferences = sharedPreferences,
                 currentRingerMode = RingerMode.NORMAL,
                 onRingerModeChange = {}
             )

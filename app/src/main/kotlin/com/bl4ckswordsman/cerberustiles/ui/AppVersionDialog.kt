@@ -15,6 +15,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -32,12 +33,7 @@ fun AppVersionDialog(
     onDismiss: () -> Unit,
     context: Context = LocalContext.current
 ) {
-    val appVersion = try {
-        context.packageManager.getPackageInfo(context.packageName, 0).versionName
-    } catch (e: Exception) {
-        Log.w("AppVersionDialog", "Failed to retrieve app version", e)
-        UNKNOWN
-    }
+    val appVersion = remember(context) { getAppVersion(context) ?: UNKNOWN }
 
     fun openExternalLink(url: String) {
         val intent = Intent(Intent.ACTION_VIEW, url.toUri())

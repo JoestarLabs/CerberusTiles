@@ -55,8 +55,14 @@ data class ComponentVisibility(
     }
 }
 
-/** Backward-compatibility alias for [ComponentVisibility]. */
-typealias ComponentVisibilityDialogParams = ComponentVisibility
+private val VISIBILITY_KEYS = setOf(
+    ComponentVisibility.KEY_ADAPTIVE_BRIGHTNESS,
+    ComponentVisibility.KEY_BRIGHTNESS_SLIDER,
+    ComponentVisibility.KEY_RINGER_MODE,
+    ComponentVisibility.KEY_CHARGING_OPTIMIZATION,
+    ComponentVisibility.KEY_SMART_PIXELS,
+    ComponentVisibility.KEY_NETWORK_SPEED_LIMIT
+)
 
 /**
  * Remembers a [ComponentVisibility] instance that automatically updates whenever
@@ -70,15 +76,7 @@ fun rememberComponentVisibility(sharedPreferences: SharedPreferences): Component
 
     DisposableEffect(sharedPreferences) {
         val listener = SharedPreferences.OnSharedPreferenceChangeListener { prefs, key ->
-            if (key in listOf(
-                    ComponentVisibility.KEY_ADAPTIVE_BRIGHTNESS,
-                    ComponentVisibility.KEY_BRIGHTNESS_SLIDER,
-                    ComponentVisibility.KEY_RINGER_MODE,
-                    ComponentVisibility.KEY_CHARGING_OPTIMIZATION,
-                    ComponentVisibility.KEY_SMART_PIXELS,
-                    ComponentVisibility.KEY_NETWORK_SPEED_LIMIT
-                )
-            ) {
+            if (key in VISIBILITY_KEYS) {
                 visibility = ComponentVisibility.fromPreferences(prefs)
             }
         }
