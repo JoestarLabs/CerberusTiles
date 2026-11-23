@@ -16,6 +16,13 @@ object Constants {
     const val TOGGLE_VIBRATION_MODE_ACTION =
         "com.bl4ckswordsman.cerberustiles.action.TOGGLE_VIBRATION_MODE"
 
+    /** The intent action string used to open the toolbox overlay shortcut. */
+    const val OPEN_OVERLAY_ACTION =
+        "com.bl4ckswordsman.cerberustiles.OPEN_OVERLAY"
+
+    /** Name of the SharedPreferences file storing app settings. */
+    const val SETTINGS_PREFS_NAME = "settings"
+
     /** Fallback display string used when a value (e.g. app version) cannot be determined. */
     const val UNKNOWN = "Unknown"
 }
