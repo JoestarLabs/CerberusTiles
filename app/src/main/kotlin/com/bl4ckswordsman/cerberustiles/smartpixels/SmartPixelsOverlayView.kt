@@ -25,21 +25,29 @@ package com.bl4ckswordsman.cerberustiles.smartpixels
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapShader
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Matrix
 import android.graphics.Paint
+import android.graphics.Shader
 import android.view.View
+import androidx.core.graphics.createBitmap
 
 /**
- * A custom [View] that renders a hardware-accelerated checkered mesh of black pixels
+ * A custom [View] that renders a hardware-accelerated checkered mesh of dimmed black pixels
  * across the screen to reduce OLED/AMOLED display power consumption.
  */
 class SmartPixelsOverlayView(context: Context) : View(context) {
 
-    private val paint = Paint()
-    private var cachedPatternBitmap: Bitmap? = null
-    private var lastWidth = 0
-    private var lastHeight = 0
+    private val shaderPaint = Paint().apply {
+        isAntiAlias = false
+        isFilterBitmap = false
+    }
+    private val shaderMatrix = Matrix()
+    private var cachedTileBitmap: Bitmap? = null
+    private var cachedShader: BitmapShader? = null
+
     var currentIntensity: Float = 50f
         private set
     var patternOffset: Int = 0
@@ -50,7 +58,7 @@ class SmartPixelsOverlayView(context: Context) : View(context) {
     }
 
     /**
-     * Updates the mesh intensity and invalidates the cached pattern bitmap if changed.
+     * Updates the mesh intensity and invalidates the cached pattern tile if changed.
      *
      * @param intensity Mesh intensity percentage between 10% and 90%.
      */
@@ -67,24 +75,17 @@ class SmartPixelsOverlayView(context: Context) : View(context) {
      */
     fun shiftPattern() {
         patternOffset = (patternOffset + 1) % 4
-        recycleCachedBitmap()
+        updateShaderMatrix()
         invalidate()
     }
 
-    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-        super.onSizeChanged(w, h, oldw, oldh)
-        if (w != lastWidth || h != lastHeight) {
-            lastWidth = w
-            lastHeight = h
-            recycleCachedBitmap()
-        }
-    }
-
     /**
-     * Creates a new checkered bitmap of black rectangles based on the current intensity and offset.
+     * Creates a minimal `(2 * step) x (2 * step)` checkered tile bitmap for repeating [BitmapShader].
      */
-    fun createPatternBitmap(w: Int, h: Int): Bitmap {
-        val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+    fun createPatternTileBitmap(): Bitmap {
+        val step = calculateStep(currentIntensity)
+        val tileSize = step * 2
+        val bmp = createBitmap(tileSize, tileSize)
         val canvas = Canvas(bmp)
         val p = Paint().apply {
             color = Color.BLACK
@@ -92,27 +93,21 @@ class SmartPixelsOverlayView(context: Context) : View(context) {
             isAntiAlias = false
             alpha = calculateAlpha(currentIntensity)
         }
+        val stepF = step.toFloat()
+        val tileSizeF = tileSize.toFloat()
+        // Top-left and bottom-right quadrants form the repeating checkerboard unit cell
+        canvas.drawRect(0f, 0f, stepF, stepF, p)
+        canvas.drawRect(stepF, stepF, tileSizeF, tileSizeF, p)
+        return bmp
+    }
 
+    private fun updateShaderMatrix() {
+        val shader = cachedShader ?: return
         val step = calculateStep(currentIntensity)
         val offsetX = (patternOffset % 2) * step
         val offsetY = (patternOffset / 2) * step
-
-        var y = 0
-        while (y < h) {
-            var x = ((y / step % 2) * step + offsetX) % (step * 2)
-            while (x < w) {
-                canvas.drawRect(
-                    x.toFloat(),
-                    (y + offsetY).toFloat(),
-                    (x + step).toFloat(),
-                    (y + offsetY + step).toFloat(),
-                    p
-                )
-                x += step * 2
-            }
-            y += step
-        }
-        return bmp
+        shaderMatrix.setTranslate(offsetX.toFloat(), offsetY.toFloat())
+        shader.setLocalMatrix(shaderMatrix)
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -121,12 +116,16 @@ class SmartPixelsOverlayView(context: Context) : View(context) {
         val h = height
         if (w <= 0 || h <= 0) return
 
-        var bitmap = cachedPatternBitmap
-        if (bitmap == null || bitmap.isRecycled || bitmap.width != w || bitmap.height != h) {
-            bitmap = createPatternBitmap(w, h)
-            cachedPatternBitmap = bitmap
+        var tile = cachedTileBitmap
+        if (tile == null || tile.isRecycled) {
+            tile = createPatternTileBitmap()
+            cachedTileBitmap = tile
+            val shader = BitmapShader(tile, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT)
+            cachedShader = shader
+            updateShaderMatrix()
+            shaderPaint.shader = shader
         }
-        canvas.drawBitmap(bitmap, 0f, 0f, paint)
+        canvas.drawRect(0f, 0f, w.toFloat(), h.toFloat(), shaderPaint)
     }
 
     override fun onDetachedFromWindow() {
@@ -135,8 +134,10 @@ class SmartPixelsOverlayView(context: Context) : View(context) {
     }
 
     private fun recycleCachedBitmap() {
-        cachedPatternBitmap?.recycle()
-        cachedPatternBitmap = null
+        shaderPaint.shader = null
+        cachedShader = null
+        cachedTileBitmap?.recycle()
+        cachedTileBitmap = null
     }
 
     companion object {

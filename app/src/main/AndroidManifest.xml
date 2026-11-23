@@ -10,6 +10,7 @@
         tools:ignore="ProtectedPermissions" />
 
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
+    <uses-permission android:name="android.permission.DETECT_SCREEN_RECORDING" />
 
     <queries>
         <package android:name="com.android.settings" />
@@ -29,7 +30,7 @@
         <activity
             android:name=".activities.MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.AppCompat.DayNight.DarkActionBar">
+            android:theme="@style/Theme.CerberusTiles">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
