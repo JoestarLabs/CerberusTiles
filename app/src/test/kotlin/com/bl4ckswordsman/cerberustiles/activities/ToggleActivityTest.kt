@@ -38,7 +38,7 @@ class ToggleActivityTest {
     @Test
     fun `ToggleAdaptiveBrightnessActivity hasRequiredPermissions returns true when canWrite is true`() {
         val activity = spyk(ToggleAdaptiveBrightnessActivity())
-        every { Settings.System.canWrite(activity) } returns true
+        every { SettingsUtils.canWriteSettings(activity) } returns true
 
         assertTrue(activity.hasRequiredPermissions())
     }
@@ -46,7 +46,7 @@ class ToggleActivityTest {
     @Test
     fun `ToggleAdaptiveBrightnessActivity hasRequiredPermissions returns false when canWrite is false`() {
         val activity = spyk(ToggleAdaptiveBrightnessActivity())
-        every { Settings.System.canWrite(activity) } returns false
+        every { SettingsUtils.canWriteSettings(activity) } returns false
 
         assertFalse(activity.hasRequiredPermissions())
     }
@@ -64,10 +64,9 @@ class ToggleActivityTest {
     }
 
     @Test
-    fun `ToggleVibrationModeActivity hasRequiredPermissions returns true when both permissions granted`() {
+    fun `ToggleVibrationModeActivity hasRequiredPermissions returns true when canWriteSettings is true`() {
         val activity = spyk(ToggleVibrationModeActivity())
         every { SettingsUtils.canWriteSettings(activity) } returns true
-        every { SettingsUtils.canAccessNotificationPolicy(activity) } returns true
 
         assertTrue(activity.hasRequiredPermissions())
     }
@@ -76,18 +75,18 @@ class ToggleActivityTest {
     fun `ToggleVibrationModeActivity hasRequiredPermissions returns false when canWriteSettings is false`() {
         val activity = spyk(ToggleVibrationModeActivity())
         every { SettingsUtils.canWriteSettings(activity) } returns false
-        every { SettingsUtils.canAccessNotificationPolicy(activity) } returns true
 
         assertFalse(activity.hasRequiredPermissions())
     }
 
     @Test
-    fun `ToggleVibrationModeActivity hasRequiredPermissions returns false when canAccessNotificationPolicy is false`() {
+    fun `ToggleVibrationModeActivity onPermissionsMissing opens permission settings`() {
         val activity = spyk(ToggleVibrationModeActivity())
-        every { SettingsUtils.canWriteSettings(activity) } returns true
-        every { SettingsUtils.canAccessNotificationPolicy(activity) } returns false
+        every { SettingsUtils.openPermissionSettings(activity) } returns Unit
 
-        assertFalse(activity.hasRequiredPermissions())
+        activity.onPermissionsMissing()
+
+        verify { SettingsUtils.openPermissionSettings(activity) }
     }
 
     @Test

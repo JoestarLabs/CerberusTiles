@@ -67,7 +67,7 @@ class ShortcutHelper(private val context: Context) {
                     shortLabel = "Toolbox Overlay",
                     longLabel = "Toolbox Overlay",
                     icon = R.drawable.rounded_open_in_new_24,
-                    action = "com.bl4ckswordsman.cerberustiles.OPEN_OVERLAY",
+                    action = Constants.OPEN_OVERLAY_ACTION,
                     activityClass = OverlayActivity::class.java
                 )
             )

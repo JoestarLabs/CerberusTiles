@@ -110,6 +110,22 @@ class SettingsUtilsSmartPixelsTest {
     }
 
     @Test
+    fun `isAccessibilityServiceEnabled returns true when short component name found in Settings Secure`() {
+        every { SmartPixelsAccessibilityService.isRunning() } returns false
+        every {
+            accessibilityManager.getEnabledAccessibilityServiceList(any())
+        } returns emptyList()
+
+        val expectedShort =
+            "com.bl4ckswordsman.cerberustiles/.smartpixels.SmartPixelsAccessibilityService"
+        every {
+            Settings.Secure.getString(any(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES)
+        } returns "other.pkg/other.Service:$expectedShort"
+
+        assertTrue(SettingsUtils.SmartPixels.isAccessibilityServiceEnabled(context))
+    }
+
+    @Test
     fun `isAccessibilityServiceEnabled returns false when not running and not in settings`() {
         every { SmartPixelsAccessibilityService.isRunning() } returns false
         every {

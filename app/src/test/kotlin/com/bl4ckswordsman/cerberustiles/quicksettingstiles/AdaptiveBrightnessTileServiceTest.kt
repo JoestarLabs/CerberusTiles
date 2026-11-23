@@ -32,7 +32,10 @@ class AdaptiveBrightnessTileServiceTest {
         val mockIcon = mockk<Icon>(relaxed = true)
         every { Icon.createWithResource(any<android.content.Context>(), any()) } returns mockIcon
 
+        mockkObject(SettingsUtils)
         mockkObject(SettingsUtils.Brightness)
+        every { SettingsUtils.canWriteSettings(any()) } returns true
+        every { SettingsUtils.openPermissionSettings(any()) } returns Unit
 
         tileService = spyk(AdaptiveBrightnessTileService()) {
             every { qsTile } returns mockQsTile
@@ -66,8 +69,9 @@ class AdaptiveBrightnessTileServiceTest {
 
     @Test
     fun `onClick toggles brightness from enabled to disabled and updates tile to INACTIVE with rounded icon`() {
-        every { SettingsUtils.Brightness.isAdaptiveBrightnessEnabled(tileService) } returns true
-        every { mockQsTile.state } returns Tile.STATE_INACTIVE
+        every { SettingsUtils.Brightness.toggleAdaptiveBrightness(any()) } answers {
+            firstArg<SettingsUtils.SettingsToggleParams>().onSettingChanged(false)
+        }
 
         tileService.onClick()
 
@@ -79,8 +83,9 @@ class AdaptiveBrightnessTileServiceTest {
 
     @Test
     fun `onClick toggles brightness from disabled to enabled and updates tile to ACTIVE with rounded icon`() {
-        every { SettingsUtils.Brightness.isAdaptiveBrightnessEnabled(tileService) } returns false
-        every { mockQsTile.state } returns Tile.STATE_ACTIVE
+        every { SettingsUtils.Brightness.toggleAdaptiveBrightness(any()) } answers {
+            firstArg<SettingsUtils.SettingsToggleParams>().onSettingChanged(true)
+        }
 
         tileService.onClick()
 
@@ -88,5 +93,16 @@ class AdaptiveBrightnessTileServiceTest {
         verify { mockQsTile.state = Tile.STATE_ACTIVE }
         verify { Icon.createWithResource(tileService, R.drawable.rounded_brightness_auto_24) }
         verify { mockQsTile.updateTile() }
+    }
+
+    @Test
+    fun `onClick opens permission settings and does not update tile when canWrite is false`() {
+        every { SettingsUtils.canWriteSettings(tileService) } returns false
+
+        tileService.onClick()
+
+        verify { SettingsUtils.openPermissionSettings(tileService) }
+        verify(exactly = 0) { SettingsUtils.Brightness.toggleAdaptiveBrightness(any()) }
+        verify(exactly = 0) { mockQsTile.updateTile() }
     }
 }

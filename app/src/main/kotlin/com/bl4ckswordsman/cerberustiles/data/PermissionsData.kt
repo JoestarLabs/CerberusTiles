@@ -1,7 +1,6 @@
 package com.bl4ckswordsman.cerberustiles.data
 
 import android.content.Context
-import android.content.pm.PackageManager
 import com.bl4ckswordsman.cerberustiles.SettingsUtils
 
 /**
@@ -54,10 +53,7 @@ object PermissionsData {
             feature = "Limit Charge to 80%, Network Speed Limit",
             why = "Modifies secure system settings (charge_optimization_mode on Pixel devices, ingress_rate_limit_bytes_per_second for download rate limiting).",
             howToGrant = "One-time ADB command",
-            isGranted = { context ->
-                context.checkSelfPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) ==
-                        PackageManager.PERMISSION_GRANTED
-            },
+            isGranted = { SettingsUtils.NetworkSpeed.canWriteSecureSettings(it) },
             onGrantClick = null
         ),
         PermissionItem(
@@ -87,8 +83,8 @@ object PermissionsData {
                     "- **Zero Event Types**: Does not receive or listen to window or UI events."
         ),
         FaqItem(
-            question = "How do I grant the Charging Optimization permission?",
-            answer = "The 80% charging limit modifies an Android secure system setting, which requires granting permission once via ADB:\n" +
+            question = "How do I grant the Write Secure Settings permission?",
+            answer = "The 80% charging limit and network speed limit modify secure/global system settings, which requires granting permission once via ADB:\n" +
                     "```bash\n" +
                     "adb shell pm grant com.bl4ckswordsman.cerberustiles android.permission.WRITE_SECURE_SETTINGS\n" +
                     "```"

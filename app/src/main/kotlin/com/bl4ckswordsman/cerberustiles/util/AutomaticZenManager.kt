@@ -15,9 +15,7 @@ object AutomaticZenManager {
      * Checks if we can manage DND rules (requires notification policy access).
      */
     fun canManageDndRules(context: Context): Boolean {
-        val notificationManager =
-            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        return notificationManager.isNotificationPolicyAccessGranted
+        return SettingsUtils.canAccessNotificationPolicy(context)
     }
 
     /**

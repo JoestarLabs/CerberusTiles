@@ -15,29 +15,31 @@ class NetworkRateLimitTileService : TileService() {
 
     override fun onStartListening() {
         super.onStartListening()
+        val tile = qsTile ?: return
 
         if (!SettingsUtils.NetworkSpeed.isSupported()) {
-            qsTile.state = Tile.STATE_UNAVAILABLE
-            qsTile.label = "Speed Limit"
+            tile.state = Tile.STATE_UNAVAILABLE
+            tile.label = "Speed Limit"
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-                qsTile.subtitle = "Unsupported"
+                tile.subtitle = "Unsupported"
             }
-            qsTile.updateTile()
+            tile.updateTile()
             return
         }
 
         val current = SettingsUtils.NetworkSpeed.getCurrentSpeedLimit(this)
-        qsTile.state = if (current.isUnlimited) Tile.STATE_INACTIVE else Tile.STATE_ACTIVE
-        qsTile.label = "Speed Limit"
+        tile.state = if (current.isUnlimited) Tile.STATE_INACTIVE else Tile.STATE_ACTIVE
+        tile.label = "Speed Limit"
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-            qsTile.subtitle = current.label
+            tile.subtitle = current.label
         }
-        qsTile.icon = Icon.createWithResource(this, R.drawable.rounded_network_check_24)
-        qsTile.updateTile()
+        tile.icon = Icon.createWithResource(this, R.drawable.rounded_network_check_24)
+        tile.updateTile()
     }
 
     override fun onClick() {
         super.onClick()
+        val tile = qsTile ?: return
 
         if (!SettingsUtils.NetworkSpeed.isSupported()) {
             Toast.makeText(
@@ -59,11 +61,11 @@ class NetworkRateLimitTileService : TileService() {
 
         val next = SettingsUtils.NetworkSpeed.cycleNextSpeedLimit(this)
         if (next != null) {
-            qsTile.state = if (next.isUnlimited) Tile.STATE_INACTIVE else Tile.STATE_ACTIVE
+            tile.state = if (next.isUnlimited) Tile.STATE_INACTIVE else Tile.STATE_ACTIVE
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-                qsTile.subtitle = next.label
+                tile.subtitle = next.label
             }
-            qsTile.updateTile()
+            tile.updateTile()
         }
     }
 }

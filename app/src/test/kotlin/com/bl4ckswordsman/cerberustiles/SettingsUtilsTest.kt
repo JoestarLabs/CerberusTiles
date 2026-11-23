@@ -123,8 +123,12 @@ class SettingsUtilsTest {
     @Test
     fun `isAdaptiveBrightnessEnabled returns true when SCREEN_BRIGHTNESS_MODE is 1`() {
         every {
-            Settings.System.getInt(contentResolver, Settings.System.SCREEN_BRIGHTNESS_MODE)
-        } returns 1
+            Settings.System.getInt(
+                contentResolver,
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL
+            )
+        } returns Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC
 
         assertTrue(SettingsUtils.Brightness.isAdaptiveBrightnessEnabled(context))
     }
@@ -132,8 +136,12 @@ class SettingsUtilsTest {
     @Test
     fun `isAdaptiveBrightnessEnabled returns false when SCREEN_BRIGHTNESS_MODE is 0`() {
         every {
-            Settings.System.getInt(contentResolver, Settings.System.SCREEN_BRIGHTNESS_MODE)
-        } returns 0
+            Settings.System.getInt(
+                contentResolver,
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL
+            )
+        } returns Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL
 
         assertFalse(SettingsUtils.Brightness.isAdaptiveBrightnessEnabled(context))
     }
@@ -142,8 +150,12 @@ class SettingsUtilsTest {
     fun `toggleAdaptiveBrightness flips from 1 to 0 when permission granted`() {
         every { Settings.System.canWrite(context) } returns true
         every {
-            Settings.System.getInt(contentResolver, Settings.System.SCREEN_BRIGHTNESS_MODE)
-        } returns 1
+            Settings.System.getInt(
+                contentResolver,
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL
+            )
+        } returns Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC
         every {
             Settings.System.putInt(contentResolver, Settings.System.SCREEN_BRIGHTNESS_MODE, 0)
         } returns true
@@ -171,8 +183,12 @@ class SettingsUtilsTest {
     fun `toggleAdaptiveBrightness flips from 0 to 1 when permission granted`() {
         every { Settings.System.canWrite(context) } returns true
         every {
-            Settings.System.getInt(contentResolver, Settings.System.SCREEN_BRIGHTNESS_MODE)
-        } returns 0
+            Settings.System.getInt(
+                contentResolver,
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL
+            )
+        } returns Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL
         every {
             Settings.System.putInt(contentResolver, Settings.System.SCREEN_BRIGHTNESS_MODE, 1)
         } returns true
@@ -265,7 +281,7 @@ class SettingsUtilsTest {
     @Test
     fun `getScreenBrightness returns value from system settings`() {
         every {
-            Settings.System.getInt(contentResolver, Settings.System.SCREEN_BRIGHTNESS)
+            Settings.System.getInt(contentResolver, Settings.System.SCREEN_BRIGHTNESS, 128)
         } returns 180
 
         val brightness = SettingsUtils.Brightness.getScreenBrightness(context)

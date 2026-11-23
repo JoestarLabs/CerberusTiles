@@ -2,13 +2,17 @@ package com.bl4ckswordsman.cerberustiles
 
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.app.NotificationManager
+import android.content.ActivityNotFoundException
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.AudioManager
 import android.provider.Settings
+import android.util.Log
 import android.view.accessibility.AccessibilityManager
 import android.widget.Toast
+import androidx.core.content.edit
 import androidx.core.net.toUri
 import com.bl4ckswordsman.cerberustiles.models.NetworkSpeedLimit
 import com.bl4ckswordsman.cerberustiles.smartpixels.SmartPixelsAccessibilityService
@@ -59,8 +63,10 @@ object SettingsUtils {
          */
         fun isAdaptiveBrightnessEnabled(context: Context): Boolean {
             return Settings.System.getInt(
-                context.contentResolver, Settings.System.SCREEN_BRIGHTNESS_MODE
-            ) == 1
+                context.contentResolver,
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL
+            ) == Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC
         }
 
         /**
@@ -70,10 +76,15 @@ object SettingsUtils {
          */
         fun setAdaptiveBrightness(context: Context, enabled: Boolean): Boolean {
             if (Settings.System.canWrite(context)) {
+                val mode = if (enabled) {
+                    Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC
+                } else {
+                    Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL
+                }
                 val success = Settings.System.putInt(
                     context.contentResolver,
                     Settings.System.SCREEN_BRIGHTNESS_MODE,
-                    if (enabled) 1 else 0
+                    mode
                 )
                 if (success) {
                     showToast(context, "Adaptive brightness", enabled)
@@ -101,7 +112,7 @@ object SettingsUtils {
          */
         fun getScreenBrightness(context: Context): Int {
             return Settings.System.getInt(
-                context.contentResolver, Settings.System.SCREEN_BRIGHTNESS
+                context.contentResolver, Settings.System.SCREEN_BRIGHTNESS, 128
             )
         }
 
@@ -112,7 +123,8 @@ object SettingsUtils {
          */
         fun setScreenBrightness(context: Context, brightness: Float): Boolean {
             if (Settings.System.canWrite(context)) {
-                val brightnessValue = (255.0.pow(brightness.toDouble())).toInt()
+                val clamped = brightness.coerceIn(0f, 1f)
+                val brightnessValue = (255.0.pow(clamped.toDouble())).toInt()
                 return Settings.System.putInt(
                     context.contentResolver, Settings.System.SCREEN_BRIGHTNESS, brightnessValue
                 )
@@ -391,6 +403,15 @@ object SettingsUtils {
         }
     }
 
+    private fun startSettingsActivity(context: Context, intent: Intent) {
+        try {
+            context.startActivity(intent)
+        } catch (e: ActivityNotFoundException) {
+            Log.w("SettingsUtils", "No activity found to handle ${intent.action}", e)
+            Toast.makeText(context, "Unable to open system settings", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     /**
      * Opens the screen to allow the user to write system settings.
      */
@@ -399,7 +420,7 @@ object SettingsUtils {
             data = "package:${context.packageName}".toUri()
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
         }
-        context.startActivity(intent)
+        startSettingsActivity(context, intent)
     }
 
     /**
@@ -409,14 +430,14 @@ object SettingsUtils {
         val intent = Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
         }
-        context.startActivity(intent)
+        startSettingsActivity(context, intent)
     }
 
     /**
      * Utilities for Smart Pixels settings and accessibility overlay management.
      */
     object SmartPixels {
-        const val PREFS_NAME = "settings"
+        const val PREFS_NAME = Constants.SETTINGS_PREFS_NAME
         const val KEY_SMART_PIXELS_ENABLED = "smart_pixels_enabled"
         const val KEY_SMART_PIXELS_INTENSITY = "smart_pixels_intensity"
         const val KEY_SMART_PIXELS_DISABLE_ON_CAST = "smart_pixels_disable_on_cast"
@@ -446,15 +467,15 @@ object SettingsUtils {
                 null
             } ?: return false
 
-            val expectedFull =
-                "${context.packageName}/${SmartPixelsAccessibilityService::class.java.name}"
-            val expectedShort =
-                "${context.packageName}/.${SmartPixelsAccessibilityService::class.java.simpleName}"
-            return enabledServicesSetting.split(':').any {
-                it.equals(expectedFull, ignoreCase = true) || it.equals(
-                    expectedShort,
-                    ignoreCase = true
-                )
+            val serviceClassName = SmartPixelsAccessibilityService::class.java.name
+            val expectedFull = "${context.packageName}/$serviceClassName"
+            val shortClassName = serviceClassName.removePrefix("${context.packageName}.")
+            val expectedShort = "${context.packageName}/.$shortClassName"
+            return enabledServicesSetting.split(':').any { entry ->
+                val parsed = ComponentName.unflattenFromString(entry)
+                (parsed != null && parsed.packageName == context.packageName && parsed.className == serviceClassName) ||
+                        entry.equals(expectedFull, ignoreCase = true) ||
+                        entry.equals(expectedShort, ignoreCase = true)
             }
         }
 
@@ -465,7 +486,7 @@ object SettingsUtils {
             val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK
             }
-            context.startActivity(intent)
+            startSettingsActivity(context, intent)
         }
 
         /**
@@ -481,7 +502,7 @@ object SettingsUtils {
          */
         fun setSmartPixelsEnabled(context: Context, enabled: Boolean) {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            prefs.edit().putBoolean(KEY_SMART_PIXELS_ENABLED, enabled).apply()
+            prefs.edit { putBoolean(KEY_SMART_PIXELS_ENABLED, enabled) }
             SmartPixelsAccessibilityService.updateState(context)
         }
 
@@ -498,7 +519,7 @@ object SettingsUtils {
          */
         fun setSmartPixelsIntensity(context: Context, intensity: Float) {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            prefs.edit().putFloat(KEY_SMART_PIXELS_INTENSITY, intensity).apply()
+            prefs.edit { putFloat(KEY_SMART_PIXELS_INTENSITY, intensity) }
             SmartPixelsAccessibilityService.updateIntensity(context, intensity)
         }
 
@@ -515,7 +536,7 @@ object SettingsUtils {
          */
         fun setDisableOnCastEnabled(context: Context, enabled: Boolean) {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            prefs.edit().putBoolean(KEY_SMART_PIXELS_DISABLE_ON_CAST, enabled).apply()
+            prefs.edit { putBoolean(KEY_SMART_PIXELS_DISABLE_ON_CAST, enabled) }
             SmartPixelsAccessibilityService.updateState(context)
         }
     }

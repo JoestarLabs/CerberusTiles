@@ -1,7 +1,9 @@
 package com.bl4ckswordsman.cerberustiles.util
 
+import android.annotation.SuppressLint
 import android.content.Context
 import com.bl4ckswordsman.cerberustiles.models.NetworkSpeedLimit
+import java.util.Locale
 
 /**
  * Repository responsible for providing the available network speed limitation options.
@@ -19,16 +21,28 @@ object NetworkSpeedLimitRepository {
     @Volatile
     private var cachedLimits: List<NetworkSpeedLimit>? = null
 
+    @Volatile
+    private var cachedLocaleTag: String? = null
+
     /**
      * Returns the available network speed limits for this device.
      */
     fun getAvailableLimits(context: Context): List<NetworkSpeedLimit> {
-        cachedLimits?.let { return it }
+        val currentLocale = Locale.getDefault().toLanguageTag()
+        val cached = cachedLimits
+        if (cached != null && cachedLocaleTag == currentLocale) return cached
 
-        val resolved = resolveFromSystemSettings(context)
-        val result = if (!resolved.isNullOrEmpty()) resolved else NetworkSpeedLimit.DEFAULT_PRESETS
-        cachedLimits = result
-        return result
+        synchronized(this) {
+            val rechecked = cachedLimits
+            if (rechecked != null && cachedLocaleTag == currentLocale) return rechecked
+
+            val resolved = resolveFromSystemSettings(context)
+            val result =
+                if (!resolved.isNullOrEmpty()) resolved else NetworkSpeedLimit.DEFAULT_PRESETS
+            cachedLimits = result
+            cachedLocaleTag = currentLocale
+            return result
+        }
     }
 
     /**
@@ -36,11 +50,13 @@ object NetworkSpeedLimitRepository {
      */
     fun clearCache() {
         cachedLimits = null
+        cachedLocaleTag = null
     }
 
     /**
      * Attempts dynamic resolution from the host device's Settings package resources.
      */
+    @SuppressLint("DiscouragedApi") // Cross-package lookup in com.android.settings has no compile-time R.array ID
     internal fun resolveFromSystemSettings(context: Context): List<NetworkSpeedLimit>? {
         return try {
             val pm = context.packageManager

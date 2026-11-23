@@ -24,32 +24,27 @@ class PermissionsDataTest {
     }
 
     @Test
-    fun `sync permissions documentation to README`() {
+    fun `README permissions section matches PermissionsData`() {
         val candidateLocations = listOf(
             File("../README.md"),
             File("README.md"),
             File("../../README.md")
         )
-        val readmeFile = candidateLocations.firstOrNull { it.exists() } ?: return
+        val readmeFile = candidateLocations.firstOrNull { it.exists() }
+            ?: error("README.md not found in expected locations")
 
         val originalText = readmeFile.readText()
         val startMarker = "<!-- PERMISSIONS_START -->"
         val endMarker = "<!-- PERMISSIONS_END -->"
+        val startIdx = originalText.indexOf(startMarker)
+        val endIdx = originalText.indexOf(endMarker)
+        assertTrue("README.md must contain $startMarker and $endMarker", startIdx >= 0 && endIdx > startIdx)
 
-        if (originalText.contains(startMarker) && originalText.contains(endMarker)) {
-            val generatedMarkdown = PermissionsData.toMarkdown()
-            val pattern = Regex("${Regex.escape(startMarker)}[\\s\\S]*?${Regex.escape(endMarker)}")
-            val updatedSection = "$startMarker\n$generatedMarkdown\n$endMarker"
-            val updatedText = pattern.replace(originalText, updatedSection)
-
-            if (originalText != updatedText) {
-                readmeFile.writeText(updatedText)
-            }
-
-            assertTrue(
-                "README should contain generated markdown",
-                readmeFile.readText().contains(generatedMarkdown)
-            )
-        }
+        val currentSection = originalText.substring(startIdx + startMarker.length, endIdx).trim()
+        assertEquals(
+            "README.md permissions section is out of sync with PermissionsData.toMarkdown()",
+            PermissionsData.toMarkdown().trim(),
+            currentSection
+        )
     }
 }
