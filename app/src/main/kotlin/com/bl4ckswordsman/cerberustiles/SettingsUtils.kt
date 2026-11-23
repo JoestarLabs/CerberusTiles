@@ -441,6 +441,7 @@ object SettingsUtils {
         const val KEY_SMART_PIXELS_ENABLED = "smart_pixels_enabled"
         const val KEY_SMART_PIXELS_INTENSITY = "smart_pixels_intensity"
         const val KEY_SMART_PIXELS_DISABLE_ON_CAST = "smart_pixels_disable_on_cast"
+        const val KEY_SMART_PIXELS_PITCH_BLACK = "smart_pixels_pitch_black"
         const val DEFAULT_INTENSITY = 50f
 
         /**
@@ -537,6 +538,23 @@ object SettingsUtils {
         fun setDisableOnCastEnabled(context: Context, enabled: Boolean) {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             prefs.edit { putBoolean(KEY_SMART_PIXELS_DISABLE_ON_CAST, enabled) }
+            SmartPixelsAccessibilityService.updateState(context)
+        }
+
+        /**
+         * Gets whether Smart Pixels renders pitch-black pixels (full opacity) instead of dimmed pixels.
+         */
+        fun isPitchBlackEnabled(context: Context): Boolean {
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            return prefs.getBoolean(KEY_SMART_PIXELS_PITCH_BLACK, false)
+        }
+
+        /**
+         * Sets whether Smart Pixels renders pitch-black pixels (full opacity) and notifies the service.
+         */
+        fun setPitchBlackEnabled(context: Context, enabled: Boolean) {
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            prefs.edit { putBoolean(KEY_SMART_PIXELS_PITCH_BLACK, enabled) }
             SmartPixelsAccessibilityService.updateState(context)
         }
     }

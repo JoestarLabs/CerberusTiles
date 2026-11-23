@@ -76,4 +76,21 @@ class SmartPixelsOverlayViewTest {
         view.setIntensity(75f)
         assertEquals(75f, view.currentIntensity, 0.01f)
     }
+
+    @Test
+    fun `calculateAlpha returns 255 when pitchBlack is true regardless of intensity`() {
+        assertEquals(255, SmartPixelsOverlayView.calculateAlpha(10f, pitchBlack = true))
+        assertEquals(255, SmartPixelsOverlayView.calculateAlpha(50f, pitchBlack = true))
+        assertEquals(255, SmartPixelsOverlayView.calculateAlpha(90f, pitchBlack = true))
+    }
+
+    @Test
+    fun `setPitchBlack updates isPitchBlack`() {
+        val context = io.mockk.mockk<android.content.Context>(relaxed = true)
+        val view = SmartPixelsOverlayView(context)
+
+        assertEquals(false, view.isPitchBlack)
+        view.setPitchBlack(true)
+        assertEquals(true, view.isPitchBlack)
+    }
 }

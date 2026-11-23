@@ -50,6 +50,9 @@ class MainViewModel : ViewModel() {
     /** Whether Smart Pixels should pause during screen recording / casting. */
     val isSmartPixelsDisableOnCast = mutableStateOf(true)
 
+    /** Whether Smart Pixels renders pitch-black pixels instead of dimmed pixels. */
+    val isSmartPixelsPitchBlack = mutableStateOf(false)
+
     /** Whether network download rate limiting is supported on this device (Android 13+). */
     val isNetworkSpeedLimitSupported = mutableStateOf(false)
 
@@ -105,6 +108,7 @@ class MainViewModel : ViewModel() {
         isSmartPixelsOn.value = SettingsUtils.SmartPixels.isSmartPixelsEnabled(context)
         smartPixelsIntensity.value = SettingsUtils.SmartPixels.getSmartPixelsIntensity(context)
         isSmartPixelsDisableOnCast.value = SettingsUtils.SmartPixels.isDisableOnCastEnabled(context)
+        isSmartPixelsPitchBlack.value = SettingsUtils.SmartPixels.isPitchBlackEnabled(context)
     }
 
     /**

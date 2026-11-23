@@ -45,6 +45,7 @@ class SmartPixelsOverlayControllerTest {
         every { SettingsUtils.SmartPixels.isSmartPixelsEnabled(any()) } returns false
         every { SettingsUtils.SmartPixels.isDisableOnCastEnabled(any()) } returns true
         every { SettingsUtils.SmartPixels.getSmartPixelsIntensity(any()) } returns 50f
+        every { SettingsUtils.SmartPixels.isPitchBlackEnabled(any()) } returns false
 
         controller = SmartPixelsOverlayController(service)
         controller.init()
@@ -88,5 +89,16 @@ class SmartPixelsOverlayControllerTest {
         verify { displayManager.unregisterDisplayListener(any()) }
         verify { service.unregisterReceiver(any()) }
         verify { windowManager.removeView(any()) }
+    }
+
+    @Test
+    fun `updateState reads pitchBlack setting when showing overlay`() {
+        every { SettingsUtils.SmartPixels.isSmartPixelsEnabled(service) } returns true
+        every { SettingsUtils.SmartPixels.isPitchBlackEnabled(service) } returns true
+
+        controller.updateState()
+
+        verify { SettingsUtils.SmartPixels.isPitchBlackEnabled(service) }
+        verify { windowManager.addView(any(), any()) }
     }
 }

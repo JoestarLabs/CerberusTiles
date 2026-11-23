@@ -219,4 +219,30 @@ class SettingsUtilsSmartPixelsTest {
         verify { editor.apply() }
         verify { SmartPixelsAccessibilityService.updateState(context) }
     }
+
+    @Test
+    fun `isPitchBlackEnabled reads stored value or default false`() {
+        every {
+            sharedPreferences.getBoolean(
+                SettingsUtils.SmartPixels.KEY_SMART_PIXELS_PITCH_BLACK,
+                false
+            )
+        } returns true
+
+        assertTrue(SettingsUtils.SmartPixels.isPitchBlackEnabled(context))
+    }
+
+    @Test
+    fun `setPitchBlackEnabled saves value and updates service state`() {
+        SettingsUtils.SmartPixels.setPitchBlackEnabled(context, true)
+
+        verify {
+            editor.putBoolean(
+                SettingsUtils.SmartPixels.KEY_SMART_PIXELS_PITCH_BLACK,
+                true
+            )
+        }
+        verify { editor.apply() }
+        verify { SmartPixelsAccessibilityService.updateState(context) }
+    }
 }

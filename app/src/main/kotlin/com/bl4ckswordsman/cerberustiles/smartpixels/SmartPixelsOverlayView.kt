@@ -50,6 +50,8 @@ class SmartPixelsOverlayView(context: Context) : View(context) {
 
     var currentIntensity: Float = 50f
         private set
+    var isPitchBlack: Boolean = false
+        private set
     var patternOffset: Int = 0
         private set
 
@@ -65,6 +67,17 @@ class SmartPixelsOverlayView(context: Context) : View(context) {
     fun setIntensity(intensity: Float) {
         if (currentIntensity != intensity) {
             currentIntensity = intensity
+            recycleCachedBitmap()
+            invalidate()
+        }
+    }
+
+    /**
+     * Updates whether the mesh pixels are pitch black (full opacity) and invalidates the cached tile if changed.
+     */
+    fun setPitchBlack(pitchBlack: Boolean) {
+        if (isPitchBlack != pitchBlack) {
+            isPitchBlack = pitchBlack
             recycleCachedBitmap()
             invalidate()
         }
@@ -91,7 +104,7 @@ class SmartPixelsOverlayView(context: Context) : View(context) {
             color = Color.BLACK
             style = Paint.Style.FILL
             isAntiAlias = false
-            alpha = calculateAlpha(currentIntensity)
+            alpha = calculateAlpha(currentIntensity, isPitchBlack)
         }
         val stepF = step.toFloat()
         val tileSizeF = tileSize.toFloat()
@@ -152,9 +165,10 @@ class SmartPixelsOverlayView(context: Context) : View(context) {
         }
 
         /**
-         * Calculates paint alpha value (20..230) corresponding to the intensity percentage.
+         * Calculates paint alpha value (20..230, or 255 when [pitchBlack] is true)
+         * corresponding to the intensity percentage.
          */
-        fun calculateAlpha(intensity: Float): Int =
-            (intensity / 100f * 255).toInt().coerceIn(20, 230)
+        fun calculateAlpha(intensity: Float, pitchBlack: Boolean = false): Int =
+            if (pitchBlack) 255 else (intensity / 100f * 255).toInt().coerceIn(20, 230)
     }
 }
