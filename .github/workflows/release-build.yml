@@ -1,8 +1,7 @@
 name: "Manual Release Build"
 
 permissions:
-  contents: write
-  packages: write
+  contents: read
 
 on:
   workflow_dispatch:
@@ -22,13 +21,17 @@ jobs:
   release:
     needs: run-tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout
         uses: actions/checkout@v7
 
       - name: Set release version env
-        run: echo "RELEASE_VERSION=${{ github.event.inputs.tag }}" >> $GITHUB_ENV
+        env:
+          INPUT_TAG: ${{ github.event.inputs.tag }}
+        run: echo "RELEASE_VERSION=$INPUT_TAG" >> "$GITHUB_ENV"
 
       - name: Set up JDK
         uses: actions/setup-java@v6
@@ -56,7 +59,9 @@ jobs:
           keyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
 
       - name: Rename signed APK
-        run: mv ${{ steps.sign_apk.outputs.signedFile }} ${{ env.APP_NAME }}-release-${{ env.RELEASE_VERSION }}.apk
+        env:
+          SIGNED_FILE: ${{ steps.sign_apk.outputs.signedFile }}
+        run: mv "$SIGNED_FILE" "${APP_NAME}-release-${RELEASE_VERSION}.apk"
 
       - name: Create or update GitHub Release and upload APK
         uses: "mathieucarbou/marvinpinto-action-automatic-releases@latest"
@@ -82,12 +87,11 @@ jobs:
         if: env.VT_API_KEY != '' && steps.vt.outputs.analysis != ''
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VT_API_KEY: ${{ secrets.VT_API_KEY }}
+          TAG: ${{ github.event.inputs.tag }}
+          VT_LINK: ${{ steps.vt.outputs.analysis }}
         run: |
-          TAG="${{ github.event.inputs.tag }}"
           CURRENT_BODY=$(gh release view "$TAG" --json body --jq .body)
-          VT_LINK="${{ steps.vt.outputs.analysis }}"
           VT_URL=$(echo "$VT_LINK" | cut -d'=' -f2-)
-          APK_NAME="${{ env.APP_NAME }}-release-${{ env.RELEASE_VERSION }}.apk"
+          APK_NAME="${APP_NAME}-release-${RELEASE_VERSION}.apk"
           NEW_BODY=$(printf "%s\n\n## Security Scan\n* [VirusTotal Analysis](%s) for \`%s\`\n" "$CURRENT_BODY" "$VT_URL" "$APK_NAME")
           gh release edit "$TAG" --notes "$NEW_BODY"

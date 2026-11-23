@@ -9,6 +9,7 @@ import json
 import os
 import sys
 import xml.etree.ElementTree as ET
+from xml.sax.saxutils import escape
 
 
 def get_color(pct: float) -> str:
@@ -37,8 +38,10 @@ def generate_svg_badge(label: str, message: str, color_hex: str) -> str:
     label_width = len(label) * 7 + 10
     value_width = len(message) * 7 + 10
     total_width = label_width + value_width
+    safe_label = escape(label)
+    safe_message = escape(message)
 
-    return f"""<svg xmlns="http://www.w3.org/2000/svg" width="{total_width}" height="20" role="img" aria-label="{label}: {message}">
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" width="{total_width}" height="20" role="img" aria-label="{safe_label}: {safe_message}">
   <linearGradient id="s" x2="0" y2="100%">
     <stop offset="0" stop-color="#bbb" stop-opacity=".1"/>
     <stop offset="1" stop-opacity=".1"/>
@@ -52,12 +55,52 @@ def generate_svg_badge(label: str, message: str, color_hex: str) -> str:
     <rect width="{total_width}" height="20" fill="url(#s)"/>
   </g>
   <g fill="#fff" text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" text-rendering="geometricPrecision" font-size="110">
-    <text aria-hidden="true" x="{label_width * 5}" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)">{label}</text>
-    <text x="{label_width * 5}" y="140" transform="scale(.1)">{label}</text>
-    <text aria-hidden="true" x="{(label_width + value_width / 2) * 10}" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)">{message}</text>
-    <text x="{(label_width + value_width / 2) * 10}" y="140" transform="scale(.1)">{message}</text>
+    <text aria-hidden="true" x="{label_width * 5}" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)">{safe_label}</text>
+    <text x="{label_width * 5}" y="140" transform="scale(.1)">{safe_label}</text>
+    <text aria-hidden="true" x="{(label_width + value_width / 2) * 10}" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)">{safe_message}</text>
+    <text x="{(label_width + value_width / 2) * 10}" y="140" transform="scale(.1)">{safe_message}</text>
   </g>
 </svg>"""
+
+
+def parse_counters(element: ET.Element) -> dict:
+    counters = {}
+    for counter in element.findall("counter"):
+        counter_type = counter.get("type")
+        if not counter_type:
+            continue
+        missed = int(counter.get("missed", 0))
+        covered = int(counter.get("covered", 0))
+        total = missed + covered
+        pct = (covered / total * 100.0) if total > 0 else 0.0
+        counters[counter_type] = {
+            "covered": covered,
+            "missed": missed,
+            "total": total,
+            "pct": pct,
+        }
+    return counters
+
+
+def categorize_package(pkg_name: str) -> str:
+    if pkg_name.endswith(".ui.theme") or ".ui.theme." in pkg_name:
+        return "Compose Theme"
+    elif pkg_name.endswith(".ui") or ".ui." in pkg_name:
+        return "Compose UI"
+    elif pkg_name.endswith(".activities") or ".activities." in pkg_name:
+        return "Android Activities"
+    elif pkg_name.endswith(".quicksettingstiles") or ".quicksettingstiles." in pkg_name:
+        return "Tile Services"
+    elif pkg_name.endswith(".smartpixels") or ".smartpixels." in pkg_name:
+        return "Smart Pixels"
+    elif pkg_name.endswith(".models") or ".models." in pkg_name:
+        return "Data Models"
+    elif pkg_name.endswith(".data") or ".data." in pkg_name:
+        return "Data & Docs"
+    elif pkg_name.endswith(".util") or ".util." in pkg_name:
+        return "Utilities & ViewModel"
+    else:
+        return "Core & Shortcuts"
 
 
 def main():
@@ -92,24 +135,17 @@ def main():
     try:
         tree = ET.parse(args.xml)
         root = tree.getroot()
-    except Exception as e:
+    except (ET.ParseError, OSError) as e:
         print(f"Error parsing {args.xml}: {e}", file=sys.stderr)
         sys.exit(1)
 
-    counters = {}
-    for c in root.findall("counter"):
-        t = c.get("type")
-        missed = int(c.get("missed", 0))
-        covered = int(c.get("covered", 0))
-        total = missed + covered
-        pct = (covered / total * 100.0) if total > 0 else 0.0
-        counters[t] = {"covered": covered, "missed": missed, "total": total, "pct": pct}
-
-    line_cov = counters.get("LINE", {"pct": 0.0, "covered": 0, "total": 0})
-    branch_cov = counters.get("BRANCH", {"pct": 0.0, "covered": 0, "total": 0})
-    inst_cov = counters.get("INSTRUCTION", {"pct": 0.0, "covered": 0, "total": 0})
-    method_cov = counters.get("METHOD", {"pct": 0.0, "covered": 0, "total": 0})
-    class_cov = counters.get("CLASS", {"pct": 0.0, "covered": 0, "total": 0})
+    counters = parse_counters(root)
+    empty_counter = {"pct": 0.0, "covered": 0, "total": 0}
+    line_cov = counters.get("LINE", empty_counter)
+    branch_cov = counters.get("BRANCH", empty_counter)
+    inst_cov = counters.get("INSTRUCTION", empty_counter)
+    method_cov = counters.get("METHOD", empty_counter)
+    class_cov = counters.get("CLASS", empty_counter)
 
     line_pct = line_cov["pct"]
     color_name = get_color(line_pct)
@@ -122,7 +158,6 @@ def main():
     }
     color_hex = color_hex_map.get(color_name, "#e05d44")
 
-    # Shields.io endpoint JSON
     if args.json_out:
         os.makedirs(os.path.dirname(os.path.abspath(args.json_out)), exist_ok=True)
         shield_data = {
@@ -134,56 +169,33 @@ def main():
         with open(args.json_out, "w", encoding="utf-8") as f:
             json.dump(shield_data, f, indent=2)
 
-    # SVG badge
     if args.svg_out:
         os.makedirs(os.path.dirname(os.path.abspath(args.svg_out)), exist_ok=True)
         svg_content = generate_svg_badge("coverage", f"{line_pct:.1f}%", color_hex)
         with open(args.svg_out, "w", encoding="utf-8") as f:
             f.write(svg_content)
 
-    def categorize_package(pkg_name: str) -> str:
-        if ".ui.theme" in pkg_name:
-            return "Compose Theme"
-        elif ".ui" in pkg_name:
-            return "Compose UI"
-        elif ".activities" in pkg_name:
-            return "Android Activities"
-        elif ".quicksettingstiles" in pkg_name:
-            return "Tile Services"
-        elif ".models" in pkg_name:
-            return "Data Models"
-        elif ".navbar" in pkg_name:
-            return "Navigation"
-        elif ".util" in pkg_name:
-            return "Utilities & ViewModel"
-        else:
-            return "Core & Shortcuts"
-
     packages = []
     logic_covered, logic_total = 0, 0
     non_ui_covered, non_ui_total = 0, 0
+    ui_total = 0
 
     for pkg in root.findall("package"):
         name = pkg.get("name", "").replace("/", ".")
         cat = categorize_package(name)
-        c = {}
-        for counter in pkg.findall("counter"):
-            t = counter.get("type")
-            m = int(counter.get("missed", 0))
-            cov = int(counter.get("covered", 0))
-            tot = m + cov
-            p = (cov / tot * 100.0) if tot > 0 else 0.0
-            c[t] = {"covered": cov, "total": tot, "pct": p}
-        if "LINE" in c:
-            cov = c["LINE"]["covered"]
-            tot = c["LINE"]["total"]
-            pct = c["LINE"]["pct"]
+        pkg_counters = parse_counters(pkg)
+        if "LINE" in pkg_counters:
+            cov = pkg_counters["LINE"]["covered"]
+            tot = pkg_counters["LINE"]["total"]
+            pct = pkg_counters["LINE"]["pct"]
             packages.append((name, cat, pct, cov, tot))
 
-            if "Compose" not in cat:
+            if "Compose" in cat:
+                ui_total += tot
+            else:
                 non_ui_covered += cov
                 non_ui_total += tot
-            if cat in ("Tile Services", "Data Models", "Core & Shortcuts", "Utilities & ViewModel"):
+            if cat in ("Tile Services", "Smart Pixels", "Data Models", "Data & Docs", "Core & Shortcuts", "Utilities & ViewModel"):
                 logic_covered += cov
                 logic_total += tot
 
@@ -191,15 +203,17 @@ def main():
 
     logic_pct = (logic_covered / logic_total * 100.0) if logic_total > 0 else 0.0
     non_ui_pct = (non_ui_covered / non_ui_total * 100.0) if non_ui_total > 0 else 0.0
+    total_lines = line_cov["total"]
+    ui_share_pct = round(ui_total / total_lines * 100) if total_lines > 0 else 0
 
     summary_lines = [
-        f"## 📊 Kover Code Coverage Summary\n",
+        "## 📊 Kover Code Coverage Summary\n",
         "| Scope | Line Coverage | Covered / Total Lines | Status |",
         "| :--- | :---: | :---: | :---: |",
         f"| 🧠 **Core Logic & Services** | **{logic_pct:.1f}%** | {logic_covered:,} / {logic_total:,} | {get_status_emoji(logic_pct)} |",
         f"| ⚙️ **All Non-UI Code** *(Logic + Activities)* | **{non_ui_pct:.1f}%** | {non_ui_covered:,} / {non_ui_total:,} | {get_status_emoji(non_ui_pct)} |",
         f"| 🌐 **Total Codebase** *(Includes Compose UI)* | **{line_pct:.1f}%** | {line_cov['covered']:,} / {line_cov['total']:,} | {get_status_emoji(line_pct)} |",
-        "\n> ℹ️ *Compose UI & Theme composables account for 715 lines (~62% of the codebase) and are tested via instrumented tests.*\n",
+        f"\n> ℹ️ *Compose UI & Theme composables account for {ui_total:,} lines (~{ui_share_pct}% of the codebase) and are tested via instrumented tests.*\n",
         "<details><summary><b>Detailed Metrics by Counter Type</b></summary>\n",
         "| Metric | Covered | Total | Coverage % | Status |",
         "| :--- | :---: | :---: | :---: | :---: |",

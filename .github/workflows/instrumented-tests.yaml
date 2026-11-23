@@ -7,6 +7,9 @@ on:
   schedule:
     - cron: '17 3 * * 0' # Every Sunday at 3:17 AM UTC (avoids top-of-hour runner delays)
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true

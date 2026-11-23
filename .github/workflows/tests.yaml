@@ -11,6 +11,9 @@ on:
   workflow_dispatch: # allows manual trigger from Actions tab
   workflow_call:
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -25,7 +28,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Set up JDK 17
+      - name: Set up JDK
         uses: actions/setup-java@v6
         with:
           distribution: temurin
