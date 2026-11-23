@@ -1,5 +1,6 @@
 package com.bl4ckswordsman.cerberustiles.ui
 
+import android.content.SharedPreferences
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -24,16 +25,12 @@ data class OverlayDialogParams(
     val setSwitchedOn: (Boolean) -> Unit,
     val toggleAdaptiveBrightness: () -> Unit,
     val openPermissionSettings: () -> Unit,
-    val isVibrationModeOn: Boolean,
-    val setVibrationMode: (Boolean) -> Unit,
-    val toggleVibrationMode: () -> Boolean,
     val isChargingOptimizationOn: Boolean,
-    val isChargingOptimizationSupported: Boolean,
-    val setChargingOptimization: (Boolean) -> Unit,
     val toggleChargingOptimization: (Boolean) -> Unit,
-    val sharedParams: SharedParams,
+    val sharedPreferences: SharedPreferences,
     val currentRingerMode: RingerMode,
     val onRingerModeChange: (RingerMode) -> Unit,
+    val setVibrationMode: (Boolean) -> Unit = {},
     val isSmartPixelsOn: Boolean = false,
     val toggleSmartPixels: ((Boolean) -> Unit)? = null,
     val currentNetworkSpeedLimit: NetworkSpeedLimit = NetworkSpeedLimit.NO_LIMIT,
@@ -47,7 +44,7 @@ data class OverlayDialogParams(
  */
 @Composable
 fun OverlayDialog(params: OverlayDialogParams) {
-    val componentVisibility = rememberComponentVisibility(params.sharedParams.sharedPreferences)
+    val componentVisibility = rememberComponentVisibility(params.sharedPreferences)
 
     if (params.showDialog.value) {
         CerberusTilesTheme {
@@ -63,14 +60,10 @@ fun OverlayDialog(params: OverlayDialogParams) {
                         setSwitchedOn = params.setSwitchedOn,
                         toggleAdaptiveBrightness = params.toggleAdaptiveBrightness,
                         openPermissionSettings = params.openPermissionSettings,
-                        isVibrationModeOn = params.isVibrationModeOn,
                         setVibrationMode = params.setVibrationMode,
-                        toggleVibrationMode = params.toggleVibrationMode,
                         isChargingOptimizationOn = params.isChargingOptimizationOn,
-                        setChargingOptimization = params.setChargingOptimization,
                         toggleChargingOptimization = params.toggleChargingOptimization,
                         componentVisibilityParams = componentVisibility,
-                        sharedParams = params.sharedParams,
                         currentRingerMode = params.currentRingerMode,
                         onRingerModeChange = params.onRingerModeChange,
                         isOverlayContext = true,

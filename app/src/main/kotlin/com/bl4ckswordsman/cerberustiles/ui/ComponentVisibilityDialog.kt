@@ -3,6 +3,9 @@ package com.bl4ckswordsman.cerberustiles.ui
 import android.content.SharedPreferences
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
@@ -11,6 +14,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.unit.dp
 import androidx.core.content.edit
 
 /**
@@ -125,14 +131,24 @@ fun SettingsCheckbox(
     onCheckedChange: (Boolean) -> Unit
 ) {
     val checkboxValue = rememberSaveable { mutableStateOf(initialValue) }
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .toggleable(
+                value = checkboxValue.value,
+                role = Role.Checkbox,
+                onValueChange = {
+                    checkboxValue.value = it
+                    onCheckedChange(it)
+                }
+            )
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Checkbox(
             checked = checkboxValue.value,
-            onCheckedChange = {
-                checkboxValue.value = it
-                onCheckedChange(it)
-            }
+            onCheckedChange = null
         )
-        Text(text)
+        Text(text, modifier = Modifier.padding(start = 8.dp))
     }
 }

@@ -1,6 +1,6 @@
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.plugin.compose") version "2.4.21"
+    id("org.jetbrains.kotlin.plugin.compose")
     id("com.mikepenz.aboutlibraries.plugin.android")
     id("org.jetbrains.kotlinx.kover")
 }
@@ -39,7 +39,6 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            //signingConfig = signingConfigs.getByName("debug")
         }
         debug {
             applicationIdSuffix = ".debug"
@@ -92,9 +91,6 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.runtime:runtime-android:1.12.1")
     implementation("androidx.compose.runtime:runtime-livedata:1.12.1")
-    implementation("androidx.compose.runtime:runtime-rxjava2:1.12.1")
-    implementation("androidx.appcompat:appcompat:1.8.0")
-    implementation("androidx.lifecycle:lifecycle-process:2.11.0")
     implementation("androidx.compose.material:material-icons-core")
     implementation("androidx.compose.material3:material3:1.5.0-rc01") // TODO: Don't rely on alpha version
     implementation("com.mikepenz:aboutlibraries-compose-m3:15.3.0")

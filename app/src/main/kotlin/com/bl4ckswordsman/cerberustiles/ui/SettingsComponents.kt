@@ -1,5 +1,6 @@
 package com.bl4ckswordsman.cerberustiles.ui
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -37,13 +38,12 @@ data class SettingsComponentsParams(
     val setSwitchedOn: (Boolean) -> Unit,
     val toggleAdaptiveBrightness: () -> Unit,
     val openPermissionSettings: () -> Unit,
-    val isVibrationModeOn: Boolean,
+    val isVibrationModeOn: Boolean = false,
     val setVibrationMode: (Boolean) -> Unit,
-    val toggleVibrationMode: () -> Boolean,
+    val toggleVibrationMode: () -> Boolean = { false },
     val isChargingOptimizationOn: Boolean,
-    val setChargingOptimization: (Boolean) -> Unit,
+    val setChargingOptimization: (Boolean) -> Unit = {},
     val toggleChargingOptimization: (Boolean) -> Unit,
-    val sharedParams: SharedParams,
     val currentRingerMode: RingerMode,
     val onRingerModeChange: (RingerMode) -> Unit,
     val isOverlayContext: Boolean = false,
@@ -76,7 +76,6 @@ fun SettingsComponents(
             SwitchWithLabel(
                 isSwitchedOn = params.isSwitchedOn,
                 onCheckedChange = {
-                    params.setSwitchedOn(it)
                     if (params.canWriteState) {
                         params.toggleAdaptiveBrightness()
                     } else {
@@ -269,7 +268,7 @@ private fun triggerRingerModeChangeOnSelection(
             mode
         )
     }.onFailure { e ->
-        println("Error changing mode: ${e.message}")
+        Log.e("SettingsComponents", "Error changing ringer mode", e)
     }
 }
 

@@ -7,8 +7,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import com.bl4ckswordsman.cerberustiles.Constants
 import com.bl4ckswordsman.cerberustiles.models.NetworkSpeedLimit
 import com.bl4ckswordsman.cerberustiles.models.RingerMode
 
@@ -22,11 +24,11 @@ data class HomeScreenParams(
     val setSwitchedOn: (Boolean) -> Unit,
     val toggleAdaptiveBrightness: () -> Unit,
     val openPermissionSettings: () -> Unit,
-    val isVibrationModeOn: Boolean,
-    val setVibrationMode: (Boolean) -> Unit,
-    val toggleVibrationMode: () -> Boolean,
+    val isVibrationModeOn: Boolean = false,
+    val setVibrationMode: (Boolean) -> Unit = {},
+    val toggleVibrationMode: () -> Boolean = { false },
     val isChargingOptimizationOn: Boolean,
-    val setChargingOptimization: (Boolean) -> Unit,
+    val setChargingOptimization: (Boolean) -> Unit = {},
     val toggleChargingOptimization: (Boolean) -> Unit,
     val currentRingerMode: RingerMode,
     val onRingerModeChange: (RingerMode) -> Unit,
@@ -45,7 +47,9 @@ data class HomeScreenParams(
 @Composable
 fun HomeScreen(params: HomeScreenParams) {
     val context = LocalContext.current
-    val sharedPreferences = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+    val sharedPreferences = remember(context) {
+        context.getSharedPreferences(Constants.SETTINGS_PREFS_NAME, Context.MODE_PRIVATE)
+    }
     val componentVisibility = rememberComponentVisibility(sharedPreferences)
 
     val settingsCompParams = SettingsComponentsParams(
@@ -54,13 +58,9 @@ fun HomeScreen(params: HomeScreenParams) {
         setSwitchedOn = params.setSwitchedOn,
         toggleAdaptiveBrightness = params.toggleAdaptiveBrightness,
         openPermissionSettings = params.openPermissionSettings,
-        isVibrationModeOn = params.isVibrationModeOn,
         setVibrationMode = params.setVibrationMode,
-        toggleVibrationMode = params.toggleVibrationMode,
         isChargingOptimizationOn = params.isChargingOptimizationOn,
-        setChargingOptimization = params.setChargingOptimization,
         toggleChargingOptimization = params.toggleChargingOptimization,
-        sharedParams = createSharedParams(),
         componentVisibilityParams = componentVisibility,
         currentRingerMode = params.currentRingerMode,
         onRingerModeChange = params.onRingerModeChange,

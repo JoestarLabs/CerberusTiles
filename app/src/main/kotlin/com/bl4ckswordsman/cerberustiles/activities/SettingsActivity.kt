@@ -5,23 +5,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MediumTopAppBar
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
+import com.bl4ckswordsman.cerberustiles.Constants
+import com.bl4ckswordsman.cerberustiles.ui.CerberusSubScreenScaffold
 import com.bl4ckswordsman.cerberustiles.ui.SettingsScreen
 import com.bl4ckswordsman.cerberustiles.ui.SettingsScreenParams
 import com.bl4ckswordsman.cerberustiles.ui.createSharedParams
-import com.bl4ckswordsman.cerberustiles.ui.theme.CerberusTilesTheme
-import com.bl4ckswordsman.cerberustiles.Constants as label
 
 /**
  * Activity for displaying application settings, dialogs, and navigation to
@@ -29,51 +17,28 @@ import com.bl4ckswordsman.cerberustiles.Constants as label
  */
 class SettingsActivity : ComponentActivity() {
 
-    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContent {
-            CerberusTilesTheme {
-                val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-
-                Scaffold(
-                    modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                    topBar = {
-                        MediumTopAppBar(
-                            title = { Text(label.SETTINGS_SCREEN) },
-                            navigationIcon = {
-                                IconButton(onClick = { finish() }) {
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                        contentDescription = "Back"
-                                    )
-                                }
-                            },
-                            colors = TopAppBarDefaults.topAppBarColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                                scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer
-                            ),
-                            scrollBehavior = scrollBehavior
-                        )
+            CerberusSubScreenScaffold(
+                title = Constants.SETTINGS_SCREEN,
+                onNavigateBack = { finish() }
+            ) { innerPadding ->
+                val sharedParams = createSharedParams(
+                    onNavigateToPermissions = {
+                        startActivity(Intent(this, PermissionsActivity::class.java))
+                    },
+                    onNavigateToLicenses = {
+                        startActivity(Intent(this, LicensesActivity::class.java))
                     }
-                ) { innerPadding ->
-                    val sharedParams = createSharedParams(
-                        onNavigateToPermissions = {
-                            startActivity(Intent(this, PermissionsActivity::class.java))
-                        },
-                        onNavigateToLicenses = {
-                            startActivity(Intent(this, LicensesActivity::class.java))
-                        }
+                )
+                SettingsScreen(
+                    SettingsScreenParams(
+                        paddingValues = innerPadding,
+                        sharedParams = sharedParams
                     )
-                    SettingsScreen(
-                        SettingsScreenParams(
-                            paddingValues = innerPadding,
-                            sharedParams = sharedParams
-                        )
-                    )
-                }
+                )
             }
         }
     }
