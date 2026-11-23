@@ -89,7 +89,7 @@ jobs:
             ${{ env.APP_NAME }}-release-${{ needs.release-please.outputs.tag_name }}.apk
 
       - name: Update Release Title and Body with Scan Results
-        if: env.VT_API_KEY != '' && steps.vt.outputs.analysis != ''
+        if: steps.vt.outputs.analysis != ''
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ needs.release-please.outputs.tag_name }}

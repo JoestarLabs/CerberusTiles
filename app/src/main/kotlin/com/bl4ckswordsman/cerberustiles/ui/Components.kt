@@ -37,6 +37,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -189,13 +190,15 @@ fun BrightnessPresetButtonGroup(
         )
     }
     var previousAdaptiveState by rememberSaveable { mutableStateOf(isAdaptiveBrightnessOn) }
+    var hasInitialized by remember { mutableStateOf(false) }
 
     LaunchedEffect(isAdaptiveBrightnessOn) {
-        if (previousAdaptiveState && !isAdaptiveBrightnessOn) {
+        if (!isAdaptiveBrightnessOn && ((!hasInitialized && initialPreset == null) || previousAdaptiveState)) {
             selectedPreset = BrightnessPreset.fromBrightness(
                 SettingsUtils.Brightness.getScreenBrightness(context)
             )
         }
+        hasInitialized = true
         previousAdaptiveState = isAdaptiveBrightnessOn
     }
 
