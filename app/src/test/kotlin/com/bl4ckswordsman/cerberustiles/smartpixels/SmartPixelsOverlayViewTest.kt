@@ -52,21 +52,28 @@ class SmartPixelsOverlayViewTest {
     }
 
     @Test
-    fun `4-phase offset calculation cycles correctly`() {
-        var offset = 0
-        val offsets = mutableListOf<Pair<Int, Int>>()
-        for (i in 0 until 4) {
-            val step = 3
-            val offsetX = (offset % 2) * step
-            val offsetY = (offset / 2) * step
-            offsets.add(Pair(offsetX, offsetY))
-            offset = (offset + 1) % 4
-        }
+    fun `shiftPattern cycles patternOffset through 0 to 3 and wraps around`() {
+        val context = io.mockk.mockk<android.content.Context>(relaxed = true)
+        val view = SmartPixelsOverlayView(context)
 
-        assertEquals(Pair(0, 0), offsets[0])
-        assertEquals(Pair(3, 0), offsets[1])
-        assertEquals(Pair(0, 3), offsets[2])
-        assertEquals(Pair(3, 3), offsets[3])
-        assertEquals(0, offset) // Back to start
+        assertEquals(0, view.patternOffset)
+        view.shiftPattern()
+        assertEquals(1, view.patternOffset)
+        view.shiftPattern()
+        assertEquals(2, view.patternOffset)
+        view.shiftPattern()
+        assertEquals(3, view.patternOffset)
+        view.shiftPattern()
+        assertEquals(0, view.patternOffset)
+    }
+
+    @Test
+    fun `setIntensity updates currentIntensity`() {
+        val context = io.mockk.mockk<android.content.Context>(relaxed = true)
+        val view = SmartPixelsOverlayView(context)
+
+        assertEquals(50f, view.currentIntensity, 0.01f)
+        view.setIntensity(75f)
+        assertEquals(75f, view.currentIntensity, 0.01f)
     }
 }

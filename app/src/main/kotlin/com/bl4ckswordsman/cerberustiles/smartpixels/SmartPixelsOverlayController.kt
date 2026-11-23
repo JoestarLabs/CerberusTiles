@@ -24,6 +24,7 @@
 package com.bl4ckswordsman.cerberustiles.smartpixels
 
 import android.accessibilityservice.AccessibilityService
+import android.animation.ObjectAnimator
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -69,6 +70,7 @@ class SmartPixelsOverlayController(
 
     private var isScreenRecordingActive = false
     private var screenRecordingCallback: Consumer<Int>? = null
+    private var fadeAnimator: ObjectAnimator? = null
 
     private val displayListener = object : DisplayManager.DisplayListener {
         override fun onDisplayAdded(displayId: Int) = updateState()
@@ -116,7 +118,8 @@ class SmartPixelsOverlayController(
     }
 
     private fun registerScreenRecordingCallback() {
-        if (Build.VERSION.SDK_INT >= 35 && windowManager != null) {
+        val wm = windowManager ?: return
+        if (Build.VERSION.SDK_INT >= 35) {
             try {
                 val callback = Consumer<Int> { state ->
                     isScreenRecordingActive =
@@ -124,10 +127,12 @@ class SmartPixelsOverlayController(
                     updateState()
                 }
                 screenRecordingCallback = callback
-                windowManager?.addScreenRecordingCallback(
+                val initialState = wm.addScreenRecordingCallback(
                     { command -> handler.post(command) },
                     callback
                 )
+                isScreenRecordingActive =
+                    (initialState == WindowManager.SCREEN_RECORDING_STATE_VISIBLE)
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to register screen recording callback", e)
             }
@@ -135,10 +140,12 @@ class SmartPixelsOverlayController(
     }
 
     private fun unregisterScreenRecordingCallback() {
-        if (Build.VERSION.SDK_INT >= 35 && screenRecordingCallback != null) {
+        val callback = screenRecordingCallback ?: return
+        if (Build.VERSION.SDK_INT >= 35) {
             try {
-                windowManager?.removeScreenRecordingCallback(screenRecordingCallback!!)
-            } catch (_: Exception) {
+                windowManager?.removeScreenRecordingCallback(callback)
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to unregister screen recording callback", e)
             }
             screenRecordingCallback = null
         }
@@ -158,17 +165,7 @@ class SmartPixelsOverlayController(
 
     private fun isScreenCastingOrMirroring(): Boolean {
         if (isScreenRecordingActive) return true
-        val displays = displayManager?.displays ?: return false
-        for (display in displays) {
-            if (display.displayId == Display.DEFAULT_DISPLAY) continue
-            val flags = display.flags
-            val isPresentation = (flags and Display.FLAG_PRESENTATION) != 0
-            val isPrivate = (flags and Display.FLAG_PRIVATE) != 0
-            if (isPresentation || isPrivate || display.displayId != Display.DEFAULT_DISPLAY) {
-                return true
-            }
-        }
-        return false
+        return displayManager?.displays?.any { it.displayId != Display.DEFAULT_DISPLAY } == true
     }
 
     fun setIntensity(intensity: Float) {
@@ -206,7 +203,8 @@ class SmartPixelsOverlayController(
                 windowManager?.addView(overlayView, params)
                 isOverlayAdded = true
 
-                android.animation.ObjectAnimator.ofFloat(overlayView, "alpha", 0f, 1f).apply {
+                fadeAnimator?.cancel()
+                fadeAnimator = ObjectAnimator.ofFloat(overlayView, View.ALPHA, 0f, 1f).apply {
                     duration = 200
                     start()
                 }
@@ -224,13 +222,16 @@ class SmartPixelsOverlayController(
     }
 
     fun hideOverlay() {
+        fadeAnimator?.cancel()
+        fadeAnimator = null
         if (isOverlayAdded && overlayView != null) {
             handler.removeCallbacks(shiftPatternRunnable)
             val currentView = overlayView ?: return
             currentView.visibility = View.GONE
             try {
                 windowManager?.removeView(currentView)
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to remove Smart Pixels overlay view", e)
             }
             isOverlayAdded = false
         }
@@ -241,7 +242,8 @@ class SmartPixelsOverlayController(
         displayManager?.unregisterDisplayListener(displayListener)
         try {
             service.unregisterReceiver(screenStateReceiver)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to unregister screen state receiver", e)
         }
         handler.removeCallbacks(shiftPatternRunnable)
         hideOverlay()

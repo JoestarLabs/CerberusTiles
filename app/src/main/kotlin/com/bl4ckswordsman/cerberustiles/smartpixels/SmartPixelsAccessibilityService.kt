@@ -77,6 +77,7 @@ class SmartPixelsAccessibilityService : AccessibilityService() {
     }
 
     companion object {
+        @Volatile
         var instance: SmartPixelsAccessibilityService? = null
             private set
 

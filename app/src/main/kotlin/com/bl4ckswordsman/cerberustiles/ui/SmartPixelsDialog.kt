@@ -8,16 +8,18 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
+import androidx.compose.material3.rememberSliderState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -26,12 +28,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.bl4ckswordsman.cerberustiles.R
 import com.bl4ckswordsman.cerberustiles.SettingsUtils
+import com.bl4ckswordsman.cerberustiles.smartpixels.SmartPixelsAccessibilityService
 
 /**
  * Dialog for configuring Smart Pixels power-saving overlay settings.
@@ -39,6 +43,7 @@ import com.bl4ckswordsman.cerberustiles.SettingsUtils
  * @param onDismiss Invoked when the dialog is dismissed or completed.
  * @param context The [Context] used to query and apply Smart Pixels settings.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SmartPixelsDialog(
     onDismiss: () -> Unit,
@@ -47,9 +52,14 @@ fun SmartPixelsDialog(
     val isEnabled = rememberSaveable {
         mutableStateOf(SettingsUtils.SmartPixels.isSmartPixelsEnabled(context))
     }
-    val intensity = rememberSaveable {
-        mutableFloatStateOf(SettingsUtils.SmartPixels.getSmartPixelsIntensity(context))
+    val initialIntensity = remember {
+        SettingsUtils.SmartPixels.getSmartPixelsIntensity(context)
     }
+    val sliderState = rememberSliderState(
+        initialIntensity,
+        7,
+        10f..90f
+    )
     val disableOnCast = rememberSaveable {
         mutableStateOf(SettingsUtils.SmartPixels.isDisableOnCastEnabled(context))
     }
@@ -112,29 +122,37 @@ fun SmartPixelsDialog(
                     }
                 )
 
-                Text("Intensity: ${intensity.floatValue.toInt()}%")
+                Text("Intensity: ${sliderState.value.toInt()}%")
 
                 Slider(
-                    value = intensity.floatValue,
+                    state = sliderState,
                     onValueChange = { newVal ->
-                        intensity.floatValue = newVal
-                        SettingsUtils.SmartPixels.setSmartPixelsIntensity(context, newVal)
+                        sliderState.value = newVal
+                        SmartPixelsAccessibilityService.updateIntensity(context, newVal)
                     },
-                    valueRange = 10f..90f,
-                    steps = 7,
+                    onValueChangeFinished = {
+                        SettingsUtils.SmartPixels.setSmartPixelsIntensity(context, sliderState.value)
+                    },
                     enabled = isEnabled.value && hasAccessPerm.value
                 )
 
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .toggleable(
+                            value = disableOnCast.value,
+                            role = Role.Checkbox,
+                            onValueChange = { checked ->
+                                disableOnCast.value = checked
+                                SettingsUtils.SmartPixels.setDisableOnCastEnabled(context, checked)
+                            }
+                        )
+                        .padding(vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Checkbox(
                         checked = disableOnCast.value,
-                        onCheckedChange = { checked ->
-                            disableOnCast.value = checked
-                            SettingsUtils.SmartPixels.setDisableOnCastEnabled(context, checked)
-                        }
+                        onCheckedChange = null
                     )
                     Spacer(modifier = Modifier.padding(4.dp))
                     Text(stringResource(R.string.smart_pixels_disable_on_cast))
