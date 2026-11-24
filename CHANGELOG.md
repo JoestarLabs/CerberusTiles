@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.5.4](https://github.com/JoestarLabs/CerberusTiles/compare/v0.5.3...v0.5.4) (2026-11-24)
+
+
+### Features
+
+* **smartpixels:** add pitch-black pixels toggle ([a595a54](https://github.com/JoestarLabs/CerberusTiles/commit/a595a543e3ca2af15235be3f54c9a7f7f50d0608))
+
+
+### Bug Fixes
+
+* address code review findings across workflows, cache, UI, and tests ([6e2736b](https://github.com/JoestarLabs/CerberusTiles/commit/6e2736b2b8bcfcb6f6e35758a58d53e40b6a0f43))
+* **charging:** detect adaptive charging and refresh state on app start ([2fd4e3b](https://github.com/JoestarLabs/CerberusTiles/commit/2fd4e3b37fabb7edfb24e1e904d5f671509d8257))
+* correct brightness, ringer, and permission edge cases and sync readme tests ([decbd54](https://github.com/JoestarLabs/CerberusTiles/commit/decbd549753a8447d3425fb26dbb12bd9cad6f97))
+* **deps:** update gradle dependencies ([7f20308](https://github.com/JoestarLabs/CerberusTiles/commit/7f20308461e4e3d5b7e58f8da77f007e85c6f1f6))
+* **deps:** update gradle dependencies ([03dba10](https://github.com/JoestarLabs/CerberusTiles/commit/03dba10b7448443b3f6c5a24f9fbf16ff3df0ff5))
+
 ## [0.5.3](https://github.com/JoestarLabs/CerberusTiles/compare/v0.5.2...v0.5.3) (2026-11-03)
 
 
