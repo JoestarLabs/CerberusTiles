@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.CerberusTiles" parent="android:Theme.Material.NoActionBar" />
+
+    <style name="Theme.OverlayActivity" parent="android:Theme.Material.NoActionBar">
+        <!-- Make the window background transparent -->
+        <item name="android:windowIsTranslucent">true</item>
+    </style>
+
+</resources>
