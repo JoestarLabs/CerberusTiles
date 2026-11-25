@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.5](https://github.com/JoestarLabs/CerberusTiles/compare/v0.5.4...v0.5.5) (2026-11-25)
+
+
+### Bug Fixes
+
+* **charging:** isolate secure key reads and persist state for write-only keys ([5ca18f8](https://github.com/JoestarLabs/CerberusTiles/commit/5ca18f8cfd66b440af10b799cb86f38913ddbe83))
+* **theme:** add values-night theme styles so activities follow system dark mode ([e3868cc](https://github.com/JoestarLabs/CerberusTiles/commit/e3868cc5bbc1ebcd66e2bdceee1df76f3dc75d0f))
+
 ## [0.5.4](https://github.com/JoestarLabs/CerberusTiles/compare/v0.5.3...v0.5.4) (2026-11-24)
 
 
