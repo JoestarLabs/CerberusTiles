@@ -2,8 +2,11 @@ package com.bl4ckswordsman.cerberustiles.util
 
 import android.content.ContentResolver
 import android.content.Context
+import android.content.SharedPreferences
 import android.provider.Settings
+import android.widget.Toast
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import com.bl4ckswordsman.cerberustiles.Constants
 import com.bl4ckswordsman.cerberustiles.MainViewModel
 import com.bl4ckswordsman.cerberustiles.SettingsUtils
 import com.bl4ckswordsman.cerberustiles.models.NetworkSpeedLimit
@@ -11,9 +14,11 @@ import com.bl4ckswordsman.cerberustiles.models.RingerMode
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
+import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
+import io.mockk.unmockkObject
 import io.mockk.verify
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -312,5 +317,53 @@ class MainViewModelTest {
 
         assertTrue(viewModel.isNetworkSpeedLimitSupported.value)
         assertEquals(testLimit, viewModel.currentNetworkSpeedLimit.value)
+    }
+
+    @Test
+    fun `charging optimization stays ON across ViewModel restart when secure key is write-only`() {
+        unmockkObject(SettingsUtils.Charging)
+        mockkStatic(Toast::class)
+        every { Toast.makeText(any(), any<CharSequence>(), any()) } returns mockk(relaxed = true)
+
+        var storedState = false
+        val prefs = mockk<SharedPreferences>(relaxed = true)
+        val editor = mockk<SharedPreferences.Editor>(relaxed = true)
+        every {
+            context.getSharedPreferences(Constants.SETTINGS_PREFS_NAME, Context.MODE_PRIVATE)
+        } returns prefs
+        every { prefs.edit() } returns editor
+        every {
+            editor.putBoolean(SettingsUtils.Charging.KEY_CHARGING_OPTIMIZATION_ENABLED, any())
+        } answers {
+            storedState = secondArg()
+            editor
+        }
+        every {
+            prefs.getBoolean(SettingsUtils.Charging.KEY_CHARGING_OPTIMIZATION_ENABLED, false)
+        } answers { storedState }
+
+        every {
+            Settings.Secure.putInt(contentResolver, "charge_optimization_mode", any())
+        } returns true
+        every {
+            Settings.Secure.putInt(contentResolver, "adaptive_charging_enabled", any())
+        } returns true
+        every {
+            Settings.Secure.getInt(contentResolver, "charge_optimization_mode", any())
+        } throws SecurityException("Settings key: <charge_optimization_mode> is not readable")
+        every {
+            Settings.Secure.getInt(contentResolver, "adaptive_charging_enabled", any())
+        } throws SecurityException("Settings key: <adaptive_charging_enabled> is not readable")
+
+        // User toggles charging optimization ON
+        viewModel.toggleChargingOptimization(context, true)
+        assertTrue(viewModel.isChargingOptimizationOn.value)
+
+        // Simulate app restart with a fresh MainViewModel
+        val restartedViewModel = MainViewModel()
+        restartedViewModel.updateIsChargingOptimizationOn(context)
+
+        assertTrue(restartedViewModel.isChargingOptimizationSupported.value)
+        assertTrue(restartedViewModel.isChargingOptimizationOn.value)
     }
 }

@@ -2,8 +2,10 @@ package com.bl4ckswordsman.cerberustiles.util
 
 import android.content.ContentResolver
 import android.content.Context
+import android.content.SharedPreferences
 import android.provider.Settings
 import android.widget.Toast
+import com.bl4ckswordsman.cerberustiles.Constants
 import com.bl4ckswordsman.cerberustiles.SettingsUtils
 import io.mockk.MockKAnnotations
 import io.mockk.every
@@ -25,6 +27,12 @@ class ChargingOptimizationTest {
     @MockK(relaxed = true)
     private lateinit var contentResolver: ContentResolver
 
+    @MockK(relaxed = true)
+    private lateinit var sharedPreferences: SharedPreferences
+
+    @MockK(relaxed = true)
+    private lateinit var editor: SharedPreferences.Editor
+
     private val packageName = "com.bl4ckswordsman.cerberustiles"
 
     companion object {
@@ -38,6 +46,12 @@ class ChargingOptimizationTest {
 
         every { context.contentResolver } returns contentResolver
         every { context.packageName } returns packageName
+        every {
+            context.getSharedPreferences(Constants.SETTINGS_PREFS_NAME, Context.MODE_PRIVATE)
+        } returns sharedPreferences
+        every { sharedPreferences.edit() } returns editor
+        every { editor.putBoolean(any(), any()) } returns editor
+        every { sharedPreferences.getBoolean(any(), any()) } returns false
 
         mockkStatic(Toast::class)
         val mockToast = io.mockk.mockk<Toast>(relaxed = true)
@@ -365,5 +379,93 @@ class ChargingOptimizationTest {
 
         verify { Settings.Secure.putInt(contentResolver, CHARGE_OPTIMIZATION_KEY, 1) }
         verify { Settings.Secure.putInt(contentResolver, ADAPTIVE_CHARGING_KEY, 0) }
+    }
+
+    @Test
+    fun `isChargingOptimizationSupported returns true when charge_optimization_mode exists and adaptive throws SecurityException`() {
+        every {
+            Settings.Secure.getInt(contentResolver, CHARGE_OPTIMIZATION_KEY, -1)
+        } returns 1
+        every {
+            Settings.Secure.getInt(contentResolver, ADAPTIVE_CHARGING_KEY, -1)
+        } throws SecurityException("adaptive_charging_enabled is not readable")
+
+        assertTrue(SettingsUtils.Charging.isChargingOptimizationSupported(context))
+    }
+
+    @Test
+    fun `isChargingOptimizationEnabled returns true when charge_optimization_mode is 1 and adaptive throws SecurityException`() {
+        every {
+            Settings.Secure.getInt(contentResolver, CHARGE_OPTIMIZATION_KEY, 0)
+        } returns 1
+        every {
+            Settings.Secure.getInt(contentResolver, ADAPTIVE_CHARGING_KEY, 0)
+        } throws SecurityException("adaptive_charging_enabled is not readable")
+
+        assertTrue(SettingsUtils.Charging.isChargingOptimizationEnabled(context))
+    }
+
+    @Test
+    fun `isChargingOptimizationSupported returns true when charge_optimization_mode throws SecurityException`() {
+        every {
+            Settings.Secure.getInt(contentResolver, CHARGE_OPTIMIZATION_KEY, -1)
+        } throws SecurityException("charge_optimization_mode is not readable")
+
+        assertTrue(SettingsUtils.Charging.isChargingOptimizationSupported(context))
+    }
+
+    @Test
+    fun `isChargingOptimizationEnabled falls back to persisted state when charge_optimization_mode throws SecurityException`() {
+        every {
+            Settings.Secure.getInt(contentResolver, CHARGE_OPTIMIZATION_KEY, 0)
+        } throws SecurityException("charge_optimization_mode is not readable")
+        every {
+            Settings.Secure.getInt(contentResolver, ADAPTIVE_CHARGING_KEY, 0)
+        } returns 0
+        every {
+            sharedPreferences.getBoolean(
+                SettingsUtils.Charging.KEY_CHARGING_OPTIMIZATION_ENABLED,
+                false
+            )
+        } returns true
+
+        assertTrue(SettingsUtils.Charging.isChargingOptimizationEnabled(context))
+    }
+
+    @Test
+    fun `isChargingOptimizationEnabled prefers live system value over persisted state when readable`() {
+        every {
+            Settings.Secure.getInt(contentResolver, CHARGE_OPTIMIZATION_KEY, 0)
+        } returns 0
+        every {
+            Settings.Secure.getInt(contentResolver, ADAPTIVE_CHARGING_KEY, 0)
+        } returns 0
+        every {
+            sharedPreferences.getBoolean(
+                SettingsUtils.Charging.KEY_CHARGING_OPTIMIZATION_ENABLED,
+                false
+            )
+        } returns true
+
+        assertFalse(SettingsUtils.Charging.isChargingOptimizationEnabled(context))
+    }
+
+    @Test
+    fun `setChargingOptimization persists enabled state to SharedPreferences on success`() {
+        every {
+            Settings.Secure.putInt(contentResolver, CHARGE_OPTIMIZATION_KEY, 1)
+        } returns true
+
+        val params = SettingsUtils.SettingsToggleParams(
+            context = context,
+            onSettingChanged = { }
+        )
+
+        SettingsUtils.Charging.setChargingOptimization(true, params)
+
+        verify {
+            editor.putBoolean(SettingsUtils.Charging.KEY_CHARGING_OPTIMIZATION_ENABLED, true)
+        }
+        verify { editor.apply() }
     }
 }

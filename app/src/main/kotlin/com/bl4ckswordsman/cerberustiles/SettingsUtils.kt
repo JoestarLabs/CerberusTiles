@@ -212,49 +212,89 @@ object SettingsUtils {
      * Utilities for charging settings.
      */
     object Charging {
+        private const val TAG = "ChargingSettings"
         private const val CHARGE_OPTIMIZATION_MODE = "charge_optimization_mode"
         private const val ADAPTIVE_CHARGING_ENABLED = "adaptive_charging_enabled"
+        internal const val KEY_CHARGING_OPTIMIZATION_ENABLED = "charging_optimization_enabled"
+
+        private sealed class SecureIntResult {
+            data class Value(val value: Int) : SecureIntResult()
+            data object Unreadable : SecureIntResult()
+            data object Error : SecureIntResult()
+        }
+
+        private fun readSecureInt(
+            context: Context,
+            key: String,
+            defaultValue: Int
+        ): SecureIntResult {
+            return try {
+                SecureIntResult.Value(
+                    Settings.Secure.getInt(context.contentResolver, key, defaultValue)
+                )
+            } catch (e: SecurityException) {
+                Log.w(TAG, "Secure setting '$key' is not readable", e)
+                SecureIntResult.Unreadable
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to read secure setting '$key'", e)
+                SecureIntResult.Error
+            }
+        }
+
+        private fun getPersistedState(context: Context): Boolean {
+            val prefs =
+                context.getSharedPreferences(Constants.SETTINGS_PREFS_NAME, Context.MODE_PRIVATE)
+            return prefs.getBoolean(KEY_CHARGING_OPTIMIZATION_ENABLED, false)
+        }
+
+        private fun savePersistedState(context: Context, enabled: Boolean) {
+            val prefs =
+                context.getSharedPreferences(Constants.SETTINGS_PREFS_NAME, Context.MODE_PRIVATE)
+            prefs.edit { putBoolean(KEY_CHARGING_OPTIMIZATION_ENABLED, enabled) }
+        }
 
         /**
          * Checks if charging optimization (80% limit or adaptive charging) is supported on this device.
          *
-         * Returns false if neither the [CHARGE_OPTIMIZATION_MODE] nor [ADAPTIVE_CHARGING_ENABLED]
-         * secure setting exists (default value of -1 is returned) or if reading them throws any exception.
+         * Reads each setting independently so a [SecurityException] on one restricted `@hide` key
+         * does not mask the other. Returns true if either key is present or restricted by Android S+
+         * read controls (`SecurityException`), and false if absent or on other errors.
          */
         fun isChargingOptimizationSupported(context: Context): Boolean {
-            return try {
-                val hasChargeOptimization = Settings.Secure.getInt(
-                    context.contentResolver, CHARGE_OPTIMIZATION_MODE, -1
-                ) != -1
-                val hasAdaptiveCharging = Settings.Secure.getInt(
-                    context.contentResolver, ADAPTIVE_CHARGING_ENABLED, -1
-                ) != -1
-                hasChargeOptimization || hasAdaptiveCharging
-            } catch (_: Exception) {
-                false
-            }
+            val mode = readSecureInt(context, CHARGE_OPTIMIZATION_MODE, -1)
+            val adaptive = readSecureInt(context, ADAPTIVE_CHARGING_ENABLED, -1)
+            val hasChargeOptimization = mode is SecureIntResult.Value && mode.value != -1
+            val hasAdaptiveCharging = adaptive is SecureIntResult.Value && adaptive.value != -1
+            val isRestricted =
+                mode is SecureIntResult.Unreadable || adaptive is SecureIntResult.Unreadable
+            return hasChargeOptimization || hasAdaptiveCharging || isRestricted
         }
 
         /**
          * Checks if charging optimization (80% limit or adaptive charging) is enabled.
          *
-         * Returns false if the setting is 0, absent, or if reading it throws any exception.
+         * Reads each setting independently so a [SecurityException] on one key does not discard
+         * the other. On Android S+ devices where `charge_optimization_mode` is annotated `@hide`
+         * without `@Readable`, `Settings.Secure.getInt` throws [SecurityException] even when
+         * `WRITE_SECURE_SETTINGS` is granted; in that case this falls back to the last state
+         * successfully written by [setChargingOptimization].
+         *
          * On Google Pixel devices:
          * - Limit to 80%: charge_optimization_mode = 1, adaptive_charging_enabled = 0
          * - Adaptive Charging: charge_optimization_mode = 0, adaptive_charging_enabled = 1
          */
         fun isChargingOptimizationEnabled(context: Context): Boolean {
-            return try {
-                val mode = Settings.Secure.getInt(
-                    context.contentResolver, CHARGE_OPTIMIZATION_MODE, 0
-                )
-                val adaptive = Settings.Secure.getInt(
-                    context.contentResolver, ADAPTIVE_CHARGING_ENABLED, 0
-                )
-                mode > 0 || adaptive > 0
-            } catch (_: Exception) {
-                false
+            val mode = readSecureInt(context, CHARGE_OPTIMIZATION_MODE, 0)
+            val adaptive = readSecureInt(context, ADAPTIVE_CHARGING_ENABLED, 0)
+
+            val modeEnabled = mode is SecureIntResult.Value && mode.value > 0
+            val adaptiveEnabled = adaptive is SecureIntResult.Value && adaptive.value > 0
+            if (modeEnabled || adaptiveEnabled) return true
+
+            if (mode is SecureIntResult.Unreadable) {
+                return getPersistedState(context)
             }
+            return false
         }
 
         /**
@@ -277,6 +317,7 @@ object SettingsUtils {
                     } catch (_: Exception) {
                         // Adaptive charging may not be present on all devices
                     }
+                    savePersistedState(params.context, enabled)
                     showToast(params.context, "Charging optimization", enabled)
                     params.onSettingChanged(enabled)
                 } else {
